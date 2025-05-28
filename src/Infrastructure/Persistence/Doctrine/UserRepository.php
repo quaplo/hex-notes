@@ -6,6 +6,7 @@ use App\Domain\User\Model\User;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
 use App\Shared\ValueObject\Email;
+use App\Shared\ValueObject\Uuid;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class UserRepository implements UserRepositoryInterface
@@ -15,7 +16,7 @@ final class UserRepository implements UserRepositoryInterface
 	public function save(User $user): void
 	{
 		$entity = new UserEntity(
-			$user->getId(),
+			$user->getId()->getValue(),
 			$user->getEmail()->getValue(),
 			$user->getCreatedAt()
 		);
@@ -34,7 +35,7 @@ final class UserRepository implements UserRepositoryInterface
 		}
 
 		return new User(
-			$entity->getId(),
+			new Uuid($entity->getId()),
 			new Email($entity->getEmail()),
 			$entity->getCreatedAt()
 		);

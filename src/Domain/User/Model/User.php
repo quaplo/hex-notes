@@ -3,18 +3,20 @@
 namespace App\Domain\User\Model;
 
 use App\Shared\ValueObject\Email;
+use App\Shared\ValueObject\Uuid;
+use DateTimeImmutable;
 
 final class User
 {
 	public function __construct(
-		private string             $id,
-		private Email             $email,
-		private \DateTimeImmutable $createdAt
+		private Uuid               $id,
+		private Email              $email,
+		private DateTimeImmutable $createdAt
 	)
 	{
 	}
 
-	public function getId(): string
+	public function getId(): Uuid
 	{
 		return $this->id;
 	}
@@ -24,7 +26,7 @@ final class User
 		return $this->email;
 	}
 
-	public function getCreatedAt(): \DateTimeImmutable
+	public function getCreatedAt(): DateTimeImmutable
 	{
 		return $this->createdAt;
 	}
