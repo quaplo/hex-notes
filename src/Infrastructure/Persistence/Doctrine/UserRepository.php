@@ -1,12 +1,14 @@
-<?php
-// src/Infrastructure/Persistence/Doctrine/UserRepository.php
+<?php declare(strict_types=1);
+
 namespace App\Infrastructure\Persistence\Doctrine;
 
+use App\Application\Exception\EmailAlreadyExistsException;
 use App\Domain\User\Model\User;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class UserRepository implements UserRepositoryInterface
@@ -15,14 +17,19 @@ final class UserRepository implements UserRepositoryInterface
 
 	public function save(User $user): void
 	{
-		$entity = new UserEntity(
-			$user->getId()->getValue(),
-			$user->getEmail()->getValue(),
-			$user->getCreatedAt()
-		);
+		try {
+			$entity = new UserEntity(
+				$user->getId()->getValue(),
+				$user->getEmail()->getValue(),
+				$user->getCreatedAt()
+			);
 
-		$this->em->persist($entity);
-		$this->em->flush();
+			$this->em->persist($entity);
+			$this->em->flush();
+		} catch (UniqueConstraintViolationException $e){
+			throw new EmailAlreadyExistsException($user->getEmail()->getValue(), $e);
+		}
+
 	}
 
 	public function findByEmail(string $email): ?User

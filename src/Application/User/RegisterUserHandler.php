@@ -1,7 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Application\User;
 
+use App\Application\Exception\EmailAlreadyExistsException;
 use App\Domain\User\Model\User;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Shared\ValueObject\Email;
@@ -25,6 +26,11 @@ final class RegisterUserHandler
 			createdAt: new DateTimeImmutable()
 		);
 
-		$this->userRepository->save($user);
+		try {
+			$this->userRepository->save($user);
+		} catch (EmailAlreadyExistsException $e) {
+			// Môžeš zalogovať, auditovať alebo preniesť vyššie
+			throw $e;
+		}
 	}
 }
