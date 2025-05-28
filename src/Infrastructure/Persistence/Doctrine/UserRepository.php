@@ -5,6 +5,7 @@ namespace App\Infrastructure\Persistence\Doctrine;
 use App\Domain\User\Model\User;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
+use App\Shared\ValueObject\Email;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class UserRepository implements UserRepositoryInterface
@@ -15,7 +16,7 @@ final class UserRepository implements UserRepositoryInterface
 	{
 		$entity = new UserEntity(
 			$user->getId(),
-			$user->getEmail(),
+			$user->getEmail()->getValue(),
 			$user->getCreatedAt()
 		);
 
@@ -34,7 +35,7 @@ final class UserRepository implements UserRepositoryInterface
 
 		return new User(
 			$entity->getId(),
-			$entity->getEmail(),
+			new Email($entity->getEmail()),
 			$entity->getCreatedAt()
 		);
 	}

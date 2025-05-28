@@ -2,11 +2,13 @@
 
 namespace App\Domain\User\Model;
 
+use App\Shared\ValueObject\Email;
+
 final class User
 {
 	public function __construct(
 		private string             $id,
-		private string             $email,
+		private Email             $email,
 		private \DateTimeImmutable $createdAt
 	)
 	{
@@ -17,7 +19,7 @@ final class User
 		return $this->id;
 	}
 
-	public function getEmail(): string
+	public function getEmail(): Email
 	{
 		return $this->email;
 	}

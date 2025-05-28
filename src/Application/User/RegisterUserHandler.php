@@ -4,6 +4,7 @@ namespace App\Application\User;
 
 use App\Domain\User\Model\User;
 use App\Domain\User\Repository\UserRepositoryInterface;
+use App\Shared\ValueObject\Email;
 use Symfony\Component\Uid\Uuid;
 
 final class RegisterUserHandler
@@ -18,7 +19,7 @@ final class RegisterUserHandler
 	{
 		$user = new User(
 			id: $this->generateUuid(),
-			email: $email,
+			email: new Email($email),
 			createdAt: new \DateTimeImmutable()
 		);
 
