@@ -10,6 +10,7 @@
         "doctrine/doctrine-bundle": "^2.14",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
+        "ramsey/uuid": "*",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
         "symfony/flex": "^2",
@@ -17,6 +18,7 @@
         "symfony/http-foundation": "7.2.*",
         "symfony/http-kernel": "7.2.*",
         "symfony/runtime": "7.2.*",
+        "symfony/uid": "7.2.*",
         "symfony/yaml": "7.2.*"
     },
     "config": {
