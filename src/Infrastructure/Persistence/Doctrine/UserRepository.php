@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Doctrine;
 
@@ -13,38 +15,39 @@ use Doctrine\ORM\EntityManagerInterface;
 
 final class UserRepository implements UserRepositoryInterface
 {
-	public function __construct(private EntityManagerInterface $em) {}
+    public function __construct(private EntityManagerInterface $em)
+    {
+    }
 
-	public function save(User $user): void
-	{
-		try {
-			$entity = new UserEntity(
-				$user->getId()->getValue(),
-				$user->getEmail()->getValue(),
-				$user->getCreatedAt()
-			);
+    public function save(User $user): void
+    {
+        try {
+            $entity = new UserEntity(
+                $user->getId()->getValue(),
+                $user->getEmail()->getValue(),
+                $user->getCreatedAt()
+            );
 
-			$this->em->persist($entity);
-			$this->em->flush();
-		} catch (UniqueConstraintViolationException $e){
-			throw new EmailAlreadyExistsException($user->getEmail()->getValue(), $e);
-		}
+            $this->em->persist($entity);
+            $this->em->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            throw new EmailAlreadyExistsException($user->getEmail()->getValue(), $e);
+        }
+    }
 
-	}
+    public function findByEmail(string $email): ?User
+    {
+        $repo = $this->em->getRepository(UserEntity::class);
+        $entity = $repo->findOneBy(['email' => $email]);
 
-	public function findByEmail(string $email): ?User
-	{
-		$repo = $this->em->getRepository(UserEntity::class);
-		$entity = $repo->findOneBy(['email' => $email]);
+        if (!$entity) {
+            return null;
+        }
 
-		if (!$entity) {
-			return null;
-		}
-
-		return new User(
-			new Uuid($entity->getId()),
-			new Email($entity->getEmail()),
-			$entity->getCreatedAt()
-		);
-	}
+        return new User(
+            new Uuid($entity->getId()),
+            new Email($entity->getEmail()),
+            $entity->getCreatedAt()
+        );
+    }
 }

@@ -9,25 +9,34 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'users')]
 class UserEntity
 {
-	#[ORM\Id]
-	#[ORM\Column(type: 'uuid')]
-	#[ORM\GeneratedValue(strategy: 'NONE')]
-	private string $id;
+    #[ORM\Id]
+    #[ORM\Column(type: 'uuid')]
+    #[ORM\GeneratedValue(strategy: 'NONE')]
+    private string $id;
 
-	#[ORM\Column(length: 255, unique: true)]
-	private string $email;
+    #[ORM\Column(length: 255, unique: true)]
+    private string $email;
 
-	#[ORM\Column(type: 'datetime_immutable')]
-	private \DateTimeImmutable $createdAt;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
 
-	public function __construct(string $id, string $email, \DateTimeImmutable $createdAt)
-	{
-		$this->id = $id;
-		$this->email = $email;
-		$this->createdAt = $createdAt;
-	}
+    public function __construct(string $id, string $email, \DateTimeImmutable $createdAt)
+    {
+        $this->id = $id;
+        $this->email = $email;
+        $this->createdAt = $createdAt;
+    }
 
-	public function getId(): string { return $this->id; }
-	public function getEmail(): string { return $this->email; }
-	public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    public function getId(): string
+    {
+        return $this->id;
+    }
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
 }

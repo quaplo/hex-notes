@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Domain\User\Model;
 
@@ -8,26 +10,25 @@ use DateTimeImmutable;
 
 final class User
 {
-	public function __construct(
-		private Uuid               $id,
-		private Email              $email,
-		private DateTimeImmutable $createdAt
-	)
-	{
-	}
+    public function __construct(
+        private Uuid $id,
+        private Email $email,
+        private DateTimeImmutable $createdAt
+    ) {
+    }
 
-	public function getId(): Uuid
-	{
-		return $this->id;
-	}
+    public function getId(): Uuid
+    {
+        return $this->id;
+    }
 
-	public function getEmail(): Email
-	{
-		return $this->email;
-	}
+    public function getEmail(): Email
+    {
+        return $this->email;
+    }
 
-	public function getCreatedAt(): DateTimeImmutable
-	{
-		return $this->createdAt;
-	}
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
 }

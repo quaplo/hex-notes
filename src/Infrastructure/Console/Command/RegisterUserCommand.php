@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Infrastructure\Console\Command;
 
@@ -12,29 +14,29 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'app:register-user')]
 class RegisterUserCommand extends Command
 {
-	public function __construct(private RegisterUserHandler $handler)
-	{
-		parent::__construct();
-	}
+    public function __construct(private RegisterUserHandler $handler)
+    {
+        parent::__construct();
+    }
 
-	protected function configure(): void
-	{
-		$this
-			->setDescription('Registers a new user')
-			->addArgument('email', InputArgument::REQUIRED, 'The email address of the user');
-	}
+    protected function configure(): void
+    {
+        $this
+            ->setDescription('Registers a new user')
+            ->addArgument('email', InputArgument::REQUIRED, 'The email address of the user');
+    }
 
-	protected function execute(InputInterface $input, OutputInterface $output): int
-	{
-		$email = $input->getArgument('email');
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $email = $input->getArgument('email');
 
-		try {
-			$this->handler->handle($email);
-			$output->writeln("<info>User '$email' registered successfully.</info>");
-			return Command::SUCCESS;
-		} catch (\Throwable $e) {
-			$output->writeln("<error>Failed to register user: {$e->getMessage()}</error>");
-			return Command::FAILURE;
-		}
-	}
+        try {
+            $this->handler->handle($email);
+            $output->writeln("<info>User '$email' registered successfully.</info>");
+            return Command::SUCCESS;
+        } catch (\Throwable $e) {
+            $output->writeln("<error>Failed to register user: {$e->getMessage()}</error>");
+            return Command::FAILURE;
+        }
+    }
 }
