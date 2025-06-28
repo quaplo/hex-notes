@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Application\Project;
+
+use App\Domain\Project\Model\Project;
+use App\Domain\Project\Model\ProjectWorker;
+use App\Domain\Project\Repository\ProjectRepositoryInterface;
+use App\Domain\Project\ValueObject\ProjectName;
+use App\Domain\Project\ValueObject\ProjectRole;
+use App\Domain\User\Repository\UserRepositoryInterface;
+use App\Shared\ValueObject\Email;
+use App\Application\Exception\UserNotFoundException;
+
+final class ProjectService
+{
+    public function __construct(
+        private ProjectRepositoryInterface $projectRepository,
+        private UserRepositoryInterface $userRepository,
+    ) {
+    }
+
+    public function registerProjectWithOwner(string $name, string $ownerEmail): Project
+    {
+        $user = $this->userRepository->findByEmail(new Email($ownerEmail));
+
+        if (!$user) {
+            throw new UserNotFoundException(sprintf('User with email %s not found', $ownerEmail));
+        }
+
+        $project = Project::create(new ProjectName($name));
+
+        $project->addWorker(
+            ProjectWorker::create(
+                $user->getId(),
+                ProjectRole::owner()
+            )
+        );
+
+        $this->projectRepository->save($project);
+
+        return $project;
+    }
+}

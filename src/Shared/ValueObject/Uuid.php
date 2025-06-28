@@ -30,4 +30,9 @@ final class Uuid
     {
         return $this->value;
     }
+
+    public function equals(Uuid $other): bool
+    {
+        return $this->value === (string) $other;
+    }
 }

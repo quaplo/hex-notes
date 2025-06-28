@@ -5,35 +5,92 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Doctrine\Mapper;
 
 use App\Domain\Project\Model\Project;
-use App\Infrastructure\Persistence\Doctrine\Entity\ProjectEntity;
+use App\Domain\Project\Model\ProjectWorker;
 use App\Domain\Project\ValueObject\ProjectName;
+use App\Domain\Project\ValueObject\ProjectRole;
+use App\Infrastructure\Persistence\Doctrine\Entity\ProjectEntity;
+use App\Infrastructure\Persistence\Doctrine\Entity\ProjectWorkerEntity;
+use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
 use App\Shared\ValueObject\Uuid;
+use Doctrine\ORM\EntityManagerInterface;
 
 final class ProjectMapper
 {
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {
+    }
+
     public function mapToDomain(ProjectEntity $entity): Project
     {
-        return new Project(
+        $project = new Project(
             new Uuid($entity->getId()),
             new ProjectName($entity->getName()),
             $entity->getCreatedAt(),
             $entity->getDeletedAt()
         );
+
+        foreach ($entity->getProjectWorkers() as $workerEntity) {
+            $project->addWorker(
+                new ProjectWorker(
+                    new Uuid($workerEntity->getUser()->getId()),
+                    ProjectRole::from($workerEntity->getRole()),
+                    $workerEntity->getCreatedAt(),
+                    new Uuid($workerEntity->getAddedBy()->getId())
+                )
+            );
+        }
+
+        return $project;
     }
 
     public function mapToEntity(Project $project): ProjectEntity
     {
-        return new ProjectEntity(
+        $entity = new ProjectEntity(
             $project->getId()->toString(),
             (string) $project->getName(),
             $project->getCreatedAt(),
             $project->getDeletedAt()
         );
+
+        foreach ($project->getWorkers() as $worker) {
+            $user = $this->em->getReference(UserEntity::class, $worker->getUserId()->toString());
+            $addedBy = $this->em->getReference(UserEntity::class, $worker->getAddedBy()?->toString() ?? $worker->getUserId()->toString());
+
+            $workerEntity = new ProjectWorkerEntity(
+                project: $entity,
+                user: $user,
+                role: $worker->getRole()->__toString(),
+                addedBy: $addedBy,
+                createdAt: $worker->getCreatedAt()
+            );
+
+            $entity->addProjectWorker($workerEntity);
+        }
+
+        return $entity;
     }
 
     public function updateEntity(ProjectEntity $entity, Project $project): void
     {
         $entity->setName((string) $project->getName());
         $entity->setDeletedAt($project->getDeletedAt());
+
+        $entity->clearProjectWorkers();
+
+        foreach ($project->getWorkers() as $worker) {
+            $user = $this->em->getReference(UserEntity::class, $worker->getUserId()->toString());
+            $addedBy = $this->em->getReference(UserEntity::class, $worker->getAddedBy()?->toString() ?? $worker->getUserId()->toString());
+
+            $workerEntity = new ProjectWorkerEntity(
+                project: $entity,
+                user: $user,
+                role: $worker->getRole()->__toString(),
+                addedBy: $addedBy,
+                createdAt: $worker->getCreatedAt()
+            );
+
+            $entity->addProjectWorker($workerEntity);
+        }
     }
 }

@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-// src/Infrastructure/Persistence/Doctrine/Entity/ProjectEntity.php
 namespace App\Infrastructure\Persistence\Doctrine\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -28,12 +27,8 @@ class ProjectEntity
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
-    /**
-     * @var Collection<int, UserEntity>
-     */
-    #[ORM\ManyToMany(targetEntity: UserEntity::class, inversedBy: 'projects')]
-    #[ORM\JoinTable(name: 'user_project')]
-    private Collection $users;
+    #[ORM\OneToMany(mappedBy: 'project', targetEntity: ProjectWorkerEntity::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $projectWorkers;
 
     public function __construct(
         string $id,
@@ -44,8 +39,8 @@ class ProjectEntity
         $this->id = $id;
         $this->name = $name;
         $this->createdAt = $createdAt;
-        $this->users = new ArrayCollection();
         $this->deletedAt = $deletedAt;
+        $this->projectWorkers = new ArrayCollection();
     }
 
     public function getId(): string
@@ -85,18 +80,20 @@ class ProjectEntity
         $this->deletedAt = new DateTimeImmutable();
     }
 
-    /**
-     * @return Collection<int, UserEntity>
-     */
-    public function getUsers(): Collection
+    public function getProjectWorkers(): Collection
     {
-        return $this->users;
+        return $this->projectWorkers;
     }
 
-    public function addUser(UserEntity $user): void
+    public function addProjectWorker(ProjectWorkerEntity $worker): void
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
+        if (!$this->projectWorkers->contains($worker)) {
+            $this->projectWorkers->add($worker);
         }
+    }
+
+    public function clearProjectWorkers(): void
+    {
+        $this->projectWorkers->clear();
     }
 }

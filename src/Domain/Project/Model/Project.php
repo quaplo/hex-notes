@@ -10,10 +10,16 @@ use DateTimeImmutable;
 
 final class Project
 {
+    /**
+     * @var ProjectWorker[]
+     */
+    private array $workers = [];
+
     public static function create(ProjectName $name): self
     {
         return new self(Uuid::generate(), $name, new DateTimeImmutable(), null);
     }
+
     public function __construct(
         private Uuid $id,
         private ProjectName $name,
@@ -56,5 +62,22 @@ final class Project
     public function delete(): self
     {
         return new self($this->id, $this->name, $this->createdAt, new DateTimeImmutable());
+    }
+
+    /** @return ProjectWorker[] */
+    public function getWorkers(): array
+    {
+        return $this->workers;
+    }
+
+    public function addWorker(ProjectWorker $worker): void
+    {
+        foreach ($this->workers as $existing) {
+            if ($existing->getUserId()->equals($worker->getUserId())) {
+                return;
+            }
+        }
+
+        $this->workers[] = $worker;
     }
 }
