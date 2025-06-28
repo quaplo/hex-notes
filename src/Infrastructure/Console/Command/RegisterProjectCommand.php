@@ -30,9 +30,10 @@ final class RegisterProjectCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $name = $input->getArgument('name');
+        $ownerEmail = $input->getArgument('email');
 
         try {
-            $project = $this->handler->handle($name);
+            $project = $this->handler->handle($name, $ownerEmail);
             $output->writeln(sprintf('<info>"%s"created (ID: %s).</info>', $project->getName(), $project->getId()));
             return Command::SUCCESS;
         } catch (\Throwable $e) {

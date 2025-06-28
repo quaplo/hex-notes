@@ -42,5 +42,4 @@ class UserEntity
     {
         return $this->createdAt;
     }
-
 }
