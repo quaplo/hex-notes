@@ -23,7 +23,7 @@ final class UserRepository implements UserRepositoryInterface
     {
         try {
             $entity = new UserEntity(
-                $user->getId()->getValue(),
+                $user->getId()->toString(),
                 $user->getEmail()->getValue(),
                 $user->getCreatedAt()
             );

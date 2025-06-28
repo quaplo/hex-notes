@@ -11,8 +11,8 @@ final class Uuid
 {
     public function __construct(private readonly string $value)
     {
-        if (!SymfonyUuid::isValid($value)) {
-            throw new InvalidArgumentException("Invalid UUID: $value");
+        if (!SymfonyUuid::isValid($this->value)) {
+            throw new InvalidArgumentException("Invalid UUID: {$this->value}");
         }
     }
 
@@ -21,17 +21,12 @@ final class Uuid
         return new self(SymfonyUuid::v4()->toRfc4122());
     }
 
-    public function getValue(): string
+    public function __toString(): string
     {
         return $this->value;
     }
 
-    public function equals(self $other): bool
-    {
-        return $this->value === $other->value;
-    }
-
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

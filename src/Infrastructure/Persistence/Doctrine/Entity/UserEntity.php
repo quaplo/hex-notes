@@ -3,6 +3,7 @@
 // src/Infrastructure/Persistence/Doctrine/Entity/UserEntity.php
 namespace App\Infrastructure\Persistence\Doctrine\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -31,12 +32,15 @@ class UserEntity
     {
         return $this->id;
     }
+
     public function getEmail(): string
     {
         return $this->email;
     }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
+
 }
