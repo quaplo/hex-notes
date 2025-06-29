@@ -38,7 +38,7 @@ final class UserRepository implements UserRepositoryInterface
     public function findByEmail(Email $email): ?User
     {
         $repo = $this->em->getRepository(UserEntity::class);
-        $entity = $repo->findOneBy(['email' => $email]);
+        $entity = $repo->findOneBy(['email' => $email->getValue()]);
 
         if (!$entity) {
             return null;

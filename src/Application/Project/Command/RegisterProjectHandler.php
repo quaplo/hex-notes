@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Application\Project\Command;
 
-use App\Application\Project\ProjectService;
+use App\Application\Project\EventSourcingService;
 use App\Domain\Project\Model\Project;
 
 final class RegisterProjectHandler
 {
     public function __construct(
-        private ProjectService $service
+        private EventSourcingService $service
     ) {
     }
 
     public function __invoke(RegisterProjectCommand $command): Project
     {
-        return $this->service->registerProjectWithOwner($command->getName(), $command->getOwnerEmail());
+        return $this->service->createProject($command->name, $command->ownerEmail);
     }
 }
