@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Doctrine\Entity;
 
-use App\Domain\Project\Model\ProjectWorker;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -39,16 +38,35 @@ class ProjectEntity
     )]
     private Collection $projectWorkers;
 
+    #[ORM\Column(type: 'uuid')]
+    private string $createdBy;
+
+    #[ORM\ManyToOne(targetEntity: UserEntity::class)]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
+    private UserEntity $owner;
+
+    public function getOwner(): UserEntity
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(UserEntity $owner): void
+    {
+        $this->owner = $owner;
+    }
+
     public function __construct(
         string $id,
         string $name,
         DateTimeImmutable $createdAt,
-        DateTimeImmutable $deletedAt = null
+        string $createdBy,
+        DateTimeImmutable $deletedAt = null,
     ) {
         $this->id = $id;
         $this->name = $name;
         $this->createdAt = $createdAt;
         $this->deletedAt = $deletedAt;
+        $this->createdBy = $createdBy;
         $this->projectWorkers = new ArrayCollection();
     }
 
@@ -107,5 +125,10 @@ class ProjectEntity
     public function clearProjectWorkers(): void
     {
         $this->projectWorkers->clear();
+    }
+
+    public function getCreatedBy(): string
+    {
+        return $this->createdBy;
     }
 }

@@ -16,6 +16,11 @@ final class Uuid
         }
     }
 
+    public static function create(string $value): self
+    {
+        return new self($value);
+    }
+
     public static function generate(): self
     {
         return new self(SymfonyUuid::v4()->toRfc4122());

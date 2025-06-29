@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Project\Model;
 
-use App\Shared\ValueObject\Uuid;
 use App\Domain\Project\ValueObject\ProjectName;
+use App\Domain\Project\ValueObject\ProjectOwner;
+use App\Domain\Project\ValueObject\UserId;
+use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
 final class Project
@@ -15,17 +17,31 @@ final class Project
      */
     private array $workers = [];
 
-    public static function create(ProjectName $name): self
+    private UserId $createdBy;
+
+    public function getOwner(): ProjectOwner
     {
-        return new self(Uuid::generate(), $name, new DateTimeImmutable(), null);
+        return $this->owner;
+    }
+
+    public static function create(ProjectName $name, ProjectOwner $owner): self
+    {
+        return new self(Uuid::generate(), $name, new DateTimeImmutable(), $owner);
     }
 
     public function __construct(
         private Uuid $id,
         private ProjectName $name,
         private DateTimeImmutable $createdAt,
+        private ProjectOwner $owner,
         private ?DateTimeImmutable $deletedAt = null,
     ) {
+        $this->createdBy = $this->owner->getId();
+    }
+
+    public function getCreatedBy(): UserId
+    {
+        return $this->createdBy;
     }
 
     public function getId(): Uuid
@@ -61,7 +77,7 @@ final class Project
 
     public function delete(): self
     {
-        return new self($this->id, $this->name, $this->createdAt, new DateTimeImmutable());
+        return new self($this->id, $this->name, $this->createdAt, $this->owner, new DateTimeImmutable());
     }
 
     /** @return ProjectWorker[] */

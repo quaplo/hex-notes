@@ -69,7 +69,13 @@
         ],
         "phpstan": "vendor/bin/phpstan analyse",
         "phpcs": "vendor/bin/phpcs",
-        "phpcbf": "vendor/bin/phpcbf"
+        "phpcbf": "vendor/bin/phpcbf",
+        "doctrine:diff": "php bin/console doctrine:migrations:diff",
+        "doctrine:migrate": "php bin/console doctrine:migrations:migrate --no-interaction",
+        "doctrine:sync": [
+            "@doctrine:diff",
+            "@doctrine:migrate"
+        ]
     },
     "conflict": {
         "symfony/symfony": "*"

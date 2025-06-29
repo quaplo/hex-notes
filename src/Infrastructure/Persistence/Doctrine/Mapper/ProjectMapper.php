@@ -8,6 +8,7 @@ use App\Domain\Project\Model\Project;
 use App\Domain\Project\Model\ProjectWorker;
 use App\Domain\Project\ValueObject\ProjectName;
 use App\Domain\Project\ValueObject\ProjectRole;
+use App\Domain\Project\ValueObject\UserId;
 use App\Infrastructure\Persistence\Doctrine\Entity\ProjectEntity;
 use App\Infrastructure\Persistence\Doctrine\Entity\ProjectWorkerEntity;
 use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
@@ -17,7 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 final class ProjectMapper
 {
     public function __construct(
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
     ) {
     }
 
@@ -27,6 +28,7 @@ final class ProjectMapper
             new Uuid($entity->getId()),
             new ProjectName($entity->getName()),
             $entity->getCreatedAt(),
+            UserId::fromString($entity->getCreatedBy()),
             $entity->getDeletedAt()
         );
 
@@ -50,8 +52,12 @@ final class ProjectMapper
             $project->getId()->toString(),
             (string) $project->getName(),
             $project->getCreatedAt(),
+            $project->getCreatedBy()->toString(),
             $project->getDeletedAt()
         );
+
+        $userEntity = $this->em->getRepository(UserEntity::class)->findOneById($project->getOwner()->getId()->toString());
+        $entity->setOwner($userEntity);
 
         foreach ($project->getWorkers() as $worker) {
             $user = $this->em->getReference(UserEntity::class, $worker->getUserId()->toString());

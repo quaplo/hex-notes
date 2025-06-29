@@ -8,7 +8,9 @@ use App\Domain\Project\Model\Project;
 use App\Domain\Project\Model\ProjectWorker;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Domain\Project\ValueObject\ProjectName;
+use App\Domain\Project\ValueObject\ProjectOwner;
 use App\Domain\Project\ValueObject\ProjectRole;
+use App\Domain\Project\ValueObject\UserId;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Shared\ValueObject\Email;
 use App\Application\Exception\UserNotFoundException;
@@ -29,7 +31,9 @@ final class ProjectService
             throw new UserNotFoundException(sprintf('User with email %s not found', $ownerEmail));
         }
 
-        $project = Project::create($name);
+        $projectOwner = ProjectOwner::create(UserId::fromUuid($user->getId()), $user->getEmail());
+
+        $project = Project::create($name, $projectOwner);
 
         $project->addWorker(
             ProjectWorker::create(
