@@ -21,15 +21,15 @@ final class ProjectService
     ) {
     }
 
-    public function registerProjectWithOwner(string $name, string $ownerEmail): Project
+    public function registerProjectWithOwner(ProjectName $name, Email $ownerEmail): Project
     {
-        $user = $this->userRepository->findByEmail(new Email($ownerEmail));
+        $user = $this->userRepository->findByEmail($ownerEmail);
 
         if (!$user) {
             throw new UserNotFoundException(sprintf('User with email %s not found', $ownerEmail));
         }
 
-        $project = Project::create(new ProjectName($name));
+        $project = Project::create($name);
 
         $project->addWorker(
             ProjectWorker::create(

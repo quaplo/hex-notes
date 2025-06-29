@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Controller;
 
-use App\Application\Project\RegisterProjectHandler;
+use App\Application\Project\Command\RegisterProjectCommand;
+use App\Application\Project\Command\RegisterProjectHandler;
 use App\Infrastructure\Http\Request\CreateProjectRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +15,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 final class ProjectController
 {
     public function __construct(
-        private readonly RegisterProjectHandler $handler,
+        private readonly RegisterProjectHandler $registerProjectHandler,
         private readonly SerializerInterface $serializer,
     ) {
     }
@@ -29,7 +30,8 @@ final class ProjectController
             'json'
         );
 
-        $project = $this->handler->handle($dto->name, $dto->ownerEmail);
+        $command = new RegisterProjectCommand($dto->name, $dto->ownerEmail);
+        $project = ($this->registerProjectHandler)($command);
 
         return new JsonResponse([
             'id' => $project->getId()->toString(),
