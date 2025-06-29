@@ -55,7 +55,10 @@ final class ProjectMapper
 
         foreach ($project->getWorkers() as $worker) {
             $user = $this->em->getReference(UserEntity::class, $worker->getUserId()->toString());
-            $addedBy = $this->em->getReference(UserEntity::class, $worker->getAddedBy()?->toString() ?? $worker->getUserId()->toString());
+            $addedBy = $this->em->getReference(
+                UserEntity::class,
+                $worker->getAddedBy()?->toString() ?? $worker->getUserId()->toString()
+            );
 
             $workerEntity = new ProjectWorkerEntity(
                 project: $entity,
@@ -80,7 +83,10 @@ final class ProjectMapper
 
         foreach ($project->getWorkers() as $worker) {
             $user = $this->em->getReference(UserEntity::class, $worker->getUserId()->toString());
-            $addedBy = $this->em->getReference(UserEntity::class, $worker->getAddedBy()?->toString() ?? $worker->getUserId()->toString());
+            $addedBy = $this->em->getReference(
+                UserEntity::class,
+                $worker->getAddedBy()?->toString() ?? $worker->getUserId()->toString()
+            );
 
             $workerEntity = new ProjectWorkerEntity(
                 project: $entity,

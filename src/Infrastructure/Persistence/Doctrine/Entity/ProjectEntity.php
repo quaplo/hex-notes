@@ -28,10 +28,15 @@ class ProjectEntity
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
-	/**
-	 * @var Collection<int, ProjectWorkerEntity>
-	 */
-    #[ORM\OneToMany(mappedBy: 'project', targetEntity: ProjectWorkerEntity::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    /**
+     * @var Collection<int, ProjectWorkerEntity>
+     */
+    #[ORM\OneToMany(
+        mappedBy: 'project',
+        targetEntity: ProjectWorkerEntity::class,
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
     private Collection $projectWorkers;
 
     public function __construct(
@@ -84,9 +89,9 @@ class ProjectEntity
         $this->deletedAt = new DateTimeImmutable();
     }
 
-	/**
-	 * @return Collection<int, ProjectWorkerEntity>
-	 */
+    /**
+     * @return Collection<int, ProjectWorkerEntity>
+     */
     public function getProjectWorkers(): Collection
     {
         return $this->projectWorkers;
