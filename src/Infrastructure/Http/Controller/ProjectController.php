@@ -6,9 +6,13 @@ namespace App\Infrastructure\Http\Controller;
 
 use App\Application\Project\Command\RegisterProjectCommand;
 use App\Application\Project\Command\RegisterProjectHandler;
-use App\Infrastructure\Http\Request\CreateProjectRequest;
+use App\Application\Project\Query\GetProjectHandler;
+use App\Application\Project\Query\GetProjectQuery;
+use App\Infrastructure\Http\Dto\CreateProjectRequestDto;
+use App\Shared\ValueObject\Uuid;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -20,13 +24,29 @@ final class ProjectController
     ) {
     }
 
+    #[Route('/api/projects/{id}', name: 'detail', methods: ['GET'])]
+    public function detail(
+        string $id,
+        GetProjectHandler $handler
+    ): JsonResponse {
+        try {
+            $dto = $handler(new GetProjectQuery($id));
+
+            $json = $this->serializer->serialize($dto, 'json');
+
+            return new JsonResponse($json, JsonResponse::HTTP_OK, [], true);
+        } catch (\Throwable $e) {
+            throw new NotFoundHttpException('Project not found.');
+        }
+    }
+
     #[Route('/api/projects', name: 'create_project', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        /** @var CreateProjectRequest $dto */
+        /** @var CreateProjectRequestDto $dto */
         $dto = $this->serializer->deserialize(
             $request->getContent(),
-            CreateProjectRequest::class,
+            CreateProjectRequestDto::class,
             'json'
         );
 

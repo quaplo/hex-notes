@@ -86,6 +86,11 @@ final class Project
         return $this->workers;
     }
 
+    public function getOwnerEmail()
+    {
+        return $this->owner->getEmail();
+    }
+
     public function addWorker(ProjectWorker $worker): void
     {
         foreach ($this->workers as $existing) {

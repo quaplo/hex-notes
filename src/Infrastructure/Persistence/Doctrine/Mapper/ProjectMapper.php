@@ -7,11 +7,13 @@ namespace App\Infrastructure\Persistence\Doctrine\Mapper;
 use App\Domain\Project\Model\Project;
 use App\Domain\Project\Model\ProjectWorker;
 use App\Domain\Project\ValueObject\ProjectName;
+use App\Domain\Project\ValueObject\ProjectOwner;
 use App\Domain\Project\ValueObject\ProjectRole;
 use App\Domain\Project\ValueObject\UserId;
 use App\Infrastructure\Persistence\Doctrine\Entity\ProjectEntity;
 use App\Infrastructure\Persistence\Doctrine\Entity\ProjectWorkerEntity;
 use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
+use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -24,11 +26,13 @@ final class ProjectMapper
 
     public function mapToDomain(ProjectEntity $entity): Project
     {
+        $owner = $entity->getOwner();
+
         $project = new Project(
             new Uuid($entity->getId()),
             new ProjectName($entity->getName()),
             $entity->getCreatedAt(),
-            UserId::fromString($entity->getCreatedBy()),
+            ProjectOwner::create(UserId::fromString($owner->getId()), Email::fromString($owner->getEmail())),
             $entity->getDeletedAt()
         );
 
@@ -56,7 +60,8 @@ final class ProjectMapper
             $project->getDeletedAt()
         );
 
-        $userEntity = $this->em->getRepository(UserEntity::class)->findOneById($project->getOwner()->getId()->toString());
+        $userEntity = $this->em->getRepository(UserEntity::class)
+            ->findOneById($project->getOwner()->getId()->toString());
         $entity->setOwner($userEntity);
 
         foreach ($project->getWorkers() as $worker) {

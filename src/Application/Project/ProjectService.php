@@ -14,6 +14,7 @@ use App\Domain\Project\ValueObject\UserId;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Shared\ValueObject\Email;
 use App\Application\Exception\UserNotFoundException;
+use App\Shared\ValueObject\Uuid;
 
 final class ProjectService
 {
@@ -45,5 +46,10 @@ final class ProjectService
         $this->projectRepository->save($project);
 
         return $project;
+    }
+
+    public function getProject(Uuid $id): ?Project
+    {
+        return $this->projectRepository->findById($id);
     }
 }

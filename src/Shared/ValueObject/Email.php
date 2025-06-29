@@ -15,6 +15,11 @@ final class Email
         }
     }
 
+    public static function fromString(string $value): self
+    {
+        return new self($value);
+    }
+
     public function getValue(): string
     {
         return $this->value;

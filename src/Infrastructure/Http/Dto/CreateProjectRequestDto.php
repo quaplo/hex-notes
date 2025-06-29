@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Http\Request;
+namespace App\Infrastructure\Http\Dto;
 
-final readonly class CreateProjectRequest
+final readonly class CreateProjectRequestDto
 {
     public function __construct(
         public string $name,

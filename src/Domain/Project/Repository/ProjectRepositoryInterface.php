@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\Project\Repository;
 
 use App\Domain\Project\Model\Project;
+use App\Shared\ValueObject\Uuid;
 
 interface ProjectRepositoryInterface
 {
@@ -12,7 +13,7 @@ interface ProjectRepositoryInterface
 
     public function delete(Project $project): void;
 
-    public function findById(string $id): ?Project;
+    public function findById(Uuid $id): ?Project;
 
     /**
      * @return Project[]

@@ -8,6 +8,7 @@ use App\Domain\Project\Model\Project;
 use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Infrastructure\Persistence\Doctrine\Entity\ProjectEntity;
 use App\Infrastructure\Persistence\Doctrine\Mapper\ProjectMapper;
+use App\Shared\ValueObject\Uuid;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class ProjectRepository implements ProjectRepositoryInterface
@@ -32,9 +33,12 @@ final class ProjectRepository implements ProjectRepositoryInterface
         $this->em->flush();
     }
 
-    public function findById(string $id): ?Project
+    public function findById(Uuid $id): ?Project
     {
-        $entity = $this->em->getRepository(ProjectEntity::class)->find($id);
+        $entity = $this->em
+            ->getRepository(ProjectEntity::class)
+            ->findOneBy(['id' => $id->toString()]);
+
         return $entity ? $this->mapper->mapToDomain($entity) : null;
     }
 
