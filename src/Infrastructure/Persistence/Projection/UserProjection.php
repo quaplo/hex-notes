@@ -68,4 +68,17 @@ final class UserProjection implements EventDispatcher
         
         return $row ?: null;
     }
+
+    public function findUserIdByEmail(Email $email): ?Uuid
+    {
+        $sql = 'SELECT id FROM user_projection WHERE email = ?';
+        
+        $stmt = $this->connection->prepare($sql);
+        $stmt->bindValue(1, $email->__toString());
+        $result = $stmt->executeQuery();
+        
+        $id = $result->fetchOne();
+        
+        return $id ? Uuid::create($id) : null;
+    }
 } 

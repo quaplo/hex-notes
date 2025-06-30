@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace App\Application\Project;
 
+use App\Application\User\UserEventSourcingService;
 use App\Domain\Project\Model\Project;
 use App\Domain\Project\ValueObject\ProjectName;
 use App\Domain\Project\ValueObject\ProjectOwner;
 use App\Domain\Project\ValueObject\UserId;
-use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
 
-final class EventSourcingService
+final class ProjectService
 {
     public function __construct(
         private readonly ProjectEventStoreRepository $projectRepository,
-        private readonly UserRepositoryInterface $userRepository
+        private readonly UserEventSourcingService $userService
     ) {
     }
 
     public function createProject(string $name, string $ownerEmail): Project
     {
-        $user = $this->userRepository->findByEmail(new Email($ownerEmail));
+        $user = $this->userService->getUserByEmail(new Email($ownerEmail));
 
         if (!$user) {
             throw new \DomainException("User with email $ownerEmail not found");
@@ -79,8 +79,6 @@ final class EventSourcingService
 
     public function getProjectHistory(string $projectId): array
     {
-        // This would typically be implemented in a separate read model
-        // For now, we'll just return the project with its events
         $project = $this->projectRepository->load(new Uuid($projectId));
         
         if (!$project) {

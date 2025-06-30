@@ -49,9 +49,12 @@ final class UserEventSourcingService
 
     public function getUserByEmail(Email $email): ?User
     {
-        // Pre jednoduchosť hľadáme cez všetky events
-        // V produkčnom prostredí by sme mali index alebo projection
-        // TODO: Implementovať getAllEvents() ak je potrebné
-        return null;
+        $userId = $this->userProjection->findUserIdByEmail($email);
+
+        if (!$userId) {
+            return null;
+        }
+        
+        return $this->getUserById($userId);
     }
 } 
