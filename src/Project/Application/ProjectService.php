@@ -70,4 +70,9 @@ final class ProjectService
             'events' => $project->getDomainEvents()
         ];
     }
+
+    public function save(Project $project): void
+    {
+        $this->projectRepository->save($project);
+    }
 }

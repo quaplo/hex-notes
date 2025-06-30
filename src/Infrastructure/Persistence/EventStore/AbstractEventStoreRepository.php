@@ -26,9 +26,8 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
             return;
         }
 
-        // Pre nový aggregate (verzia 0) očakávame verziu 0
-        // Pre existujúci aggregate očakávame aktuálnu verziu
-        $expectedVersion = $aggregate->getVersion() === 0 ? 0 : $aggregate->getVersion() - count($events);
+        // Oprava: expectedVersion je aktuálna verzia aggregate
+        $expectedVersion = $aggregate->getVersion();
 
         $this->eventStore->append(
             $aggregate->getId(),

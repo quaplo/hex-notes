@@ -119,6 +119,7 @@ final class DoctrineEventStore implements EventStore
             'App\\Project\\Domain\\Event\\ProjectCreatedEvent' => $this->serializeProjectCreatedEvent($event),
             'App\\Project\\Domain\\Event\\ProjectRenamedEvent' => $this->serializeProjectRenamedEvent($event),
             'App\\Project\\Domain\\Event\\ProjectDeletedEvent' => $this->serializeProjectDeletedEvent($event),
+            'App\\Project\\Domain\\Event\\ProjectWorkerAddedEvent' => $this->serializeProjectWorkerAddedEvent($event),
             'App\\User\\Domain\\Event\\UserCreatedEvent' => $this->serializeUserCreatedEvent($event),
             default => throw new \RuntimeException("Unknown event type for serialization: " . get_class($event))
         };
@@ -157,6 +158,18 @@ final class DoctrineEventStore implements EventStore
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
+    private function serializeProjectWorkerAddedEvent(\App\Project\Domain\Event\ProjectWorkerAddedEvent $event): string
+    {
+        $data = [
+            'projectId' => $event->getProjectId()->toString(),
+            'userId' => $event->getUserId()->toString(),
+            'role' => (string)$event->getRole(),
+            'addedBy' => $event->getAddedBy()?->toString(),
+            'occurredAt' => $event->getOccurredAt()->format(\DateTimeInterface::ATOM)
+        ];
+        return json_encode($data, JSON_THROW_ON_ERROR);
+    }
+
     private function serializeUserCreatedEvent(\App\User\Domain\Event\UserCreatedEvent $event): string
     {
         $data = [
@@ -185,6 +198,7 @@ final class DoctrineEventStore implements EventStore
                 'App\\Project\\Domain\\Event\\ProjectCreatedEvent' => $this->deserializeProjectCreatedEvent($data),
                 'App\\Project\\Domain\\Event\\ProjectRenamedEvent' => $this->deserializeProjectRenamedEvent($data),
                 'App\\Project\\Domain\\Event\\ProjectDeletedEvent' => $this->deserializeProjectDeletedEvent($data),
+                'App\\Project\\Domain\\Event\\ProjectWorkerAddedEvent' => $this->deserializeProjectWorkerAddedEvent($data),
                 'App\\User\\Domain\\Event\\UserCreatedEvent' => $this->deserializeUserCreatedEvent($data),
                 default => throw new \RuntimeException("Unknown event type: $eventType")
             };
@@ -217,6 +231,17 @@ final class DoctrineEventStore implements EventStore
     {
         return new \App\Project\Domain\Event\ProjectDeletedEvent(
             new Uuid($data['projectId']),
+            new \DateTimeImmutable($data['occurredAt'])
+        );
+    }
+
+    private function deserializeProjectWorkerAddedEvent(array $data): \App\Project\Domain\Event\ProjectWorkerAddedEvent
+    {
+        return new \App\Project\Domain\Event\ProjectWorkerAddedEvent(
+            new Uuid($data['projectId']),
+            new Uuid($data['userId']),
+            \App\Project\Domain\ValueObject\ProjectRole::from($data['role']),
+            isset($data['addedBy']) && $data['addedBy'] ? new Uuid($data['addedBy']) : null,
             new \DateTimeImmutable($data['occurredAt'])
         );
     }

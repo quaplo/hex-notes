@@ -1,0 +1,36 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Project\Application\Command;
+
+use App\Project\Domain\Model\Project;
+use App\Project\Domain\Model\ProjectWorker;
+use App\Project\Domain\ValueObject\ProjectRole;
+use App\Project\Application\ProjectService;
+use App\Shared\ValueObject\Uuid;
+
+final class AddProjectWorkerHandler
+{
+    public function __construct(
+        private readonly ProjectService $projectService
+    ) {}
+
+    public function __invoke(AddProjectWorkerCommand $command): Project
+    {
+        $project = $this->projectService->getProject($command->projectId);
+        if (!$project) {
+            throw new \DomainException('Project not found');
+        }
+
+        $worker = ProjectWorker::create(
+            Uuid::create($command->userId),
+            ProjectRole::from($command->role),
+            $command->addedBy ? Uuid::create($command->addedBy) : null
+        );
+
+        $project = $project->addWorker($worker);
+        $this->projectService->save($project);
+        return $project;
+    }
+} 

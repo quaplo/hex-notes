@@ -11,6 +11,7 @@ final class ProjectFullDetailDto
 {
     public function __construct(
         public readonly ProjectDto $project,
-        public readonly UserDto $owner
+        public readonly UserDto $owner,
+        public readonly array $workers = []
     ) {}
 }

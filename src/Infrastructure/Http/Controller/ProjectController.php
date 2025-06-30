@@ -17,6 +17,9 @@ use Symfony\Component\Serializer\SerializerInterface;
 use App\Project\Application\Composite\Query\GetProjectFullDetailQuery;
 use App\Project\Application\Composite\Query\GetProjectFullDetailHandler;
 use App\Project\Application\Composite\Dto\ProjectFullDetailDto;
+use App\Infrastructure\Http\Dto\AddProjectWorkerRequestDto;
+use App\Project\Application\Command\AddProjectWorkerHandler;
+use App\Project\Application\Command\AddProjectWorkerCommand;
 
 final class ProjectController
 {
@@ -26,6 +29,7 @@ final class ProjectController
         private readonly ProjectDtoMapper $projectDtoMapper,
         private readonly SerializerInterface $serializer,
         private readonly GetProjectFullDetailHandler $getProjectFullDetailHandler,
+        private readonly AddProjectWorkerHandler $addProjectWorkerHandler,
     ) {}
 
     #[Route('/api/projects', name: 'create_project', methods: ['POST'])]
@@ -56,5 +60,25 @@ final class ProjectController
         }
 
         return new JsonResponse($dto, JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/api/projects/{id}/workers', name: 'add_project_worker', methods: ['POST'])]
+    public function addWorker(string $id, Request $request): JsonResponse
+    {
+        /** @var AddProjectWorkerRequestDto $dto */
+        $dto = $this->serializer->deserialize(
+            $request->getContent(),
+            AddProjectWorkerRequestDto::class,
+            'json'
+        );
+
+        $command = new AddProjectWorkerCommand(
+            $id,
+            $dto->userId,
+            $dto->role,
+            $dto->addedBy
+        );
+        ($this->addProjectWorkerHandler)($command);
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }
