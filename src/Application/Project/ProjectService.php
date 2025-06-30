@@ -4,43 +4,39 @@ declare(strict_types=1);
 
 namespace App\Application\Project;
 
+use App\Application\User\UserEventSourcingService;
 use App\Domain\Project\Model\Project;
-use App\Domain\Project\Model\ProjectWorker;
-use App\Domain\Project\Repository\ProjectRepositoryInterface;
 use App\Domain\Project\ValueObject\ProjectName;
 use App\Domain\Project\ValueObject\ProjectOwner;
-use App\Domain\Project\ValueObject\ProjectRole;
 use App\Domain\Project\ValueObject\UserId;
-use App\Domain\User\Repository\UserRepositoryInterface;
+use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Shared\ValueObject\Email;
-use App\Application\Exception\UserNotFoundException;
 use App\Shared\ValueObject\Uuid;
 
 final class ProjectService
 {
     public function __construct(
-        private ProjectRepositoryInterface $projectRepository,
-        private UserRepositoryInterface $userRepository,
+        private readonly ProjectEventStoreRepository $projectRepository,
+        private readonly UserEventSourcingService $userService
     ) {
     }
 
-    public function registerProjectWithOwner(ProjectName $name, Email $ownerEmail): Project
+    public function createProject(string $name, string $ownerEmail): Project
     {
-        $user = $this->userRepository->findByEmail($ownerEmail);
+        $user = $this->userService->getUserByEmail(new Email($ownerEmail));
 
         if (!$user) {
-            throw new UserNotFoundException(sprintf('User with email %s not found', $ownerEmail));
+            throw new \DomainException("User with email $ownerEmail not found");
         }
 
-        $projectOwner = ProjectOwner::create(UserId::fromUuid($user->getId()), $user->getEmail());
+        $projectOwner = ProjectOwner::create(
+            UserId::fromUuid($user->getId()),
+            $user->getEmail()
+        );
 
-        $project = Project::create($name, $projectOwner);
-
-        $project->addWorker(
-            ProjectWorker::create(
-                $user->getId(),
-                ProjectRole::owner()
-            )
+        $project = Project::create(
+            new ProjectName($name),
+            $projectOwner
         );
 
         $this->projectRepository->save($project);
@@ -48,8 +44,50 @@ final class ProjectService
         return $project;
     }
 
-    public function getProject(Uuid $id): ?Project
+    public function renameProject(string $projectId, string $newName): Project
     {
-        return $this->projectRepository->findById($id);
+        $project = $this->projectRepository->load(new Uuid($projectId));
+        
+        if (!$project) {
+            throw new \DomainException("Project with id $projectId not found");
+        }
+
+        $renamedProject = $project->rename(new ProjectName($newName));
+        $this->projectRepository->save($renamedProject);
+
+        return $renamedProject;
+    }
+
+    public function deleteProject(string $projectId): Project
+    {
+        $project = $this->projectRepository->load(new Uuid($projectId));
+        
+        if (!$project) {
+            throw new \DomainException("Project with id $projectId not found");
+        }
+
+        $deletedProject = $project->delete();
+        $this->projectRepository->save($deletedProject);
+
+        return $deletedProject;
+    }
+
+    public function getProject(string $projectId): ?Project
+    {
+        return $this->projectRepository->load(new Uuid($projectId));
+    }
+
+    public function getProjectHistory(string $projectId): array
+    {
+        $project = $this->projectRepository->load(new Uuid($projectId));
+        
+        if (!$project) {
+            return [];
+        }
+
+        return [
+            'project' => $project,
+            'events' => $project->getDomainEvents()
+        ];
     }
 }

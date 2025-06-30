@@ -16,6 +16,6 @@ final class RegisterProjectHandler
 
     public function __invoke(RegisterProjectCommand $command): Project
     {
-        return $this->service->registerProjectWithOwner($command->getName(), $command->getOwnerEmail());
+        return $this->service->createProject($command->name, $command->ownerEmail);
     }
 }
