@@ -32,7 +32,6 @@ final class ProjectEventHandler
         $this->logger->info('Project created', [
             'projectId' => $event->getProjectId()->toString(),
             'name' => $event->getName()->__toString(),
-            'ownerEmail' => $event->getOwner()->getEmail()->getValue(),
             'occurredAt' => $event->getOccurredAt()->format(\DateTimeInterface::ATOM)
         ]);
 

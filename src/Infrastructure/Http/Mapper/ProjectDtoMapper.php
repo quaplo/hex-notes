@@ -10,10 +10,11 @@ final class ProjectDtoMapper
     public function toDto(Project $project): ProjectDto
     {
         return new ProjectDto(
-            $project->getId()->toString(),
-            $project->getName()->__toString(),
-            $project->getOwnerEmail()->__toString(),
-            $project->getCreatedAt()->format(DATE_ATOM),
+            id: $project->getId()->toString(),
+            name: $project->getName()->__toString(),
+            ownerId: $project->getOwnerId()->toString(),
+            createdAt: $project->getCreatedAt()->format('Y-m-d H:i:s'),
+            deletedAt: $project->getDeletedAt()?->format('Y-m-d H:i:s')
         );
     }
 }

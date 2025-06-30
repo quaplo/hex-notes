@@ -6,6 +6,7 @@ namespace App\Project\Application\Command;
 
 use App\Project\Application\ProjectService;
 use App\Project\Domain\Model\Project;
+use App\Shared\ValueObject\Uuid;
 
 final class RegisterProjectHandler
 {
@@ -16,6 +17,6 @@ final class RegisterProjectHandler
 
     public function __invoke(RegisterProjectCommand $command): Project
     {
-        return $this->service->createProject($command->name, $command->ownerEmail);
+        return $this->service->createProject($command->name, Uuid::create($command->ownerId));
     }
 }

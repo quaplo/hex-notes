@@ -16,7 +16,7 @@ it('can create and load user via handlers', function () {
     /** @var GetUserByIdHandler $getHandler */
     $getHandler = self::getContainer()->get(GetUserByIdHandler::class);
 
-    $email = 'testsuser@example.com';
+    $email = 'teer@example.com';
     $command = new CreateUserCommand($email);
     $user = $createHandler($command);
 

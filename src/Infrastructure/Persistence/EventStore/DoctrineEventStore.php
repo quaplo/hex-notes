@@ -129,13 +129,9 @@ final class DoctrineEventStore implements EventStore
         $data = [
             'projectId' => $event->getProjectId()->toString(),
             'name' => $event->getName()->__toString(),
-            'owner' => [
-                'id' => $event->getOwner()->getId()->toString(),
-                'email' => $event->getOwner()->getEmail()->getValue()
-            ],
+            'ownerId' => $event->getOwnerId()->toString(),
             'occurredAt' => $event->getOccurredAt()->format(\DateTimeInterface::ATOM)
         ];
-
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
@@ -202,10 +198,7 @@ final class DoctrineEventStore implements EventStore
         return new \App\Project\Domain\Event\ProjectCreatedEvent(
             new Uuid($data['projectId']),
             new \App\Project\Domain\ValueObject\ProjectName($data['name']),
-            new \App\Project\Domain\ValueObject\ProjectOwner(
-                \App\Shared\ValueObject\Uuid::create($data['owner']['id']),
-                new \App\Shared\ValueObject\Email($data['owner']['email'])
-            ),
+            \App\Shared\ValueObject\Uuid::create($data['ownerId']),
             new \DateTimeImmutable($data['occurredAt'])
         );
     }

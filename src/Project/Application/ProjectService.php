@@ -7,8 +7,6 @@ namespace App\Project\Application;
 use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\ValueObject\ProjectName;
-use App\Project\Domain\ValueObject\ProjectOwner;
-use App\Project\Domain\ValueObject\UserId;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
 use App\User\Application\UserEventSourcingService;
@@ -16,31 +14,13 @@ use App\User\Application\UserEventSourcingService;
 final class ProjectService
 {
     public function __construct(
-        private readonly ProjectEventStoreRepository $projectRepository,
-        private readonly UserEventSourcingService $userService
-    ) {
-    }
+        private readonly ProjectEventStoreRepository $projectRepository
+    ) {}
 
-    public function createProject(string $name, string $ownerEmail): Project
+    public function createProject(string $name, Uuid $ownerId): Project
     {
-        $user = $this->userService->getUserByEmail(new Email($ownerEmail));
-
-        if (!$user) {
-            throw new \DomainException("User with email $ownerEmail not found");
-        }
-
-        $projectOwner = ProjectOwner::create(
-            $user->getId(),
-            $user->getEmail()
-        );
-
-        $project = Project::create(
-            new ProjectName($name),
-            $projectOwner
-        );
-
+        $project = Project::create(new ProjectName($name), $ownerId);
         $this->projectRepository->save($project);
-
         return $project;
     }
 

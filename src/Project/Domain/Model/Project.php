@@ -8,8 +8,6 @@ use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\ValueObject\ProjectName;
-use App\Project\Domain\ValueObject\ProjectOwner;
-use App\Project\Domain\ValueObject\UserId;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
@@ -21,34 +19,23 @@ final class Project extends AggregateRoot
      * @var ProjectWorker[]
      */
     private array $workers = [];
-
-    private Uuid $createdBy;
-
-    public function getOwner(): ProjectOwner
-    {
-        return $this->owner;
-    }
-
-    public static function create(ProjectName $name, ProjectOwner $owner): self
-    {
-        $project = new self(Uuid::generate(), $name, new DateTimeImmutable(), $owner);
-        $project->recordProjectCreated($name, $owner);
-        return $project;
-    }
+    private Uuid $ownerId;
 
     public function __construct(
         private Uuid $id,
         private ProjectName $name,
         private DateTimeImmutable $createdAt,
-        private ProjectOwner $owner,
+        Uuid $ownerId,
         private ?DateTimeImmutable $deletedAt = null,
     ) {
-        $this->createdBy = $this->owner->getId();
+        $this->ownerId = $ownerId;
     }
 
-    public function getCreatedBy(): Uuid
+    public static function create(ProjectName $name, Uuid $ownerId): self
     {
-        return $this->createdBy;
+        $project = new self(Uuid::generate(), $name, new DateTimeImmutable(), $ownerId);
+        $project->recordProjectCreated($name, $ownerId);
+        return $project;
     }
 
     public function getId(): Uuid
@@ -59,29 +46,6 @@ final class Project extends AggregateRoot
     public function getName(): ProjectName
     {
         return $this->name;
-    }
-
-    public function rename(ProjectName $name): self
-    {
-        if ($this->isDeleted()) {
-            throw new \DomainException('Cannot rename deleted project');
-        }
-
-        $project = new self(
-            $this->id,
-            $name,
-            $this->createdAt,
-            $this->owner,
-            $this->deletedAt
-        );
-        
-        $project->workers = $this->workers;
-        $project->createdBy = $this->createdBy;
-        $project->setVersion($this->getVersion());
-        
-        $project->recordProjectRenamed($this->name, $name);
-        
-        return $project;
     }
 
     public function getCreatedAt(): DateTimeImmutable
@@ -109,12 +73,11 @@ final class Project extends AggregateRoot
             $this->id,
             $this->name,
             $this->createdAt,
-            $this->owner,
+            $this->ownerId,
             new DateTimeImmutable()
         );
         
         $project->workers = $this->workers;
-        $project->createdBy = $this->createdBy;
         $project->setVersion($this->getVersion());
         
         $project->recordProjectDeleted();
@@ -126,11 +89,6 @@ final class Project extends AggregateRoot
     public function getWorkers(): array
     {
         return $this->workers;
-    }
-
-    public function getOwnerEmail()
-    {
-        return $this->owner->getEmail();
     }
 
     public function addWorker(ProjectWorker $worker): void
@@ -148,9 +106,14 @@ final class Project extends AggregateRoot
         $this->workers[] = $worker;
     }
 
-    protected function recordProjectCreated(ProjectName $name, ProjectOwner $owner): void
+    public function getOwnerId(): Uuid
     {
-        $this->recordEvent(new ProjectCreatedEvent($this->id, $name, $owner));
+        return $this->ownerId;
+    }
+
+    protected function recordProjectCreated(ProjectName $name, Uuid $ownerId): void
+    {
+        $this->recordEvent(new ProjectCreatedEvent($this->id, $name, $ownerId));
     }
 
     protected function recordProjectRenamed(ProjectName $oldName, ProjectName $newName): void
@@ -175,12 +138,10 @@ final class Project extends AggregateRoot
 
     private function handleProjectCreated(ProjectCreatedEvent $event): void
     {
-        // Pri event replay nastavíme stav aggregate z eventu
         $this->id = $event->getProjectId();
         $this->name = $event->getName();
-        $this->owner = $event->getOwner();
         $this->createdAt = $event->getOccurredAt();
-        $this->createdBy = $this->owner->getId();
+        $this->ownerId = $event->getOwnerId();
     }
 
     private function handleProjectRenamed(ProjectRenamedEvent $event): void
