@@ -121,6 +121,7 @@ final class DoctrineEventStore implements EventStore
             'App\\Project\\Domain\\Event\\ProjectDeletedEvent' => $this->serializeProjectDeletedEvent($event),
             'App\\Project\\Domain\\Event\\ProjectWorkerAddedEvent' => $this->serializeProjectWorkerAddedEvent($event),
             'App\\User\\Domain\\Event\\UserCreatedEvent' => $this->serializeUserCreatedEvent($event),
+            'App\\Project\\Domain\\Event\\ProjectWorkerRemovedEvent' => $this->serializeProjectWorkerRemovedEvent($event),
             default => throw new \RuntimeException("Unknown event type for serialization: " . get_class($event))
         };
     }
@@ -180,6 +181,17 @@ final class DoctrineEventStore implements EventStore
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
+    private function serializeProjectWorkerRemovedEvent(\App\Project\Domain\Event\ProjectWorkerRemovedEvent $event): string
+    {
+        $data = [
+            'projectId' => $event->getProjectId()->toString(),
+            'userId' => $event->getUserId()->toString(),
+            'removedBy' => $event->getRemovedBy()?->toString(),
+            'occurredAt' => $event->getOccurredAt()->format(\DateTimeInterface::ATOM)
+        ];
+        return json_encode($data, JSON_THROW_ON_ERROR);
+    }
+
     private function deserializeEvent(string $eventData, string $eventType): DomainEvent
     {
         try {
@@ -200,6 +212,7 @@ final class DoctrineEventStore implements EventStore
                 'App\\Project\\Domain\\Event\\ProjectDeletedEvent' => $this->deserializeProjectDeletedEvent($data),
                 'App\\Project\\Domain\\Event\\ProjectWorkerAddedEvent' => $this->deserializeProjectWorkerAddedEvent($data),
                 'App\\User\\Domain\\Event\\UserCreatedEvent' => $this->deserializeUserCreatedEvent($data),
+                'App\\Project\\Domain\\Event\\ProjectWorkerRemovedEvent' => $this->deserializeProjectWorkerRemovedEvent($data),
                 default => throw new \RuntimeException("Unknown event type: $eventType")
             };
         } catch (JsonException $e) {
@@ -252,6 +265,16 @@ final class DoctrineEventStore implements EventStore
             \App\Shared\ValueObject\Uuid::create($data['userId']),
             new \App\Shared\ValueObject\Email($data['email']),
             new \DateTimeImmutable($data['createdAt'])
+        );
+    }
+
+    private function deserializeProjectWorkerRemovedEvent(array $data): \App\Project\Domain\Event\ProjectWorkerRemovedEvent
+    {
+        return new \App\Project\Domain\Event\ProjectWorkerRemovedEvent(
+            new Uuid($data['projectId']),
+            new Uuid($data['userId']),
+            isset($data['removedBy']) && $data['removedBy'] ? new Uuid($data['removedBy']) : null,
+            new \DateTimeImmutable($data['occurredAt'])
         );
     }
 } 

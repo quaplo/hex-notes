@@ -8,6 +8,7 @@ use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
+use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
 use App\Project\Domain\ValueObject\ProjectName;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Event\DomainEvent;
@@ -121,6 +122,37 @@ final class Project extends AggregateRoot
         return $this->ownerId;
     }
 
+    public function removeWorkerByUserId(Uuid $userId, ?Uuid $removedBy = null): self
+    {
+        if ($this->isDeleted()) {
+            throw new \DomainException('Cannot remove worker from deleted project');
+        }
+
+        $found = false;
+        foreach ($this->workers as $worker) {
+            if ($worker->getUserId()->equals($userId)) {
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            throw new \DomainException('Worker not found in project');
+        }
+
+        $project = clone $this;
+        $project->workers = array_filter(
+            $this->workers,
+            fn($worker) => !$worker->getUserId()->equals($userId)
+        );
+        $project->setVersion($this->getVersion());
+        $project->recordEvent(new ProjectWorkerRemovedEvent(
+            $this->id,
+            $userId,
+            $removedBy
+        ));
+        return $project;
+    }
+
     protected function recordProjectCreated(ProjectName $name, Uuid $ownerId): void
     {
         $this->recordEvent(new ProjectCreatedEvent($this->id, $name, $ownerId));
@@ -143,6 +175,7 @@ final class Project extends AggregateRoot
             ProjectRenamedEvent::class => $this->handleProjectRenamed($event),
             ProjectDeletedEvent::class => $this->handleProjectDeleted($event),
             ProjectWorkerAddedEvent::class => $this->handleProjectWorkerAdded($event),
+            ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($event),
             default => throw new \RuntimeException('Unknown event type: ' . get_class($event))
         };
     }
@@ -172,6 +205,14 @@ final class Project extends AggregateRoot
             $event->getRole(),
             $event->getAddedBy(),
             $event->getOccurredAt()
+        );
+    }
+
+    private function handleProjectWorkerRemoved(ProjectWorkerRemovedEvent $event): void
+    {
+        $this->workers = array_filter(
+            $this->workers,
+            fn($worker) => !$worker->getUserId()->equals($event->getUserId())
         );
     }
 }

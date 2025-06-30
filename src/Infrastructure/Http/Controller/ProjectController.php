@@ -20,6 +20,9 @@ use App\Project\Application\Composite\Dto\ProjectFullDetailDto;
 use App\Infrastructure\Http\Dto\AddProjectWorkerRequestDto;
 use App\Project\Application\Command\AddProjectWorkerHandler;
 use App\Project\Application\Command\AddProjectWorkerCommand;
+use App\Infrastructure\Http\Dto\RemoveProjectWorkerRequestDto;
+use App\Project\Application\Command\RemoveProjectWorkerHandler;
+use App\Project\Application\Command\RemoveProjectWorkerCommand;
 
 final class ProjectController
 {
@@ -30,6 +33,7 @@ final class ProjectController
         private readonly SerializerInterface $serializer,
         private readonly GetProjectFullDetailHandler $getProjectFullDetailHandler,
         private readonly AddProjectWorkerHandler $addProjectWorkerHandler,
+        private readonly RemoveProjectWorkerHandler $removeProjectWorkerHandler,
     ) {}
 
     #[Route('/api/projects', name: 'create_project', methods: ['POST'])]
@@ -79,6 +83,25 @@ final class ProjectController
             $dto->addedBy
         );
         ($this->addProjectWorkerHandler)($command);
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/api/projects/{id}/workers', name: 'remove_project_worker', methods: ['DELETE'])]
+    public function removeWorker(string $id, Request $request): JsonResponse
+    {
+        /** @var RemoveProjectWorkerRequestDto $dto */
+        $dto = $this->serializer->deserialize(
+            $request->getContent(),
+            RemoveProjectWorkerRequestDto::class,
+            'json'
+        );
+
+        $command = new RemoveProjectWorkerCommand(
+            $id,
+            $dto->userId,
+            $dto->removedBy
+        );
+        ($this->removeProjectWorkerHandler)($command);
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 }
