@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Controller;
 
-use App\Application\Project\Command\RegisterProjectCommand;
-use App\Application\Project\Command\RegisterProjectHandler;
-use App\Application\Project\Query\GetProjectHandler;
-use App\Application\Project\Query\GetProjectQuery;
 use App\Infrastructure\Http\Dto\CreateProjectRequestDto;
-use App\Shared\ValueObject\Uuid;
+use App\Project\Application\Command\RegisterProjectCommand;
+use App\Project\Application\Command\RegisterProjectHandler;
+use App\Project\Application\Query\GetProjectHandler;
+use App\Project\Application\Query\GetProjectQuery;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

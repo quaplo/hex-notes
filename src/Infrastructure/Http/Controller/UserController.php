@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Controller;
 
-use App\Application\User\Command\CreateUserCommand;
-use App\Application\User\Command\CreateUserHandler;
-use App\Application\User\Query\GetUserByIdQuery;
-use App\Application\User\Query\GetUserByIdHandler;
 use App\Infrastructure\Http\Dto\CreateUserRequestDto;
+use App\User\Application\Command\CreateUserCommand;
+use App\User\Application\Command\CreateUserHandler;
+use App\User\Application\Query\GetUserByIdHandler;
+use App\User\Application\Query\GetUserByIdQuery;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;

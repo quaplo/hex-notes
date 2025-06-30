@@ -116,15 +116,15 @@ final class DoctrineEventStore implements EventStore
     private function serializeEvent(DomainEvent $event): string
     {
         return match (get_class($event)) {
-            'App\\Domain\\Project\\Event\\ProjectCreatedEvent' => $this->serializeProjectCreatedEvent($event),
-            'App\\Domain\\Project\\Event\\ProjectRenamedEvent' => $this->serializeProjectRenamedEvent($event),
-            'App\\Domain\\Project\\Event\\ProjectDeletedEvent' => $this->serializeProjectDeletedEvent($event),
-            'App\\Domain\\User\\Event\\UserCreatedEvent' => $this->serializeUserCreatedEvent($event),
+            'App\\Project\\Domain\\Event\\ProjectCreatedEvent' => $this->serializeProjectCreatedEvent($event),
+            'App\\Project\\Domain\\Event\\ProjectRenamedEvent' => $this->serializeProjectRenamedEvent($event),
+            'App\\Project\\Domain\\Event\\ProjectDeletedEvent' => $this->serializeProjectDeletedEvent($event),
+            'App\\User\\Domain\\Event\\UserCreatedEvent' => $this->serializeUserCreatedEvent($event),
             default => throw new \RuntimeException("Unknown event type for serialization: " . get_class($event))
         };
     }
 
-    private function serializeProjectCreatedEvent(\App\Domain\Project\Event\ProjectCreatedEvent $event): string
+    private function serializeProjectCreatedEvent(\App\Project\Domain\Event\ProjectCreatedEvent $event): string
     {
         $data = [
             'projectId' => $event->getProjectId()->toString(),
@@ -139,7 +139,7 @@ final class DoctrineEventStore implements EventStore
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
-    private function serializeProjectRenamedEvent(\App\Domain\Project\Event\ProjectRenamedEvent $event): string
+    private function serializeProjectRenamedEvent(\App\Project\Domain\Event\ProjectRenamedEvent $event): string
     {
         $data = [
             'projectId' => $event->getProjectId()->toString(),
@@ -151,7 +151,7 @@ final class DoctrineEventStore implements EventStore
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
-    private function serializeProjectDeletedEvent(\App\Domain\Project\Event\ProjectDeletedEvent $event): string
+    private function serializeProjectDeletedEvent(\App\Project\Domain\Event\ProjectDeletedEvent $event): string
     {
         $data = [
             'projectId' => $event->getProjectId()->toString(),
@@ -161,7 +161,7 @@ final class DoctrineEventStore implements EventStore
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
-    private function serializeUserCreatedEvent(\App\Domain\User\Event\UserCreatedEvent $event): string
+    private function serializeUserCreatedEvent(\App\User\Domain\Event\UserCreatedEvent $event): string
     {
         $data = [
             'userId' => $event->userId->toString(),
@@ -186,10 +186,10 @@ final class DoctrineEventStore implements EventStore
             // This is a simplified deserialization
             // In a real application, you'd want a more robust event deserializer
             return match ($eventType) {
-                'App\\Domain\\Project\\Event\\ProjectCreatedEvent' => $this->deserializeProjectCreatedEvent($data),
-                'App\\Domain\\Project\\Event\\ProjectRenamedEvent' => $this->deserializeProjectRenamedEvent($data),
-                'App\\Domain\\Project\\Event\\ProjectDeletedEvent' => $this->deserializeProjectDeletedEvent($data),
-                'App\\Domain\\User\\Event\\UserCreatedEvent' => $this->deserializeUserCreatedEvent($data),
+                'App\\Project\\Domain\\Event\\ProjectCreatedEvent' => $this->deserializeProjectCreatedEvent($data),
+                'App\\Project\\Domain\\Event\\ProjectRenamedEvent' => $this->deserializeProjectRenamedEvent($data),
+                'App\\Project\\Domain\\Event\\ProjectDeletedEvent' => $this->deserializeProjectDeletedEvent($data),
+                'App\\User\\Domain\\Event\\UserCreatedEvent' => $this->deserializeUserCreatedEvent($data),
                 default => throw new \RuntimeException("Unknown event type: $eventType")
             };
         } catch (JsonException $e) {
@@ -197,7 +197,7 @@ final class DoctrineEventStore implements EventStore
         }
     }
 
-    private function deserializeProjectCreatedEvent(array $data): \App\Domain\Project\Event\ProjectCreatedEvent
+    private function deserializeProjectCreatedEvent(array $data): \App\Project\Domain\Event\ProjectCreatedEvent
     {
         // Debug: vypíšeme dáta
         error_log("Deserializing ProjectCreatedEvent with data: " . json_encode($data));
@@ -208,38 +208,38 @@ final class DoctrineEventStore implements EventStore
             );
         }
         
-        return new \App\Domain\Project\Event\ProjectCreatedEvent(
+        return new \App\Project\Domain\Event\ProjectCreatedEvent(
             new Uuid($data['projectId']),
-            new \App\Domain\Project\ValueObject\ProjectName($data['name']),
-            new \App\Domain\Project\ValueObject\ProjectOwner(
-                \App\Domain\Project\ValueObject\UserId::fromString($data['owner']['id']),
+            new \App\Project\Domain\ValueObject\ProjectName($data['name']),
+            new \App\Project\Domain\ValueObject\ProjectOwner(
+                \App\Project\Domain\ValueObject\UserId::fromString($data['owner']['id']),
                 new \App\Shared\ValueObject\Email($data['owner']['email'])
             ),
             new \DateTimeImmutable($data['occurredAt'])
         );
     }
 
-    private function deserializeProjectRenamedEvent(array $data): \App\Domain\Project\Event\ProjectRenamedEvent
+    private function deserializeProjectRenamedEvent(array $data): \App\Project\Domain\Event\ProjectRenamedEvent
     {
-        return new \App\Domain\Project\Event\ProjectRenamedEvent(
+        return new \App\Project\Domain\Event\ProjectRenamedEvent(
             new Uuid($data['projectId']),
-            new \App\Domain\Project\ValueObject\ProjectName($data['oldName']),
-            new \App\Domain\Project\ValueObject\ProjectName($data['newName']),
+            new \App\Project\Domain\ValueObject\ProjectName($data['oldName']),
+            new \App\Project\Domain\ValueObject\ProjectName($data['newName']),
             new \DateTimeImmutable($data['occurredAt'])
         );
     }
 
-    private function deserializeProjectDeletedEvent(array $data): \App\Domain\Project\Event\ProjectDeletedEvent
+    private function deserializeProjectDeletedEvent(array $data): \App\Project\Domain\Event\ProjectDeletedEvent
     {
-        return new \App\Domain\Project\Event\ProjectDeletedEvent(
+        return new \App\Project\Domain\Event\ProjectDeletedEvent(
             new Uuid($data['projectId']),
             new \DateTimeImmutable($data['occurredAt'])
         );
     }
 
-    private function deserializeUserCreatedEvent(array $data): \App\Domain\User\Event\UserCreatedEvent
+    private function deserializeUserCreatedEvent(array $data): \App\User\Domain\Event\UserCreatedEvent
     {
-        return new \App\Domain\User\Event\UserCreatedEvent(
+        return new \App\User\Domain\Event\UserCreatedEvent(
             \App\Shared\ValueObject\Uuid::create($data['userId']),
             new \App\Shared\ValueObject\Email($data['email']),
             new \DateTimeImmutable($data['createdAt'])

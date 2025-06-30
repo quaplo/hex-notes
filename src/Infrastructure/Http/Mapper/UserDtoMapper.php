@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Mapper;
 
-use App\Domain\User\Model\User;
 use App\Infrastructure\Http\Dto\UserDto;
+use App\User\Domain\Model\User;
 
 final class UserDtoMapper
 {

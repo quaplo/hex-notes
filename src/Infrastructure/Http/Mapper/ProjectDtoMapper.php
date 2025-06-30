@@ -2,8 +2,8 @@
 
 namespace App\Infrastructure\Http\Mapper;
 
-use App\Domain\Project\Model\Project;
 use App\Infrastructure\Http\Dto\ProjectDto;
+use App\Project\Domain\Model\Project;
 
 final class ProjectDtoMapper
 {

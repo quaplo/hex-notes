@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Projection;
 
-use App\Domain\User\Event\UserCreatedEvent;
 use App\Shared\Event\DomainEvent;
 use App\Shared\Event\EventDispatcher;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
+use App\User\Domain\Event\UserCreatedEvent;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
 
 final class UserProjection implements EventDispatcher
 {
