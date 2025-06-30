@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-putenv('DATABASE_URL=sqlite:///' . __DIR__ . '/../../var/test.db');
-
 use App\User\Application\Command\CreateUserCommand;
 use App\User\Application\Command\CreateUserHandler;
 use App\User\Application\Query\GetUserByIdHandler;
@@ -18,7 +16,7 @@ it('can create and load user via handlers', function () {
     /** @var GetUserByIdHandler $getHandler */
     $getHandler = self::getContainer()->get(GetUserByIdHandler::class);
 
-    $email = 'testuser@example.com';
+    $email = 'testsuser@example.com';
     $command = new CreateUserCommand($email);
     $user = $createHandler($command);
 
