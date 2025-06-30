@@ -14,6 +14,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\Project\Application\Composite\Query\GetProjectFullDetailQuery;
+use App\Project\Application\Composite\Query\GetProjectFullDetailHandler;
+use App\Project\Application\Composite\Dto\ProjectFullDetailDto;
 
 final class ProjectController
 {
@@ -22,6 +25,7 @@ final class ProjectController
         private readonly GetProjectHandler $getProjectHandler,
         private readonly ProjectDtoMapper $projectDtoMapper,
         private readonly SerializerInterface $serializer,
+        private readonly GetProjectFullDetailHandler $getProjectFullDetailHandler,
     ) {}
 
     #[Route('/api/projects', name: 'create_project', methods: ['POST'])]
@@ -44,13 +48,13 @@ final class ProjectController
     #[Route('/api/projects/{id}', name: 'get_project', methods: ['GET'])]
     public function detail(string $id): JsonResponse
     {
-        $query = new GetProjectQuery($id);
-        $projectDto = ($this->getProjectHandler)($query);
+        $query = new GetProjectFullDetailQuery($id);
+        $dto = ($this->getProjectFullDetailHandler)($query);
 
-        if (!$projectDto) {
+        if (!$dto) {
             return new JsonResponse(['error' => 'Project not found'], JsonResponse::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse($projectDto, JsonResponse::HTTP_OK);
+        return new JsonResponse($dto, JsonResponse::HTTP_OK);
     }
 }
