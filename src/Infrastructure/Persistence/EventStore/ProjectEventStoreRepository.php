@@ -22,4 +22,4 @@ final class ProjectEventStoreRepository extends AbstractEventStoreRepository
             ) // This will be overridden during replay
         );
     }
-} 
+}

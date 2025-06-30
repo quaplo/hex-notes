@@ -30,3 +30,5 @@ services:
 
     App\Domain\User\Repository\UserRepositoryInterface:
         alias: App\Infrastructure\Persistence\Doctrine\UserRepository
+    App\Shared\Event\EventDispatcher: '@App\Infrastructure\Event\SymfonyEventDispatcher'
+    App\Infrastructure\Persistence\Projection\UserProjection: ~

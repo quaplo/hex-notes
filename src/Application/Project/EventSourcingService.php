@@ -24,7 +24,7 @@ final class EventSourcingService
     public function createProject(string $name, string $ownerEmail): Project
     {
         $user = $this->userRepository->findByEmail(new Email($ownerEmail));
-        
+
         if (!$user) {
             throw new \DomainException("User with email $ownerEmail not found");
         }
@@ -92,4 +92,4 @@ final class EventSourcingService
             'events' => $project->getDomainEvents()
         ];
     }
-} 
+}

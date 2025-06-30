@@ -116,9 +116,10 @@ final class DoctrineEventStore implements EventStore
     private function serializeEvent(DomainEvent $event): string
     {
         return match (get_class($event)) {
-            'App\Domain\Project\Event\ProjectCreatedEvent' => $this->serializeProjectCreatedEvent($event),
-            'App\Domain\Project\Event\ProjectRenamedEvent' => $this->serializeProjectRenamedEvent($event),
-            'App\Domain\Project\Event\ProjectDeletedEvent' => $this->serializeProjectDeletedEvent($event),
+            'App\\Domain\\Project\\Event\\ProjectCreatedEvent' => $this->serializeProjectCreatedEvent($event),
+            'App\\Domain\\Project\\Event\\ProjectRenamedEvent' => $this->serializeProjectRenamedEvent($event),
+            'App\\Domain\\Project\\Event\\ProjectDeletedEvent' => $this->serializeProjectDeletedEvent($event),
+            'App\\Domain\\User\\Event\\UserCreatedEvent' => $this->serializeUserCreatedEvent($event),
             default => throw new \RuntimeException("Unknown event type for serialization: " . get_class($event))
         };
     }
@@ -160,24 +161,35 @@ final class DoctrineEventStore implements EventStore
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
+    private function serializeUserCreatedEvent(\App\Domain\User\Event\UserCreatedEvent $event): string
+    {
+        $data = [
+            'userId' => $event->userId->toString(),
+            'email' => $event->email->__toString(),
+            'createdAt' => $event->createdAt->format(\DateTimeInterface::ATOM)
+        ];
+        return json_encode($data, JSON_THROW_ON_ERROR);
+    }
+
     private function deserializeEvent(string $eventData, string $eventType): DomainEvent
     {
         try {
             $data = json_decode($eventData, true, 512, JSON_THROW_ON_ERROR);
             
             // Debug: vyhodíme exception s informáciami
-            if (!isset($data['projectId'])) {
-                throw new \RuntimeException(
-                    "Missing projectId in event data. Event type: $eventType, Data: " . $eventData
-                );
-            }
+            // if (!isset($data['projectId'])) {
+            //     throw new \RuntimeException(
+            //         "Missing projectId in event data. Event type: $eventType, Data: " . $eventData
+            //     );
+            // }
             
             // This is a simplified deserialization
             // In a real application, you'd want a more robust event deserializer
             return match ($eventType) {
-                'App\Domain\Project\Event\ProjectCreatedEvent' => $this->deserializeProjectCreatedEvent($data),
-                'App\Domain\Project\Event\ProjectRenamedEvent' => $this->deserializeProjectRenamedEvent($data),
-                'App\Domain\Project\Event\ProjectDeletedEvent' => $this->deserializeProjectDeletedEvent($data),
+                'App\\Domain\\Project\\Event\\ProjectCreatedEvent' => $this->deserializeProjectCreatedEvent($data),
+                'App\\Domain\\Project\\Event\\ProjectRenamedEvent' => $this->deserializeProjectRenamedEvent($data),
+                'App\\Domain\\Project\\Event\\ProjectDeletedEvent' => $this->deserializeProjectDeletedEvent($data),
+                'App\\Domain\\User\\Event\\UserCreatedEvent' => $this->deserializeUserCreatedEvent($data),
                 default => throw new \RuntimeException("Unknown event type: $eventType")
             };
         } catch (JsonException $e) {
@@ -222,6 +234,15 @@ final class DoctrineEventStore implements EventStore
         return new \App\Domain\Project\Event\ProjectDeletedEvent(
             new Uuid($data['projectId']),
             new \DateTimeImmutable($data['occurredAt'])
+        );
+    }
+
+    private function deserializeUserCreatedEvent(array $data): \App\Domain\User\Event\UserCreatedEvent
+    {
+        return new \App\Domain\User\Event\UserCreatedEvent(
+            \App\Shared\ValueObject\Uuid::create($data['userId']),
+            new \App\Shared\ValueObject\Email($data['email']),
+            new \DateTimeImmutable($data['createdAt'])
         );
     }
 } 
