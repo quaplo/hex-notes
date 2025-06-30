@@ -11,5 +11,6 @@ final class AddProjectWorkerCommand
         public readonly string $userId,
         public readonly string $role,
         public readonly ?string $addedBy = null
-    ) {}
-} 
+    ) {
+    }
+}

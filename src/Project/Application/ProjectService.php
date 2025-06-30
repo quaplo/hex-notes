@@ -15,7 +15,8 @@ final class ProjectService
 {
     public function __construct(
         private readonly ProjectEventStoreRepository $projectRepository
-    ) {}
+    ) {
+    }
 
     public function createProject(string $name, Uuid $ownerId): Project
     {
@@ -27,7 +28,7 @@ final class ProjectService
     public function renameProject(string $projectId, string $newName): Project
     {
         $project = $this->projectRepository->load(new Uuid($projectId));
-        
+
         if (!$project) {
             throw new \DomainException("Project with id $projectId not found");
         }
@@ -41,7 +42,7 @@ final class ProjectService
     public function deleteProject(string $projectId): Project
     {
         $project = $this->projectRepository->load(new Uuid($projectId));
-        
+
         if (!$project) {
             throw new \DomainException("Project with id $projectId not found");
         }
@@ -60,7 +61,7 @@ final class ProjectService
     public function getProjectHistory(string $projectId): array
     {
         $project = $this->projectRepository->load(new Uuid($projectId));
-        
+
         if (!$project) {
             return [];
         }

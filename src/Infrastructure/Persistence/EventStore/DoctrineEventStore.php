@@ -26,7 +26,7 @@ final class DoctrineEventStore implements EventStore
         try {
             // Check optimistic concurrency
             $currentVersion = $this->getCurrentVersion($aggregateId);
-            
+
             if ($currentVersion !== $expectedVersion) {
                 throw new \RuntimeException(
                     sprintf(
@@ -109,7 +109,7 @@ final class DoctrineEventStore implements EventStore
         $stmt->bindValue(3, $this->serializeEvent($event), Types::TEXT);
         $stmt->bindValue(4, $version, Types::INTEGER);
         $stmt->bindValue(5, $event->getOccurredAt(), Types::DATETIME_IMMUTABLE);
-        
+
         $stmt->executeStatement();
     }
 
@@ -196,14 +196,14 @@ final class DoctrineEventStore implements EventStore
     {
         try {
             $data = json_decode($eventData, true, 512, JSON_THROW_ON_ERROR);
-            
+
             // Debug: vyhodíme exception s informáciami
             // if (!isset($data['projectId'])) {
             //     throw new \RuntimeException(
             //         "Missing projectId in event data. Event type: $eventType, Data: " . $eventData
             //     );
             // }
-            
+
             // This is a simplified deserialization
             // In a real application, you'd want a more robust event deserializer
             return match ($eventType) {
@@ -277,4 +277,4 @@ final class DoctrineEventStore implements EventStore
             new \DateTimeImmutable($data['occurredAt'])
         );
     }
-} 
+}

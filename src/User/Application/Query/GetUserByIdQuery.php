@@ -17,4 +17,4 @@ final class GetUserByIdQuery
     {
         return Uuid::create($this->userId);
     }
-} 
+}

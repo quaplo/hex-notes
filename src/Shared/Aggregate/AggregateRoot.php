@@ -13,7 +13,7 @@ abstract class AggregateRoot
      * @var DomainEvent[]
      */
     private array $domainEvents = [];
-    
+
     private int $version = 0;
 
     protected function recordEvent(DomainEvent $event): void
@@ -67,4 +67,4 @@ abstract class AggregateRoot
      * Handle specific event type
      */
     abstract protected function handleEvent(DomainEvent $event): void;
-} 
+}

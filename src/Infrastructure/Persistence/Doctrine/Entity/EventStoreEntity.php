@@ -75,4 +75,4 @@ class EventStoreEntity
     {
         return $this->occurredAt;
     }
-} 
+}

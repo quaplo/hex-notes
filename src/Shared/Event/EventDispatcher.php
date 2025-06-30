@@ -10,4 +10,4 @@ interface EventDispatcher
      * @param DomainEvent[] $events
      */
     public function dispatch(array $events): void;
-} 
+}

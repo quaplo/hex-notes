@@ -15,7 +15,8 @@ final class ProjectWorkerRemovedEvent implements DomainEvent
         private readonly Uuid $userId,
         private readonly ?Uuid $removedBy = null,
         private readonly DateTimeImmutable $occurredAt = new DateTimeImmutable()
-    ) {}
+    ) {
+    }
 
     public function getProjectId(): Uuid
     {
@@ -66,4 +67,4 @@ final class ProjectWorkerRemovedEvent implements DomainEvent
             new DateTimeImmutable($eventData['occurredAt'])
         );
     }
-} 
+}

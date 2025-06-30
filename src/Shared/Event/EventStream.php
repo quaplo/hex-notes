@@ -45,4 +45,4 @@ final class EventStream
     {
         return count($this->events);
     }
-} 
+}

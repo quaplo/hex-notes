@@ -14,7 +14,8 @@ final class AddProjectWorkerHandler
 {
     public function __construct(
         private readonly ProjectService $projectService
-    ) {}
+    ) {
+    }
 
     public function __invoke(AddProjectWorkerCommand $command): Project
     {
@@ -33,4 +34,4 @@ final class AddProjectWorkerHandler
         $this->projectService->save($project);
         return $project;
     }
-} 
+}

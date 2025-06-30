@@ -30,7 +30,7 @@ final class SymfonyEventDispatcher implements EventDispatcher
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
-                
+
                 // In a production system, you might want to:
                 // - Store failed events for retry
                 // - Send alerts
@@ -51,4 +51,4 @@ final class SymfonyEventDispatcher implements EventDispatcher
             default => $this->logger->warning('No handler found for event', ['event' => get_class($event)])
         };
     }
-} 
+}

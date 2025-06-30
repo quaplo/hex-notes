@@ -12,4 +12,4 @@ final class UserDto
         public readonly string $createdAt
     ) {
     }
-} 
+}

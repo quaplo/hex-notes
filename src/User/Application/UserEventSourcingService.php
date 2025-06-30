@@ -26,10 +26,10 @@ final class UserEventSourcingService
             throw new \RuntimeException('User with this email already exists.');
         }
         $user = User::create($email);
-        
+
         $events = $user->getDomainEvents();
         $this->eventStore->append($user->getId(), $events, $user->getVersion());
-        
+
         $this->eventDispatcher->dispatch($events);
 
         return $user;
@@ -38,7 +38,7 @@ final class UserEventSourcingService
     public function getUserById(Uuid $userId): ?User
     {
         $events = $this->eventStore->getEvents($userId);
-        
+
         if (empty($events)) {
             return null;
         }
@@ -53,7 +53,7 @@ final class UserEventSourcingService
         if (!$userId) {
             return null;
         }
-        
+
         return $this->getUserById($userId);
     }
-} 
+}

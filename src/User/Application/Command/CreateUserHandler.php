@@ -18,4 +18,4 @@ final class CreateUserHandler
     {
         return $this->userEventSourcingService->createUser($command->getEmail());
     }
-} 
+}

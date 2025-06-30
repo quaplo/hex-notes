@@ -9,5 +9,6 @@ final class CreateProjectRequestDto
     public function __construct(
         public string $name,
         public string $ownerId
-    ) {}
+    ) {
+    }
 }

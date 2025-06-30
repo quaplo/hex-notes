@@ -34,7 +34,8 @@ final class ProjectController
         private readonly GetProjectFullDetailHandler $getProjectFullDetailHandler,
         private readonly AddProjectWorkerHandler $addProjectWorkerHandler,
         private readonly RemoveProjectWorkerHandler $removeProjectWorkerHandler,
-    ) {}
+    ) {
+    }
 
     #[Route('/api/projects', name: 'create_project', methods: ['POST'])]
     public function create(Request $request): JsonResponse

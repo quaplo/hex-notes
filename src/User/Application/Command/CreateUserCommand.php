@@ -17,4 +17,4 @@ final class CreateUserCommand
     {
         return new Email($this->email);
     }
-} 
+}

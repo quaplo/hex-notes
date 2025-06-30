@@ -22,4 +22,4 @@ interface EventStore
      * @return DomainEvent[]
      */
     public function getEventsFromVersion(Uuid $aggregateId, int $fromVersion): array;
-} 
+}

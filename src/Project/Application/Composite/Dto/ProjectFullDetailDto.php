@@ -13,5 +13,6 @@ final class ProjectFullDetailDto
         public readonly ProjectDto $project,
         public readonly UserDto $owner,
         public readonly array $workers = []
-    ) {}
+    ) {
+    }
 }

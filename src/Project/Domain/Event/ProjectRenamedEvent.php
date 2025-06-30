@@ -38,4 +38,4 @@ final class ProjectRenamedEvent implements DomainEvent
     {
         return $this->occurredAt;
     }
-} 
+}

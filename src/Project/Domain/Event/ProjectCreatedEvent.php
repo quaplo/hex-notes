@@ -16,7 +16,8 @@ final class ProjectCreatedEvent implements DomainEvent
         private readonly ProjectName $name,
         private readonly Uuid $ownerId,
         private readonly DateTimeImmutable $occurredAt = new DateTimeImmutable()
-    ) {}
+    ) {
+    }
 
     public function getProjectId(): Uuid
     {
@@ -67,4 +68,4 @@ final class ProjectCreatedEvent implements DomainEvent
             new DateTimeImmutable($eventData['occurredAt'])
         );
     }
-} 
+}

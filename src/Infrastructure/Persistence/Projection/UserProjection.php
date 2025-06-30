@@ -35,49 +35,49 @@ final class UserProjection implements EventDispatcher
     private function handleUserCreated(UserCreatedEvent $event): void
     {
         $sql = 'INSERT INTO user_projection (id, email, created_at) VALUES (?, ?, ?)';
-        
+
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(1, $event->userId->toString());
         $stmt->bindValue(2, $event->email->__toString());
         $stmt->bindValue(3, $event->createdAt->format('Y-m-d H:i:s'));
-        
+
         $stmt->executeStatement();
     }
 
     public function emailExists(Email $email): bool
     {
         $sql = 'SELECT COUNT(*) FROM user_projection WHERE email = ?';
-        
+
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(1, $email->__toString());
         $result = $stmt->executeQuery();
-        
+
         return $result->fetchOne() > 0;
     }
 
     public function getUserById(Uuid $userId): ?array
     {
         $sql = 'SELECT id, email, created_at FROM user_projection WHERE id = ?';
-        
+
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(1, $userId->toString());
         $result = $stmt->executeQuery();
-        
+
         $row = $result->fetchAssociative();
-        
+
         return $row ?: null;
     }
 
     public function findUserIdByEmail(Email $email): ?Uuid
     {
         $sql = 'SELECT id FROM user_projection WHERE email = ?';
-        
+
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(1, $email->__toString());
         $result = $stmt->executeQuery();
-        
+
         $id = $result->fetchOne();
-        
+
         return $id ? Uuid::create($id) : null;
     }
-} 
+}

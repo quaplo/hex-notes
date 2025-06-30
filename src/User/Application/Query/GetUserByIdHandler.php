@@ -19,7 +19,7 @@ final class GetUserByIdHandler
     public function __invoke(GetUserByIdQuery $query): ?UserDto
     {
         $user = $this->userEventSourcingService->getUserById($query->getUserId());
-        
+
         return $user ? $this->mapper->toDto($user) : null;
     }
-} 
+}

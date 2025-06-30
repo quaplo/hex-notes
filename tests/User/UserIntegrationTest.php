@@ -29,4 +29,4 @@ it('can create and load user via handlers', function () {
     expect($userDto)->not()->toBeNull();
     expect($userDto->email)->toBe($email);
     expect($userDto->id)->toBe($user->getId()->toString());
-}); 
+});

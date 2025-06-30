@@ -12,7 +12,8 @@ final class RemoveProjectWorkerHandler
 {
     public function __construct(
         private readonly ProjectService $projectService
-    ) {}
+    ) {
+    }
 
     public function __invoke(RemoveProjectWorkerCommand $command): Project
     {
@@ -28,4 +29,4 @@ final class RemoveProjectWorkerHandler
         $this->projectService->save($project);
         return $project;
     }
-} 
+}

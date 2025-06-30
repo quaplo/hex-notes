@@ -17,4 +17,4 @@ final class UserDtoMapper
             createdAt: $user->getCreatedAt()->format('Y-m-d H:i:s')
         );
     }
-} 
+}

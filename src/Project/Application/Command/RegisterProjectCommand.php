@@ -9,5 +9,6 @@ final class RegisterProjectCommand
     public function __construct(
         public readonly string $name,
         public readonly string $ownerId
-    ) {}
+    ) {
+    }
 }

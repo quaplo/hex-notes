@@ -25,4 +25,4 @@ final class ProjectDeletedEvent implements DomainEvent
     {
         return $this->occurredAt;
     }
-} 
+}

@@ -10,5 +10,6 @@ final class AddProjectWorkerRequestDto
         public string $userId,
         public string $role,
         public ?string $addedBy = null
-    ) {}
-} 
+    ) {
+    }
+}

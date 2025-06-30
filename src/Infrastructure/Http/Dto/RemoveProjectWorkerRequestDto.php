@@ -9,5 +9,6 @@ final class RemoveProjectWorkerRequestDto
     public function __construct(
         public string $userId,
         public ?string $removedBy = null
-    ) {}
-} 
+    ) {
+    }
+}

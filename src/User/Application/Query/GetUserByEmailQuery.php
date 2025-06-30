@@ -17,4 +17,4 @@ final class GetUserByEmailQuery
     {
         return new Email($this->email);
     }
-} 
+}

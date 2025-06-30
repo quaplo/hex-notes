@@ -39,7 +39,7 @@ final class User extends AggregateRoot
     public static function fromEvents(array $events): self
     {
         $user = new self();
-        
+
         foreach ($events as $event) {
             $user->replayEvent($event);
         }

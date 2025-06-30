@@ -70,4 +70,4 @@ final class ProjectEventHandler
         // - Update read models
         // - Clean up related resources
     }
-} 
+}

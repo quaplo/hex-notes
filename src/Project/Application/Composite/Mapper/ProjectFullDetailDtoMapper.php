@@ -10,4 +10,4 @@ class ProjectFullDetailDtoMapper
     {
         return new ProjectFullDetailDto($project, $owner, $workers);
     }
-} 
+}

@@ -70,7 +70,7 @@ final class Project extends AggregateRoot
         if ($this->isDeleted()) {
             throw new \DomainException('Project is already deleted');
         }
-        
+
         $project = new self(
             $this->id,
             $this->name,
@@ -78,12 +78,12 @@ final class Project extends AggregateRoot
             $this->ownerId,
             new DateTimeImmutable()
         );
-        
+
         $project->workers = $this->workers;
         $project->setVersion($this->getVersion());
-        
+
         $project->recordProjectDeleted();
-        
+
         return $project;
     }
 

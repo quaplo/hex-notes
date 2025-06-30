@@ -10,4 +10,4 @@ final class CreateUserRequestDto
         public readonly string $email
     ) {
     }
-} 
+}

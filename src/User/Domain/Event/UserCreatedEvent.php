@@ -50,4 +50,4 @@ final class UserCreatedEvent implements DomainEvent
             createdAt: new DateTimeImmutable($eventData['createdAt'])
         );
     }
-} 
+}

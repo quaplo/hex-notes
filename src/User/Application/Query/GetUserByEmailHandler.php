@@ -19,7 +19,7 @@ final class GetUserByEmailHandler
     public function __invoke(GetUserByEmailQuery $query): ?UserDto
     {
         $user = $this->userEventSourcingService->getUserByEmail($query->getEmail());
-        
+
         return $user ? $this->mapper->toDto($user) : null;
     }
-} 
+}

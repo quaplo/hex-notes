@@ -10,5 +10,6 @@ final class RemoveProjectWorkerCommand
         public readonly string $projectId,
         public readonly string $userId,
         public readonly ?string $removedBy = null
-    ) {}
-} 
+    ) {
+    }
+}

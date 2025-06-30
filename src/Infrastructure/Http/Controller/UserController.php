@@ -55,4 +55,4 @@ final class UserController
 
         return new JsonResponse($userDto, JsonResponse::HTTP_OK);
     }
-} 
+}

@@ -21,7 +21,7 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
     public function save(AggregateRoot $aggregate): void
     {
         $events = $aggregate->getDomainEvents();
-        
+
         if (empty($events)) {
             return;
         }
@@ -44,13 +44,13 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
     public function load(Uuid $aggregateId): ?AggregateRoot
     {
         $events = $this->eventStore->getEvents($aggregateId);
-        
+
         if (empty($events)) {
             return null;
         }
 
         $aggregate = $this->createAggregate();
-        
+
         foreach ($events as $event) {
             $aggregate->replayEvent($event);
         }
@@ -65,4 +65,4 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
     }
 
     abstract protected function createAggregate(): AggregateRoot;
-} 
+}
