@@ -199,20 +199,11 @@ final class DoctrineEventStore implements EventStore
 
     private function deserializeProjectCreatedEvent(array $data): \App\Project\Domain\Event\ProjectCreatedEvent
     {
-        // Debug: vypíšeme dáta
-        error_log("Deserializing ProjectCreatedEvent with data: " . json_encode($data));
-        
-        if (!isset($data['name']) || empty($data['name'])) {
-            throw new \RuntimeException(
-                "Missing or empty name in ProjectCreatedEvent. Data: " . json_encode($data)
-            );
-        }
-        
         return new \App\Project\Domain\Event\ProjectCreatedEvent(
             new Uuid($data['projectId']),
             new \App\Project\Domain\ValueObject\ProjectName($data['name']),
             new \App\Project\Domain\ValueObject\ProjectOwner(
-                \App\Project\Domain\ValueObject\UserId::fromString($data['owner']['id']),
+                \App\Shared\ValueObject\Uuid::create($data['owner']['id']),
                 new \App\Shared\ValueObject\Email($data['owner']['email'])
             ),
             new \DateTimeImmutable($data['occurredAt'])

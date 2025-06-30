@@ -30,7 +30,7 @@ final class ProjectService
         }
 
         $projectOwner = ProjectOwner::create(
-            UserId::fromUuid($user->getId()),
+            $user->getId(),
             $user->getEmail()
         );
 

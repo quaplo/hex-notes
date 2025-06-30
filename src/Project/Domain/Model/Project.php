@@ -22,7 +22,7 @@ final class Project extends AggregateRoot
      */
     private array $workers = [];
 
-    private UserId $createdBy;
+    private Uuid $createdBy;
 
     public function getOwner(): ProjectOwner
     {
@@ -46,7 +46,7 @@ final class Project extends AggregateRoot
         $this->createdBy = $this->owner->getId();
     }
 
-    public function getCreatedBy(): UserId
+    public function getCreatedBy(): Uuid
     {
         return $this->createdBy;
     }

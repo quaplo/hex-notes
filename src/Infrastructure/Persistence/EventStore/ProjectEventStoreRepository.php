@@ -17,7 +17,7 @@ final class ProjectEventStoreRepository extends AbstractEventStoreRepository
             name: new \App\Project\Domain\ValueObject\ProjectName('Temporary'), // Valid name for replay
             createdAt: new \DateTimeImmutable(), // This will be overridden during replay
             owner: new \App\Project\Domain\ValueObject\ProjectOwner(
-                \App\Project\Domain\ValueObject\UserId::generate(),
+                \App\Shared\ValueObject\Uuid::generate(),
                 new \App\Shared\ValueObject\Email('temp@example.com')
             ) // This will be overridden during replay
         );
