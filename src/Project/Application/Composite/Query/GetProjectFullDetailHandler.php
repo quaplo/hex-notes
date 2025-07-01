@@ -24,7 +24,7 @@ final readonly class GetProjectFullDetailHandler
 
     public function __invoke(GetProjectFullDetailQuery $query): ProjectFullDetailDto
     {
-        $projectDto = ($this->getProjectHandler)(new GetProjectQuery($query->id));
+        $projectDto = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($query->id->toString()));
         $userDto = ($this->getUserHandler)(new GetUserByIdQuery($projectDto->ownerId));
 
         $project = $this->projectService->getProject($query->id);

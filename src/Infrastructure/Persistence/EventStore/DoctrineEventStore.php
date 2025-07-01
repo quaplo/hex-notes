@@ -253,7 +253,7 @@ final class DoctrineEventStore implements EventStore
         return new \App\Project\Domain\Event\ProjectWorkerAddedEvent(
             new Uuid($data['projectId']),
             new Uuid($data['userId']),
-            \App\Project\Domain\ValueObject\ProjectRole::from($data['role']),
+            \App\Project\Domain\ValueObject\ProjectRole::create($data['role']),
             isset($data['addedBy']) && $data['addedBy'] ? new Uuid($data['addedBy']) : null,
             new \DateTimeImmutable($data['occurredAt'])
         );

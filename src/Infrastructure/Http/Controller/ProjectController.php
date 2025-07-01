@@ -47,7 +47,7 @@ final class ProjectController
             'json'
         );
 
-        $command = new RegisterProjectCommand($dto->name, $dto->ownerId);
+        $command = RegisterProjectCommand::fromPrimitives($dto->name, $dto->ownerId);
         $project = ($this->registerProjectHandler)($command);
         $projectDto = $this->projectDtoMapper->toDto($project);
 
@@ -57,7 +57,7 @@ final class ProjectController
     #[Route('/api/projects/{id}', name: 'get_project', methods: ['GET'])]
     public function detail(string $id): JsonResponse
     {
-        $query = new GetProjectFullDetailQuery($id);
+        $query = GetProjectFullDetailQuery::fromPrimitives($id);
         $dto = ($this->getProjectFullDetailHandler)($query);
 
         if (!$dto) {
@@ -77,7 +77,7 @@ final class ProjectController
             'json'
         );
 
-        $command = new AddProjectWorkerCommand(
+        $command = AddProjectWorkerCommand::fromPrimitives(
             $id,
             $dto->userId,
             $dto->role,
@@ -97,7 +97,7 @@ final class ProjectController
             'json'
         );
 
-        $command = new RemoveProjectWorkerCommand(
+        $command = RemoveProjectWorkerCommand::fromPrimitives(
             $id,
             $dto->userId,
             $dto->removedBy

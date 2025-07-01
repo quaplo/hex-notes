@@ -17,6 +17,6 @@ final class RegisterProjectHandler
 
     public function __invoke(RegisterProjectCommand $command): Project
     {
-        return $this->service->createProject($command->name, Uuid::create($command->ownerId));
+        return $this->service->createProject($command->name, $command->ownerId);
     }
 }

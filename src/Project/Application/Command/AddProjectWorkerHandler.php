@@ -25,9 +25,9 @@ final readonly class AddProjectWorkerHandler
         }
 
         $worker = ProjectWorker::create(
-            Uuid::create($command->userId),
-            ProjectRole::from($command->role),
-            $command->addedBy ? Uuid::create($command->addedBy) : null
+            $command->userId,
+            $command->role,
+            $command->addedBy
         );
 
         $project = $project->addWorker($worker);

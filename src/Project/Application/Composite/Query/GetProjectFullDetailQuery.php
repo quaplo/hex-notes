@@ -8,13 +8,12 @@ use App\Shared\ValueObject\Uuid;
 
 final readonly class GetProjectFullDetailQuery
 {
-    public function __construct(
-        public string $id
-    ) {
-    }
+    private function __construct(
+        public Uuid $id
+    ) {}
 
-    public function getId(): Uuid
+    public static function fromPrimitives(string $id): self
     {
-        return Uuid::create($this->id);
+        return new self(Uuid::create($id));
     }
 }

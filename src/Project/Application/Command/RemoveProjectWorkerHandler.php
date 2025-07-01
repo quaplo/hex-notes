@@ -23,8 +23,8 @@ final readonly class RemoveProjectWorkerHandler
         }
 
         $project = $project->removeWorkerByUserId(
-            Uuid::create($command->userId),
-            $command->removedBy ? Uuid::create($command->removedBy) : null
+            $command->userId,
+            $command->removedBy
         );
         $this->projectService->save($project);
         return $project;

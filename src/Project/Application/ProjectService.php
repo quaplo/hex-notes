@@ -16,9 +16,9 @@ final readonly class ProjectService
     ) {
     }
 
-    public function createProject(string $name, Uuid $ownerId): Project
+    public function createProject(ProjectName $name, Uuid $ownerId): Project
     {
-        $project = Project::create(new ProjectName($name), $ownerId);
+        $project = Project::create($name, $ownerId);
         $this->projectRepository->save($project);
         return $project;
     }
@@ -51,9 +51,9 @@ final readonly class ProjectService
         return $deletedProject;
     }
 
-    public function getProject(string $projectId): ?Project
+    public function getProject(Uuid $projectId): ?Project
     {
-        return $this->projectRepository->load(new Uuid($projectId));
+        return $this->projectRepository->load($projectId);
     }
 
     public function getProjectHistory(string $projectId): array

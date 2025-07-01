@@ -13,7 +13,7 @@ final class ProjectRole
 
     private string $value;
 
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
         if (!in_array($value, [self::OWNER, self::PARTICIPANT], true)) {
             throw new InvalidArgumentException("Invalid project role: $value");
@@ -42,7 +42,7 @@ final class ProjectRole
         return $this->value === $other->value;
     }
 
-    public static function from(string $value): self
+    public static function create(string $value): self
     {
         return new self($value); // validácia prebehne v konštruktore
     }

@@ -18,7 +18,7 @@ final readonly class GetProjectHandler
 
     public function __invoke(GetProjectQuery $query): ProjectDto
     {
-        $project = $this->projectService->getProject($query->getId()->toString());
+        $project = $this->projectService->getProject($query->id);
 
         if (!$project) {
             throw new \RuntimeException('Project not found');

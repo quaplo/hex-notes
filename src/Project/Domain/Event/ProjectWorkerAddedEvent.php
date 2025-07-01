@@ -71,7 +71,7 @@ final class ProjectWorkerAddedEvent implements DomainEvent
         return new self(
             Uuid::create($eventData['projectId']),
             Uuid::create($eventData['userId']),
-            ProjectRole::from($eventData['role']),
+            ProjectRole::create($eventData['role']),
             isset($eventData['addedBy']) ? Uuid::create($eventData['addedBy']) : null,
             new DateTimeImmutable($eventData['occurredAt'])
         );

@@ -14,14 +14,14 @@ final class ProjectWorker
         private Uuid $userId,
         private ProjectRole $role,
         private DateTimeImmutable $createdAt,
-        private ?Uuid $addedBy = null,
+        private Uuid $addedBy,
     ) {
     }
 
     public static function create(
         Uuid $userId,
         ProjectRole $role,
-        ?Uuid $addedBy = null,
+        Uuid $addedBy,
         ?DateTimeImmutable $createdAt = null
     ): self {
         return new self(
@@ -52,7 +52,7 @@ final class ProjectWorker
         return $this->createdAt;
     }
 
-    public function getAddedBy(): ?Uuid
+    public function getAddedBy(): Uuid
     {
         return $this->addedBy;
     }
