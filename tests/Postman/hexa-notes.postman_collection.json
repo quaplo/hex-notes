@@ -1,0 +1,863 @@
+{
+	"info": {
+		"_postman_id": "f518e118-7959-4d49-920f-2528bf0d4c05",
+		"name": "hexa-notes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "398485"
+	},
+	"item": [
+		{
+			"name": "create new user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomSuffix = Math.floor(Math.random() * 1000000);",
+							"const email = `user${randomSuffix}test@example.com`;",
+							"pm.collectionVariables.set(\"testEmail\", email);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.collectionVariables.set(\"userId\", json.id);",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"  pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response contains message, id and email\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json).to.have.property(\"message\", \"User created successfully\");",
+							"  pm.expect(json).to.have.property(\"id\");",
+							"  pm.expect(json).to.have.property(\"email\");",
+							"});",
+							"",
+							"pm.test(\"Field types are correct\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json.id).to.be.a(\"string\");",
+							"  pm.expect(json.email).to.be.a(\"string\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{testEmail}}\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.collectionVariables.set(\"projectId\", json.id);",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"  pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response contains all expected fields\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json).to.have.property(\"id\");",
+							"  pm.expect(json).to.have.property(\"name\");",
+							"  pm.expect(json).to.have.property(\"ownerId\");",
+							"  pm.expect(json).to.have.property(\"createdAt\");",
+							"  pm.expect(json).to.have.property(\"deletedAt\");",
+							"});",
+							"",
+							"pm.test(\"Field types are correct\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json.id).to.be.a(\"string\");",
+							"  pm.expect(json.name).to.be.a(\"string\");",
+							"  pm.expect(json.ownerId).to.be.a(\"string\");",
+							"  pm.expect(json.createdAt).to.be.a(\"string\");",
+							"  pm.expect(json.deletedAt).to.satisfy(v => v === null || typeof v === 'string');",
+							"});",
+							"",
+							"pm.test(\"createdAt has valid datetime format\", function () {",
+							"  const json = pm.response.json();",
+							"  const dateTimeRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"  pm.expect(json.createdAt).to.match(dateTimeRegex);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Pure project meme\",\n  \"ownerId\": \"{{userId}}\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/projects",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"pm.test(\"Response contains project, owner and workers\", function () {",
+							"  pm.expect(json).to.have.property(\"project\");",
+							"  pm.expect(json).to.have.property(\"owner\");",
+							"  pm.expect(json).to.have.property(\"workers\");",
+							"});",
+							"",
+							"pm.test(\"Project fields are correct\", function () {",
+							"  const project = json.project;",
+							"  pm.expect(project.id).to.be.a(\"string\");",
+							"  pm.expect(project.name).to.be.a(\"string\");",
+							"  pm.expect(project.ownerId).to.be.a(\"string\");",
+							"  pm.expect(project.createdAt).to.be.a(\"string\");",
+							"  pm.expect(project.deletedAt === null || typeof project.deletedAt === \"string\").to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Owner fields are correct\", function () {",
+							"  const owner = json.owner;",
+							"  pm.expect(owner.id).to.be.a(\"string\");",
+							"  pm.expect(owner.email).to.be.a(\"string\");",
+							"  pm.expect(owner.createdAt).to.be.a(\"string\");",
+							"});",
+							"",
+							"pm.test(\"Workers is an array\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\");",
+							"});",
+							"",
+							"pm.test(\"Workers is an empty array\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\").that.is.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"createdAt fields have correct datetime format\", function () {",
+							"  const datetimeRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"  pm.expect(json.project.createdAt).to.match(datetimeRegex);",
+							"  pm.expect(json.owner.createdAt).to.match(datetimeRegex);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new user as worker",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomSuffix = Math.floor(Math.random() * 1000000);",
+							"const email = `user${randomSuffix}test@example.com`;",
+							"pm.collectionVariables.set(\"testEmail\", email);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.collectionVariables.set(\"workerId\", json.id);",
+							"",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"  pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response contains message, id and email\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json).to.have.property(\"message\", \"User created successfully\");",
+							"  pm.expect(json).to.have.property(\"id\");",
+							"  pm.expect(json).to.have.property(\"email\");",
+							"});",
+							"",
+							"pm.test(\"Field types are correct\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json.id).to.be.a(\"string\");",
+							"  pm.expect(json.email).to.be.a(\"string\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{testEmail}}\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add worker to project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"  pm.response.to.have.status(204);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{workerId}}\",\n    \"role\": \"participant\",\n    \"addedBy\": \"{{userId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}/workers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}",
+						"workers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get project except 1 worker",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"pm.test(\"Response contains project, owner and workers\", function () {",
+							"  pm.expect(json).to.have.property(\"project\");",
+							"  pm.expect(json).to.have.property(\"owner\");",
+							"  pm.expect(json).to.have.property(\"workers\");",
+							"});",
+							"",
+							"pm.test(\"Project fields are correct\", function () {",
+							"  const project = json.project;",
+							"  pm.expect(project.id).to.be.a(\"string\");",
+							"  pm.expect(project.name).to.be.a(\"string\");",
+							"  pm.expect(project.ownerId).to.be.a(\"string\");",
+							"  pm.expect(project.createdAt).to.be.a(\"string\");",
+							"  pm.expect(project.deletedAt === null || typeof project.deletedAt === \"string\").to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Owner fields are correct\", function () {",
+							"  const owner = json.owner;",
+							"  pm.expect(owner.id).to.be.a(\"string\");",
+							"  pm.expect(owner.email).to.be.a(\"string\");",
+							"  pm.expect(owner.createdAt).to.be.a(\"string\");",
+							"});",
+							"",
+							"pm.test(\"Workers is an array\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\");",
+							"});",
+							"",
+							"pm.test(\"Workers array contains exactly 1 item\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\").that.has.lengthOf(1);",
+							"});",
+							"",
+							"pm.test(\"createdAt fields have correct datetime format\", function () {",
+							"  const datetimeRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"  pm.expect(json.project.createdAt).to.match(datetimeRegex);",
+							"  pm.expect(json.owner.createdAt).to.match(datetimeRegex);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create new user as worker Copy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const randomSuffix = Math.floor(Math.random() * 1000000);",
+							"const email = `user${randomSuffix}test@example.com`;",
+							"pm.collectionVariables.set(\"testEmail\", email);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let json = pm.response.json();",
+							"pm.collectionVariables.set(\"workerId2\", json.id);",
+							"",
+							"",
+							"pm.test(\"Status code is 201\", function () {",
+							"  pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response contains message, id and email\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json).to.have.property(\"message\", \"User created successfully\");",
+							"  pm.expect(json).to.have.property(\"id\");",
+							"  pm.expect(json).to.have.property(\"email\");",
+							"});",
+							"",
+							"pm.test(\"Field types are correct\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json.id).to.be.a(\"string\");",
+							"  pm.expect(json.email).to.be.a(\"string\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"{{testEmail}}\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add worker to project Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"  pm.response.to.have.status(204);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{workerId2}}\",\n    \"role\": \"participant\",\n    \"addedBy\": \"{{workerId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}/workers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}",
+						"workers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get project except 2 worker Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"pm.test(\"Response contains project, owner and workers\", function () {",
+							"  pm.expect(json).to.have.property(\"project\");",
+							"  pm.expect(json).to.have.property(\"owner\");",
+							"  pm.expect(json).to.have.property(\"workers\");",
+							"});",
+							"",
+							"pm.test(\"Project fields are correct\", function () {",
+							"  const project = json.project;",
+							"  pm.expect(project.id).to.be.a(\"string\");",
+							"  pm.expect(project.name).to.be.a(\"string\");",
+							"  pm.expect(project.ownerId).to.be.a(\"string\");",
+							"  pm.expect(project.createdAt).to.be.a(\"string\");",
+							"  pm.expect(project.deletedAt === null || typeof project.deletedAt === \"string\").to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Owner fields are correct\", function () {",
+							"  const owner = json.owner;",
+							"  pm.expect(owner.id).to.be.a(\"string\");",
+							"  pm.expect(owner.email).to.be.a(\"string\");",
+							"  pm.expect(owner.createdAt).to.be.a(\"string\");",
+							"});",
+							"",
+							"pm.test(\"Workers is an array\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\");",
+							"});",
+							"",
+							"pm.test(\"Workers array contains exactly 2 item\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\").that.has.lengthOf(2);",
+							"});",
+							"",
+							"pm.test(\"createdAt fields have correct datetime format\", function () {",
+							"  const datetimeRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"  pm.expect(json.project.createdAt).to.match(datetimeRegex);",
+							"  pm.expect(json.owner.createdAt).to.match(datetimeRegex);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remove worker from project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"  pm.response.to.have.status(204);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{workerId}}\",\n    \"removedBy\": \"{{userId}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}/workers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}",
+						"workers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get project except 1 worker Copy 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"pm.test(\"Response contains project, owner and workers\", function () {",
+							"  pm.expect(json).to.have.property(\"project\");",
+							"  pm.expect(json).to.have.property(\"owner\");",
+							"  pm.expect(json).to.have.property(\"workers\");",
+							"});",
+							"",
+							"pm.test(\"Project fields are correct\", function () {",
+							"  const project = json.project;",
+							"  pm.expect(project.id).to.be.a(\"string\");",
+							"  pm.expect(project.name).to.be.a(\"string\");",
+							"  pm.expect(project.ownerId).to.be.a(\"string\");",
+							"  pm.expect(project.createdAt).to.be.a(\"string\");",
+							"  pm.expect(project.deletedAt === null || typeof project.deletedAt === \"string\").to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Owner fields are correct\", function () {",
+							"  const owner = json.owner;",
+							"  pm.expect(owner.id).to.be.a(\"string\");",
+							"  pm.expect(owner.email).to.be.a(\"string\");",
+							"  pm.expect(owner.createdAt).to.be.a(\"string\");",
+							"});",
+							"",
+							"pm.test(\"Workers is an array\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\");",
+							"});",
+							"",
+							"pm.test(\"Workers array contains exactly 1 item\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\").that.has.lengthOf(1);",
+							"});",
+							"",
+							"pm.test(\"createdAt fields have correct datetime format\", function () {",
+							"  const datetimeRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"  pm.expect(json.project.createdAt).to.match(datetimeRegex);",
+							"  pm.expect(json.owner.createdAt).to.match(datetimeRegex);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response contains id, email and createdAt\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json).to.have.property(\"id\");",
+							"  pm.expect(json).to.have.property(\"email\");",
+							"  pm.expect(json).to.have.property(\"createdAt\");",
+							"});",
+							"",
+							"pm.test(\"Field types are correct\", function () {",
+							"  const json = pm.response.json();",
+							"  pm.expect(json.id).to.be.a(\"string\");",
+							"  pm.expect(json.email).to.be.a(\"string\");",
+							"  pm.expect(json.createdAt).to.be.a(\"string\");",
+							"});",
+							"",
+							"pm.test(\"createdAt is in valid datetime format\", function () {",
+							"  const json = pm.response.json();",
+							"  const datetimeRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"  pm.expect(json.createdAt).to.match(datetimeRegex);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/users/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "testEmail",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "projectId",
+			"value": ""
+		},
+		{
+			"key": "workerId",
+			"value": ""
+		},
+		{
+			"key": "workerId2",
+			"value": ""
+		}
+	]
+}
