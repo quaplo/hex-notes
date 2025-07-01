@@ -12,7 +12,7 @@ use App\User\Application\Query\GetUserByIdHandler;
 use App\User\Application\Query\GetUserByIdQuery;
 use App\Project\Application\ProjectService;
 
-final class GetProjectFullDetailHandler
+final readonly class GetProjectFullDetailHandler
 {
     public function __construct(
         private GetProjectHandler $getProjectHandler,
@@ -27,7 +27,6 @@ final class GetProjectFullDetailHandler
         $projectDto = ($this->getProjectHandler)(new GetProjectQuery($query->id));
         $userDto = ($this->getUserHandler)(new GetUserByIdQuery($projectDto->ownerId));
 
-        // Získaj aggregate pre workers
         $project = $this->projectService->getProject($query->id);
         $workers = [];
         if ($project) {

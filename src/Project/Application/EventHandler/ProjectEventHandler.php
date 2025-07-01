@@ -10,10 +10,10 @@ use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Shared\Event\DomainEvent;
 use Psr\Log\LoggerInterface;
 
-final class ProjectEventHandler
+final readonly class ProjectEventHandler
 {
     public function __construct(
-        private readonly LoggerInterface $logger
+        private LoggerInterface $logger
     ) {
     }
 

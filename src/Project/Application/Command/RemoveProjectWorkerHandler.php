@@ -8,10 +8,10 @@ use App\Project\Application\ProjectService;
 use App\Project\Domain\Model\Project;
 use App\Shared\ValueObject\Uuid;
 
-final class RemoveProjectWorkerHandler
+final readonly class RemoveProjectWorkerHandler
 {
     public function __construct(
-        private readonly ProjectService $projectService
+        private ProjectService $projectService
     ) {
     }
 

@@ -10,10 +10,10 @@ use App\Project\Domain\ValueObject\ProjectRole;
 use App\Project\Application\ProjectService;
 use App\Shared\ValueObject\Uuid;
 
-final class AddProjectWorkerHandler
+final readonly class AddProjectWorkerHandler
 {
     public function __construct(
-        private readonly ProjectService $projectService
+        private ProjectService $projectService
     ) {
     }
 

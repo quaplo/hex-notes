@@ -7,14 +7,12 @@ namespace App\Project\Application;
 use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\ValueObject\ProjectName;
-use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
-use App\User\Application\UserEventSourcingService;
 
-final class ProjectService
+final readonly class ProjectService
 {
     public function __construct(
-        private readonly ProjectEventStoreRepository $projectRepository
+        private ProjectEventStoreRepository $projectRepository
     ) {
     }
 

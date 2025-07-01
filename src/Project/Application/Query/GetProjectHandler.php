@@ -8,11 +8,11 @@ use App\Infrastructure\Http\Dto\ProjectDto;
 use App\Infrastructure\Http\Mapper\ProjectDtoMapper;
 use App\Project\Application\ProjectService;
 
-final class GetProjectHandler
+final readonly class GetProjectHandler
 {
     public function __construct(
-        private readonly ProjectService $projectService,
-        private readonly ProjectDtoMapper $mapper
+        private ProjectService $projectService,
+        private ProjectDtoMapper $mapper
     ) {
     }
 

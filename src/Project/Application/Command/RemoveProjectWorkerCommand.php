@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Command;
 
-final class RemoveProjectWorkerCommand
+final readonly class RemoveProjectWorkerCommand
 {
     public function __construct(
-        public readonly string $projectId,
-        public readonly string $userId,
-        public readonly ?string $removedBy = null
+        public string $projectId,
+        public string $userId,
+        public ?string $removedBy = null
     ) {
     }
 }
