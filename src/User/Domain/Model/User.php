@@ -4,56 +4,34 @@ declare(strict_types=1);
 
 namespace App\User\Domain\Model;
 
-use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
-use App\User\Domain\Event\UserCreatedEvent;
 use DateTimeImmutable;
 
-final class User extends AggregateRoot
+final readonly class User
 {
-    private Uuid $id;
-    private Email $email;
-    private DateTimeImmutable $createdAt;
-
-    private function __construct()
-    {
+    private function __construct(
+        private Uuid $id,
+        private Email $email,
+        private DateTimeImmutable $createdAt
+    ) {
     }
 
+    public static function fromPrimitives(string $id, string $email, DateTimeImmutable $createdAt): self
+    {
+        return new self(
+            Uuid::create($id),
+            Email::fromString($email),
+            $createdAt
+        );
+    }
     public static function create(Email $email): self
     {
-        $user = new self();
-        $user->id = Uuid::generate();
-        $user->email = $email;
-        $user->createdAt = new DateTimeImmutable();
-
-        $user->recordEvent(new UserCreatedEvent(
-            $user->id,
-            $user->email,
-            $user->createdAt
-        ));
-
-        return $user;
-    }
-
-    public static function fromEvents(array $events): self
-    {
-        $user = new self();
-
-        foreach ($events as $event) {
-            $user->replayEvent($event);
-        }
-
-        return $user;
-    }
-
-    protected function handleEvent(\App\Shared\Event\DomainEvent $event): void
-    {
-        if ($event instanceof UserCreatedEvent) {
-            $this->id = $event->userId;
-            $this->email = $event->email;
-            $this->createdAt = $event->createdAt;
-        }
+        return new self(
+            Uuid::generate(),
+            $email,
+            new DateTimeImmutable()
+        );
     }
 
     public function getId(): Uuid

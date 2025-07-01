@@ -10,7 +10,8 @@ final readonly class GetProjectQuery
 {
     private function __construct(
         public Uuid $id
-    ) {}
+    ) {
+    }
 
     public static function fromPrimitives(string $id): self
     {

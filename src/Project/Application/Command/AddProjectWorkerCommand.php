@@ -14,7 +14,8 @@ final readonly class AddProjectWorkerCommand
         public Uuid $userId,
         public ProjectRole $role,
         public Uuid $addedBy
-    ) {}
+    ) {
+    }
 
     public static function fromPrimitives(string $projectId, string $userId, string $role, string $addedBy): self
     {

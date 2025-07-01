@@ -1,9 +1,8 @@
 <?php
 
 // src/Infrastructure/Persistence/Doctrine/Entity/UserEntity.php
-namespace App\Infrastructure\Persistence\Doctrine\Entity;
+namespace App\User\Infrastructure\Persistence\Doctrine\Entity;
 
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]

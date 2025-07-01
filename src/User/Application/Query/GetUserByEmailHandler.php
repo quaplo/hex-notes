@@ -6,12 +6,12 @@ namespace App\User\Application\Query;
 
 use App\Infrastructure\Http\Dto\UserDto;
 use App\Infrastructure\Http\Mapper\UserDtoMapper;
-use App\User\Application\UserEventSourcingService;
+use App\User\Application\UserService;
 
 final class GetUserByEmailHandler
 {
     public function __construct(
-        private readonly UserEventSourcingService $userEventSourcingService,
+        private readonly UserService $userEventSourcingService,
         private readonly UserDtoMapper $mapper
     ) {
     }

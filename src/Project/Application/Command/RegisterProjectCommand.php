@@ -12,7 +12,8 @@ final readonly class RegisterProjectCommand
     private function __construct(
         public ProjectName $name,
         public Uuid $ownerId
-    ) {}
+    ) {
+    }
 
     public static function fromPrimitives(string $name, string $ownerId): self
     {

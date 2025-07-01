@@ -12,7 +12,8 @@ final readonly class RemoveProjectWorkerCommand
         public Uuid $projectId,
         public Uuid $userId,
         public ?Uuid $removedBy = null
-    ) {}
+    ) {
+    }
 
     public static function fromPrimitives(string $projectId, string $userId, ?string $removedBy = null): self
     {
