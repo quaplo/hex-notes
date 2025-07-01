@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Project\Application\Composite\Query;
 
 use App\Project\Application\Composite\Dto\ProjectFullDetailDto;
+use App\Project\Application\Composite\Mapper\ProjectFullDetailDtoMapper;
 use App\Project\Application\Query\GetProjectHandler;
 use App\Project\Application\Query\GetProjectQuery;
 use App\User\Application\Query\GetUserByIdHandler;
 use App\User\Application\Query\GetUserByIdQuery;
 use App\Project\Application\ProjectService;
-use App\Infrastructure\Http\Mapper\UserDtoMapper;
 
 final class GetProjectFullDetailHandler
 {
@@ -18,7 +18,7 @@ final class GetProjectFullDetailHandler
         private GetProjectHandler $getProjectHandler,
         private GetUserByIdHandler $getUserHandler,
         private ProjectService $projectService,
-        private UserDtoMapper $userDtoMapper,
+        private ProjectFullDetailDtoMapper $detailDtoMapper,
     ) {
     }
 
@@ -39,6 +39,6 @@ final class GetProjectFullDetailHandler
             }
         }
 
-        return new ProjectFullDetailDto($projectDto, $userDto, $workers);
+        return $this->detailDtoMapper->toDto($projectDto, $userDto, $workers);
     }
 }

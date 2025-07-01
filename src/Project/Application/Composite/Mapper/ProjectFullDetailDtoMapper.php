@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Application\Composite\Mapper;
+namespace App\Project\Application\Composite\Mapper;
 
+use App\Infrastructure\Http\Dto\ProjectDto;
 use App\Infrastructure\Http\Dto\UserDto;
+use App\Project\Application\Composite\Dto\ProjectFullDetailDto;
 
 class ProjectFullDetailDtoMapper
 {
