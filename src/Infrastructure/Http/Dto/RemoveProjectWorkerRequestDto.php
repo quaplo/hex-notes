@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Dto;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 final class RemoveProjectWorkerRequestDto
 {
     public function __construct(
-        public string $userId,
-        public ?string $removedBy = null
+        #[Assert\NotBlank(message: 'User ID cannot be empty')]
+        #[Assert\Uuid(message: 'User ID must be a valid UUID')]
+        public readonly string $userId,
+        
+        #[Assert\Uuid(message: 'Removed by must be a valid UUID')]
+        public readonly ?string $removedBy = null
     ) {
     }
 }
