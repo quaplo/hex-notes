@@ -50,11 +50,11 @@ public function __invoke(RenameProjectCommand $command): void {
 }
 ```
 
-### 3. Duplicitné event handling mechanizmy
+### 3. ✅ VYRIEŠENÉ: Duplicitné event handling mechanizmy
 
-**Problém**: `ProjectDomainEventsTrait` duplikuje funkcionalitu `AggregateRoot`
+**Problém**: `ProjectDomainEventsTrait` duplikoval funkcionalitu `AggregateRoot`
 ```php
-// ❌ Zlé - ProjectDomainEventsTrait má vlastné handleEvent
+// ❌ Zlé - ProjectDomainEventsTrait mal vlastné handleEvent
 protected function handleEvent(DomainEvent $event): void {
     match (get_class($event)) {
         // ...
@@ -64,14 +64,27 @@ protected function handleEvent(DomainEvent $event): void {
 // AggregateRoot už má apply/replayEvent mechanizmus
 ```
 
-**Riešenie**: Použiť AggregateRoot mechanizmus konzistentne
+**✅ IMPLEMENTOVANÉ RIEŠENIE**:
+- Odstránený `ProjectDomainEventsTrait`
+- `Project` trieda teraz konzistentne používa `AggregateRoot` mechanizmus
+- Všetky event recording operácie používajú `apply()` metódu
+- Implementovaná `handleEvent()` metóda priamo v `Project` triede
+
 ```php
-// ✅ Dobré - odstrániť trait, použiť apply() v Project
+// ✅ Vyriešené - Project.php používa apply() z AggregateRoot
 public function addWorker(ProjectWorker $worker): self {
     // validation...
-    $event = new ProjectWorkerAddedEvent(/*...*/);
-    $this->apply($event); // Použije AggregateRoot.apply()
-    return $this;
+    $project->apply(new ProjectWorkerAddedEvent(/*...*/));
+    return $project;
+}
+
+// Implementované handleEvent v Project triede
+protected function handleEvent(DomainEvent $event): void {
+    match (get_class($event)) {
+        ProjectCreatedEvent::class => $this->handleProjectCreated($event),
+        ProjectRenamedEvent::class => $this->handleProjectRenamed($event),
+        // ...
+    };
 }
 ```
 
@@ -187,7 +200,7 @@ public function __construct(
 ### Vysoká priorita
 1. **Vytvoriť ProjectRepositoryInterface** v domain layer
 2. **Refaktorovať ProjectService** - odstrániť business logic
-3. **Zjednotiť event handling** - odstrániť trait, použiť AggregateRoot
+3. ✅ **HOTOVO: Zjednotiť event handling** - odstránený trait, používa AggregateRoot
 4. **Vytvoriť domain exceptions**
 
 ### Stredná priorita  
@@ -223,6 +236,17 @@ Project/
 Po implementácii týchto zmien:
 - ✅ Čistá hexagonálna architektúra (domain nezávisí od infra)
 - ✅ Správne DDD modelovanie (business logic v domain)
-- ✅ Konzistentný event sourcing
+- ✅ **HOTOVO**: Konzistentný event sourcing - duplicitné mechanizmy odstránené
 - ✅ Lepšia testovateľnosť
 - ✅ Vyššia maintainability
+
+## 🔄 Stav implementácie
+
+### ✅ Vyriešené problémy:
+- **#3 Duplicitné event handling mechanizmy** - `ProjectDomainEventsTrait` odstránený, `AggregateRoot` mechanizmus používaný konzistentne
+
+### 🔄 Zostávajúce úlohy:
+- #1 Porušenie Dependency Inversion Principle
+- #2 Nesprávne umiestnenie business logiky
+- #4 Nekonzistentné Command Handler implementácie
+- #5-8 Ostatné vylepšenia
