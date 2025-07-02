@@ -7,7 +7,6 @@ namespace App\User\Application;
 use App\User\Application\Exception\EmailAlreadyExistsException;
 use App\User\Domain\Model\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
-use App\User\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
 
