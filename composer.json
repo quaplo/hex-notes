@@ -70,6 +70,7 @@
         "phpstan": "vendor/bin/phpstan analyse",
         "phpcs": "vendor/bin/phpcs",
         "phpcbf": "vendor/bin/phpcbf",
+        "sf:cache-clear": "php bin/console cache:clear",
         "doctrine:diff": "php bin/console doctrine:migrations:diff",
         "doctrine:migrate": "php bin/console doctrine:migrations:migrate --no-interaction",
         "doctrine:sync": [
