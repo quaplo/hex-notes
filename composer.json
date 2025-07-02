@@ -67,6 +67,9 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage",
+        "test-watch": "vendor/bin/pest --watch",
         "phpstan": "vendor/bin/phpstan analyse",
         "phpcs": "vendor/bin/phpcs",
         "phpcbf": "vendor/bin/phpcbf",
