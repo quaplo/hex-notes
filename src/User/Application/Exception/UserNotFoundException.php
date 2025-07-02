@@ -10,6 +10,6 @@ class UserNotFoundException extends ApplicationException
 {
     public function __construct(string $userId, Throwable $previous = null)
     {
-        parent::__construct("User ID '$userId' exist.", 0, $previous);
+        parent::__construct("User ID '$userId' not found.", 0, $previous);
     }
 }

@@ -19,7 +19,7 @@ final readonly class CreateUserHandler
     {
         $email = $command->getEmail();
         
-        $existingUser = $this->userRepository->findByEmail($email);
+        $existingUser = $this->userRepository->findByEmailIncludingDeleted($email);
         if ($existingUser) {
             throw new UserAlreadyExistsException($email);
         }

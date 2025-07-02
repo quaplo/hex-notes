@@ -16,17 +16,24 @@ final class User
         private readonly Uuid $id,
         private Email $email,
         private UserStatus $status,
-        private readonly DateTimeImmutable $createdAt
+        private readonly DateTimeImmutable $createdAt,
+        private ?DateTimeImmutable $deletedAt = null
     ) {
     }
 
-    public static function fromPrimitives(string $id, string $email, string $status, DateTimeImmutable $createdAt): self
-    {
+    public static function fromPrimitives(
+        string $id,
+        string $email,
+        string $status,
+        DateTimeImmutable $createdAt,
+        ?DateTimeImmutable $deletedAt = null
+    ): self {
         return new self(
             Uuid::create($id),
             Email::fromString($email),
             UserStatus::from($status),
-            $createdAt
+            $createdAt,
+            $deletedAt
         );
     }
 
@@ -68,6 +75,16 @@ final class User
         $this->status = UserStatus::SUSPENDED;
     }
 
+    public function delete(): void
+    {
+        if ($this->isDeleted()) {
+            return; // Already deleted
+        }
+
+        $this->status = UserStatus::DELETED;
+        $this->deletedAt = new DateTimeImmutable();
+    }
+
     public function isActive(): bool
     {
         return $this->status->isActive();
@@ -81,6 +98,11 @@ final class User
     public function isSuspended(): bool
     {
         return $this->status->isSuspended();
+    }
+
+    public function isDeleted(): bool
+    {
+        return $this->status->isDeleted();
     }
 
     public function canChangeEmail(): bool
@@ -112,5 +134,10 @@ final class User
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getDeletedAt(): ?DateTimeImmutable
+    {
+        return $this->deletedAt;
     }
 }

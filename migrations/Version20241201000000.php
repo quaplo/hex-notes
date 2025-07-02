@@ -19,14 +19,29 @@ final class Version20241201000000 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql('CREATE TABLE event_store (
-            id SERIAL PRIMARY KEY,
-            aggregate_id VARCHAR(36) NOT NULL,
-            event_type VARCHAR(255) NOT NULL,
-            event_data TEXT NOT NULL,
-            version INTEGER NOT NULL,
-            occurred_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
-        )');
+        // Use platform-specific SQL for better compatibility
+        $platform = $this->connection->getDatabasePlatform();
+        
+        if ($platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform) {
+            $this->addSql('CREATE TABLE event_store (
+                id SERIAL PRIMARY KEY,
+                aggregate_id VARCHAR(36) NOT NULL,
+                event_type VARCHAR(255) NOT NULL,
+                event_data TEXT NOT NULL,
+                version INTEGER NOT NULL,
+                occurred_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
+            )');
+        } else {
+            // SQLite compatible version
+            $this->addSql('CREATE TABLE event_store (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                aggregate_id VARCHAR(36) NOT NULL,
+                event_type VARCHAR(255) NOT NULL,
+                event_data TEXT NOT NULL,
+                version INTEGER NOT NULL,
+                occurred_at DATETIME NOT NULL
+            )');
+        }
         
         $this->addSql('CREATE INDEX idx_aggregate_version ON event_store (aggregate_id, version)');
         $this->addSql('CREATE INDEX idx_occurred_at ON event_store (occurred_at)');

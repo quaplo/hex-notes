@@ -23,12 +23,21 @@ class UserEntity
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(string $id, string $email, string $status, \DateTimeImmutable $createdAt)
-    {
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $deletedAt;
+
+    public function __construct(
+        string $id,
+        string $email,
+        string $status,
+        \DateTimeImmutable $createdAt,
+        ?\DateTimeImmutable $deletedAt = null
+    ) {
         $this->id = $id;
         $this->email = $email;
         $this->status = $status;
         $this->createdAt = $createdAt;
+        $this->deletedAt = $deletedAt;
     }
 
     public function getId(): string
@@ -59,5 +68,15 @@ class UserEntity
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): void
+    {
+        $this->deletedAt = $deletedAt;
     }
 }

@@ -11,7 +11,7 @@
 |
 */
 
-pest()->extend(App\Tests\TestCase::class)->in('Feature');
+pest()->extend(Symfony\Bundle\FrameworkBundle\Test\WebTestCase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
