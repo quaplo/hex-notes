@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Command;
 
-use App\Project\Application\ProjectService;
 use App\Project\Domain\Model\Project;
-use App\Shared\ValueObject\Uuid;
+use App\Project\Domain\Repository\ProjectRepositoryInterface;
 
-final class RegisterProjectHandler
+final readonly class RegisterProjectHandler
 {
     public function __construct(
-        private ProjectService $service
+        private ProjectRepositoryInterface $projectRepository
     ) {
     }
 
     public function __invoke(RegisterProjectCommand $command): Project
     {
-        return $this->service->createProject($command->name, $command->ownerId);
+        $project = Project::create($command->name, $command->ownerId);
+        $this->projectRepository->save($project);
+        
+        return $project;
     }
 }

@@ -4,29 +4,29 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Command;
 
-use App\Project\Application\ProjectService;
+use App\Project\Domain\Exception\ProjectNotFoundException;
 use App\Project\Domain\Model\Project;
-use App\Shared\ValueObject\Uuid;
+use App\Project\Domain\Repository\ProjectRepositoryInterface;
 
 final readonly class RemoveProjectWorkerHandler
 {
     public function __construct(
-        private ProjectService $projectService
+        private ProjectRepositoryInterface $projectRepository
     ) {
     }
 
     public function __invoke(RemoveProjectWorkerCommand $command): Project
     {
-        $project = $this->projectService->getProject($command->projectId);
+        $project = $this->projectRepository->load($command->projectId);
         if (!$project) {
-            throw new \DomainException('Project not found');
+            throw new ProjectNotFoundException($command->projectId);
         }
 
         $project = $project->removeWorkerByUserId(
             $command->userId,
             $command->removedBy
         );
-        $this->projectService->save($project);
+        $this->projectRepository->save($project);
         return $project;
     }
 }

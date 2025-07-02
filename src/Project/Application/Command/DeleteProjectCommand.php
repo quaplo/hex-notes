@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Query;
+namespace App\Project\Application\Command;
 
 use App\Shared\ValueObject\Uuid;
 
-final readonly class GetProjectQuery
+final readonly class DeleteProjectCommand
 {
     private function __construct(
         public Uuid $projectId

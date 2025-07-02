@@ -6,8 +6,14 @@ namespace App\Infrastructure\Http\Controller;
 
 use App\Project\Application\Command\RegisterProjectCommand;
 use App\Project\Application\Command\RegisterProjectHandler;
+use App\Project\Application\Command\RenameProjectCommand;
+use App\Project\Application\Command\RenameProjectHandler;
+use App\Project\Application\Command\DeleteProjectCommand;
+use App\Project\Application\Command\DeleteProjectHandler;
 use App\Project\Application\Query\GetProjectQuery;
 use App\Project\Application\Query\GetProjectHandler;
+use App\Project\Application\Query\GetProjectHistoryQuery;
+use App\Project\Application\Query\GetProjectHistoryHandler;
 use App\Infrastructure\Http\Dto\CreateProjectRequestDto;
 use App\Infrastructure\Http\Mapper\ProjectDtoMapper;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -28,7 +34,10 @@ final class ProjectController
 {
     public function __construct(
         private readonly RegisterProjectHandler $registerProjectHandler,
+        private readonly RenameProjectHandler $renameProjectHandler,
+        private readonly DeleteProjectHandler $deleteProjectHandler,
         private readonly GetProjectHandler $getProjectHandler,
+        private readonly GetProjectHistoryHandler $getProjectHistoryHandler,
         private readonly ProjectDtoMapper $projectDtoMapper,
         private readonly SerializerInterface $serializer,
         private readonly GetProjectFullDetailHandler $getProjectFullDetailHandler,
@@ -104,5 +113,39 @@ final class ProjectController
         );
         ($this->removeProjectWorkerHandler)($command);
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/api/projects/{id}', name: 'rename_project', methods: ['PUT'])]
+    public function rename(string $id, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        if (!isset($data['name'])) {
+            return new JsonResponse(['error' => 'Name is required'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $command = RenameProjectCommand::fromPrimitives($id, $data['name']);
+        $project = ($this->renameProjectHandler)($command);
+        $projectDto = $this->projectDtoMapper->toDto($project);
+
+        return new JsonResponse($projectDto, JsonResponse::HTTP_OK);
+    }
+
+    #[Route('/api/projects/{id}', name: 'delete_project', methods: ['DELETE'])]
+    public function delete(string $id): JsonResponse
+    {
+        $command = DeleteProjectCommand::fromPrimitives($id);
+        ($this->deleteProjectHandler)($command);
+
+        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    #[Route('/api/projects/{id}/history', name: 'get_project_history', methods: ['GET'])]
+    public function history(string $id): JsonResponse
+    {
+        $query = GetProjectHistoryQuery::fromPrimitives($id);
+        $history = ($this->getProjectHistoryHandler)($query);
+
+        return new JsonResponse($history, JsonResponse::HTTP_OK);
     }
 }

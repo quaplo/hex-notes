@@ -235,6 +235,162 @@
 			"response": []
 		},
 		{
+			"name": "rename project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();",
+							"pm.collectionVariables.set(\"projectId\", jsonData.id);",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Name is 'Pure project meme -changed'\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.name).to.eql(\"Pure project meme -changed\");",
+							"});",
+							"",
+							"pm.test(\"Response has correct structure and types\", function () {",
+							"    pm.expect(jsonData).to.have.property(\"id\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"name\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"ownerId\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"createdAt\").that.is.a(\"string\");",
+							"    pm.expect(jsonData).to.have.property(\"deletedAt\"); // môže byť null",
+							"",
+							"    // Validácia UUID formátu (voliteľné)",
+							"    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;",
+							"    pm.expect(jsonData.id).to.match(uuidRegex);",
+							"    pm.expect(jsonData.ownerId).to.match(uuidRegex);",
+							"",
+							"    // Validácia dátumu (voliteľné)",
+							"    const date = new Date(jsonData.createdAt);",
+							"    pm.expect(date.toString()).not.to.eql(\"Invalid Date\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Pure project meme -changed\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get project Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"  pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"pm.test(\"Name is 'Pure project meme -changed'\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json.project.name).to.eql(\"Pure project meme -changed\");",
+							"});",
+							"",
+							"pm.test(\"Response contains project, owner and workers\", function () {",
+							"  pm.expect(json).to.have.property(\"project\");",
+							"  pm.expect(json).to.have.property(\"owner\");",
+							"  pm.expect(json).to.have.property(\"workers\");",
+							"});",
+							"",
+							"pm.test(\"Project fields are correct\", function () {",
+							"  const project = json.project;",
+							"  pm.expect(project.id).to.be.a(\"string\");",
+							"  pm.expect(project.name).to.be.a(\"string\");",
+							"  pm.expect(project.ownerId).to.be.a(\"string\");",
+							"  pm.expect(project.createdAt).to.be.a(\"string\");",
+							"  pm.expect(project.deletedAt === null || typeof project.deletedAt === \"string\").to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Owner fields are correct\", function () {",
+							"  const owner = json.owner;",
+							"  pm.expect(owner.id).to.be.a(\"string\");",
+							"  pm.expect(owner.email).to.be.a(\"string\");",
+							"  pm.expect(owner.createdAt).to.be.a(\"string\");",
+							"});",
+							"",
+							"pm.test(\"Workers is an array\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\");",
+							"});",
+							"",
+							"pm.test(\"Workers is an empty array\", function () {",
+							"  pm.expect(json.workers).to.be.an(\"array\").that.is.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"createdAt fields have correct datetime format\", function () {",
+							"  const datetimeRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"  pm.expect(json.project.createdAt).to.match(datetimeRegex);",
+							"  pm.expect(json.owner.createdAt).to.match(datetimeRegex);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "create new user as worker",
 			"event": [
 				{
@@ -832,6 +988,159 @@
 						"api",
 						"users",
 						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get project history",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const json = pm.response.json();",
+							"",
+							"// Overenie existencie a typov pre 'project'",
+							"pm.test(\"Project object has correct structure\", function () {",
+							"    pm.expect(json).to.have.property(\"project\");",
+							"    const project = json.project;",
+							"",
+							"    pm.expect(project).to.have.property(\"id\").that.is.a(\"string\");",
+							"    pm.expect(project).to.have.property(\"name\").that.equals(\"Pure project meme -changed\");",
+							"    pm.expect(project).to.have.property(\"ownerId\").that.is.a(\"string\");",
+							"    pm.expect(project).to.have.property(\"createdAt\").that.is.a(\"string\");",
+							"    pm.expect(project).to.have.property(\"deletedAt\"); // môže byť null",
+							"});",
+							"",
+							"// Overenie poľa events",
+							"pm.test(\"Events array has 5 items\", function () {",
+							"    pm.expect(json).to.have.property(\"events\").that.is.an(\"array\").with.lengthOf(5);",
+							"});",
+							"",
+							"// Voliteľná validácia štruktúry každej udalosti",
+							"pm.test(\"Each event has required structure\", function () {",
+							"    json.events.forEach(event => {",
+							"        pm.expect(event).to.have.property(\"eventName\").that.is.a(\"string\");",
+							"        pm.expect(event).to.have.property(\"data\").that.is.an(\"object\");",
+							"        pm.expect(event).to.have.property(\"occurredAt\").that.is.a(\"string\");",
+							"",
+							"        // Možná validácia formátu UUID pre projectId v každom evente",
+							"        if (event.data.projectId) {",
+							"            pm.expect(event.data.projectId).to.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);",
+							"        }",
+							"    });",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}/history",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}",
+						"history"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get deleted project",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message is 'Project not found'\", function () {",
+							"    const json = pm.response.json();",
+							"    pm.expect(json).to.have.property(\"error\", \"Project not found\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/projects/{{projectId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"projects",
+						"{{projectId}}"
 					]
 				}
 			},

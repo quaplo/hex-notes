@@ -86,6 +86,30 @@ final class Project extends AggregateRoot
         return $project;
     }
 
+    public function rename(ProjectName $newName): self
+    {
+        if ($this->isDeleted()) {
+            throw new \DomainException('Cannot rename deleted project');
+        }
+
+        $oldName = $this->name;
+
+        $project = new self(
+            $this->id,
+            $newName,
+            $this->createdAt,
+            $this->ownerId,
+            $this->deletedAt
+        );
+
+        $project->workers = $this->workers;
+        $project->setVersion($this->getVersion());
+
+        $project->recordProjectRenamed($oldName, $newName);
+
+        return $project;
+    }
+
     /** @return ProjectWorker[] */
     public function getWorkers(): array
     {

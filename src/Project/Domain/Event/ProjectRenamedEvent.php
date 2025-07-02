@@ -38,4 +38,34 @@ final class ProjectRenamedEvent implements DomainEvent
     {
         return $this->occurredAt;
     }
+
+    public function getAggregateId(): string
+    {
+        return $this->projectId->toString();
+    }
+
+    public function getEventName(): string
+    {
+        return 'project.renamed';
+    }
+
+    public function getEventData(): array
+    {
+        return [
+            'projectId' => $this->projectId->toString(),
+            'oldName' => $this->oldName->__toString(),
+            'newName' => $this->newName->__toString(),
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')
+        ];
+    }
+
+    public static function fromEventData(array $eventData): self
+    {
+        return new self(
+            Uuid::create($eventData['projectId']),
+            new ProjectName($eventData['oldName']),
+            new ProjectName($eventData['newName']),
+            new DateTimeImmutable($eventData['occurredAt'])
+        );
+    }
 }

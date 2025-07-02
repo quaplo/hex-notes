@@ -6,7 +6,7 @@ namespace App\Project\Application\Query;
 
 use App\Shared\ValueObject\Uuid;
 
-final readonly class GetProjectQuery
+final readonly class GetProjectHistoryQuery
 {
     private function __construct(
         public Uuid $projectId

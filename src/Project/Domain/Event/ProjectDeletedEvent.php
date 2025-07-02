@@ -25,4 +25,30 @@ final class ProjectDeletedEvent implements DomainEvent
     {
         return $this->occurredAt;
     }
+
+    public function getAggregateId(): string
+    {
+        return $this->projectId->toString();
+    }
+
+    public function getEventName(): string
+    {
+        return 'project.deleted';
+    }
+
+    public function getEventData(): array
+    {
+        return [
+            'projectId' => $this->projectId->toString(),
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')
+        ];
+    }
+
+    public static function fromEventData(array $eventData): self
+    {
+        return new self(
+            Uuid::create($eventData['projectId']),
+            new DateTimeImmutable($eventData['occurredAt'])
+        );
+    }
 }

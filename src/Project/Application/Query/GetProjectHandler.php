@@ -4,26 +4,24 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Query;
 
-use App\Infrastructure\Http\Dto\ProjectDto;
-use App\Infrastructure\Http\Mapper\ProjectDtoMapper;
-use App\Project\Application\ProjectService;
+use App\Project\Domain\Model\Project;
+use App\Project\Domain\Repository\ProjectRepositoryInterface;
 
 final readonly class GetProjectHandler
 {
     public function __construct(
-        private ProjectService $projectService,
-        private ProjectDtoMapper $mapper
+        private ProjectRepositoryInterface $projectRepository
     ) {
     }
 
-    public function __invoke(GetProjectQuery $query): ProjectDto
+    public function __invoke(GetProjectQuery $query): ?Project
     {
-        $project = $this->projectService->getProject($query->id);
-
-        if (!$project) {
-            throw new \RuntimeException('Project not found');
+        $project = $this->projectRepository->load($query->projectId);
+        
+        if (!$project || $project->isDeleted()) {
+            return null;
         }
-
-        return $this->mapper->toDto($project);
+        
+        return $project;
     }
 }
