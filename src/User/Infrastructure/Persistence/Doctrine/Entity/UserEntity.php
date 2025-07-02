@@ -17,13 +17,17 @@ class UserEntity
     #[ORM\Column(length: 255, unique: true)]
     private string $email;
 
+    #[ORM\Column(length: 20)]
+    private string $status;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct(string $id, string $email, \DateTimeImmutable $createdAt)
+    public function __construct(string $id, string $email, string $status, \DateTimeImmutable $createdAt)
     {
         $this->id = $id;
         $this->email = $email;
+        $this->status = $status;
         $this->createdAt = $createdAt;
     }
 
@@ -35,6 +39,21 @@ class UserEntity
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
     }
 
     public function getCreatedAt(): \DateTimeImmutable

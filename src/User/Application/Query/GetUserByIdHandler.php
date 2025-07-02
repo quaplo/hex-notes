@@ -6,19 +6,19 @@ namespace App\User\Application\Query;
 
 use App\Infrastructure\Http\Dto\UserDto;
 use App\Infrastructure\Http\Mapper\UserDtoMapper;
-use App\User\Application\UserService;
+use App\User\Domain\Repository\UserRepositoryInterface;
 
-final class GetUserByIdHandler
+final readonly class GetUserByIdHandler
 {
     public function __construct(
-        private readonly UserService $userEventSourcingService,
-        private readonly UserDtoMapper $mapper
+        private UserRepositoryInterface $userRepository,
+        private UserDtoMapper $mapper
     ) {
     }
 
     public function __invoke(GetUserByIdQuery $query): ?UserDto
     {
-        $user = $this->userEventSourcingService->getUserById($query->getUserId());
+        $user = $this->userRepository->findById($query->getUserId());
 
         return $user ? $this->mapper->toDto($user) : null;
     }

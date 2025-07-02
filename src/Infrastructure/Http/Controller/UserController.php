@@ -6,9 +6,9 @@ namespace App\Infrastructure\Http\Controller;
 
 use App\Infrastructure\Http\Dto\CreateUserRequestDto;
 use App\User\Application\Command\CreateUserCommand;
-use App\User\Application\Command\CreateUserHandler;
-use App\User\Application\Query\GetUserByIdHandler;
 use App\User\Application\Query\GetUserByIdQuery;
+use App\Shared\Application\CommandBus;
+use App\Shared\Application\QueryBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,8 +17,8 @@ use Symfony\Component\Serializer\SerializerInterface;
 final class UserController
 {
     public function __construct(
-        private readonly CreateUserHandler $createUserHandler,
-        private readonly GetUserByIdHandler $getUserByIdHandler,
+        private readonly CommandBus $commandBus,
+        private readonly QueryBus $queryBus,
         private readonly SerializerInterface $serializer,
     ) {
     }
@@ -34,7 +34,7 @@ final class UserController
         );
 
         $command = new CreateUserCommand($dto->email);
-        $user = ($this->createUserHandler)($command);
+        $user = $this->commandBus->dispatch($command);
 
         return new JsonResponse([
             'message' => 'User created successfully',
@@ -47,7 +47,7 @@ final class UserController
     public function getById(string $id): JsonResponse
     {
         $query = new GetUserByIdQuery($id);
-        $userDto = ($this->getUserByIdHandler)($query);
+        $userDto = $this->queryBus->dispatch($query);
 
         if (!$userDto) {
             return new JsonResponse(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);

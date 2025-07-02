@@ -18,12 +18,23 @@ final class UserRepository implements UserRepositoryInterface
 
     public function save(User $user): void
     {
-        $entity = new UserEntity(
-            $user->getId()->toString(),
-            $user->getEmail()->__toString(),
-            $user->getCreatedAt()
-        );
-        $this->em->persist($entity);
+        $existingEntity = $this->em->getRepository(UserEntity::class)->findOneBy(['id' => $user->getId()->toString()]);
+        
+        if ($existingEntity) {
+            // Update existing entity
+            $existingEntity->setEmail($user->getEmail()->__toString());
+            $existingEntity->setStatus($user->getStatus()->value);
+        } else {
+            // Create new entity
+            $entity = new UserEntity(
+                $user->getId()->toString(),
+                $user->getEmail()->__toString(),
+                $user->getStatus()->value,
+                $user->getCreatedAt()
+            );
+            $this->em->persist($entity);
+        }
+        
         $this->em->flush();
     }
 
@@ -47,6 +58,11 @@ final class UserRepository implements UserRepositoryInterface
 
     private function mapToDomain(UserEntity $entity): User
     {
-        return User::fromPrimitives($entity->getId(), $entity->getEmail(), $entity->getCreatedAt());
+        return User::fromPrimitives(
+            $entity->getId(),
+            $entity->getEmail(),
+            $entity->getStatus(),
+            $entity->getCreatedAt()
+        );
     }
 }

@@ -4,18 +4,29 @@ declare(strict_types=1);
 
 namespace App\User\Application\Command;
 
-use App\User\Application\UserService;
+use App\User\Domain\Exception\UserAlreadyExistsException;
 use App\User\Domain\Model\User;
+use App\User\Domain\Repository\UserRepositoryInterface;
 
-final class CreateUserHandler
+final readonly class CreateUserHandler
 {
     public function __construct(
-        private UserService $userService
+        private UserRepositoryInterface $userRepository
     ) {
     }
 
     public function __invoke(CreateUserCommand $command): User
     {
-        return $this->userService->createUser($command->getEmail());
+        $email = $command->getEmail();
+        
+        $existingUser = $this->userRepository->findByEmail($email);
+        if ($existingUser) {
+            throw new UserAlreadyExistsException($email);
+        }
+        
+        $user = User::register($email);
+        $this->userRepository->save($user);
+        
+        return $user;
     }
 }
