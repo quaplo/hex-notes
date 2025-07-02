@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Project\Application;
 
-use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Project\Domain\Model\Project;
+use App\Project\Domain\Repository\ProjectRepositoryInterface;
 use App\Project\Domain\ValueObject\ProjectName;
 use App\Shared\ValueObject\Uuid;
 
 final readonly class ProjectService
 {
     public function __construct(
-        private ProjectEventStoreRepository $projectRepository
+        private ProjectRepositoryInterface $projectRepository
     ) {
     }
 
