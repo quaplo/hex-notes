@@ -28,6 +28,38 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
+    # Bus implementations
+    App\Shared\Application\CommandBus: '@App\Infrastructure\Bus\SymfonyCommandBus'
+    App\Shared\Application\QueryBus: '@App\Infrastructure\Bus\SymfonyQueryBus'
+    
+    # Command Bus configuration
+    App\Infrastructure\Bus\SymfonyCommandBus:
+        arguments:
+            $commandBus: '@command.bus'
+    
+    # Query Bus configuration
+    App\Infrastructure\Bus\SymfonyQueryBus:
+        arguments:
+            $queryBus: '@query.bus'
+    
+    # Command Handlers
+    App\Project\Application\Command\:
+        resource: '../src/Project/Application/Command/*Handler.php'
+        tags:
+            - { name: messenger.message_handler, bus: command.bus }
+    
+    # Query Handlers
+    App\Project\Application\Query\:
+        resource: '../src/Project/Application/Query/*Handler.php'
+        tags:
+            - { name: messenger.message_handler, bus: query.bus }
+            
+    # Composite Query Handlers
+    App\Project\Application\Composite\Query\:
+        resource: '../src/Project/Application/Composite/Query/*Handler.php'
+        tags:
+            - { name: messenger.message_handler, bus: query.bus }
+
     App\Shared\Event\EventDispatcher: '@App\Infrastructure\Event\SymfonyEventDispatcher'
     App\Shared\Event\EventStore: '@App\Infrastructure\Persistence\EventStore\DoctrineEventStore'
     App\Infrastructure\Persistence\Projection\UserProjection: ~

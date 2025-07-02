@@ -5,44 +5,30 @@ declare(strict_types=1);
 namespace App\Infrastructure\Http\Controller;
 
 use App\Project\Application\Command\RegisterProjectCommand;
-use App\Project\Application\Command\RegisterProjectHandler;
 use App\Project\Application\Command\RenameProjectCommand;
-use App\Project\Application\Command\RenameProjectHandler;
 use App\Project\Application\Command\DeleteProjectCommand;
-use App\Project\Application\Command\DeleteProjectHandler;
-use App\Project\Application\Query\GetProjectQuery;
-use App\Project\Application\Query\GetProjectHandler;
+use App\Project\Application\Command\AddProjectWorkerCommand;
+use App\Project\Application\Command\RemoveProjectWorkerCommand;
+use App\Project\Application\Composite\Query\GetProjectFullDetailQuery;
 use App\Project\Application\Query\GetProjectHistoryQuery;
-use App\Project\Application\Query\GetProjectHistoryHandler;
 use App\Infrastructure\Http\Dto\CreateProjectRequestDto;
+use App\Infrastructure\Http\Dto\AddProjectWorkerRequestDto;
+use App\Infrastructure\Http\Dto\RemoveProjectWorkerRequestDto;
 use App\Infrastructure\Http\Mapper\ProjectDtoMapper;
+use App\Shared\Application\CommandBus;
+use App\Shared\Application\QueryBus;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use App\Project\Application\Composite\Query\GetProjectFullDetailQuery;
-use App\Project\Application\Composite\Query\GetProjectFullDetailHandler;
-use App\Project\Application\Composite\Dto\ProjectFullDetailDto;
-use App\Infrastructure\Http\Dto\AddProjectWorkerRequestDto;
-use App\Project\Application\Command\AddProjectWorkerHandler;
-use App\Project\Application\Command\AddProjectWorkerCommand;
-use App\Infrastructure\Http\Dto\RemoveProjectWorkerRequestDto;
-use App\Project\Application\Command\RemoveProjectWorkerHandler;
-use App\Project\Application\Command\RemoveProjectWorkerCommand;
 
 final class ProjectController
 {
     public function __construct(
-        private readonly RegisterProjectHandler $registerProjectHandler,
-        private readonly RenameProjectHandler $renameProjectHandler,
-        private readonly DeleteProjectHandler $deleteProjectHandler,
-        private readonly GetProjectHandler $getProjectHandler,
-        private readonly GetProjectHistoryHandler $getProjectHistoryHandler,
+        private readonly CommandBus $commandBus,
+        private readonly QueryBus $queryBus,
         private readonly ProjectDtoMapper $projectDtoMapper,
         private readonly SerializerInterface $serializer,
-        private readonly GetProjectFullDetailHandler $getProjectFullDetailHandler,
-        private readonly AddProjectWorkerHandler $addProjectWorkerHandler,
-        private readonly RemoveProjectWorkerHandler $removeProjectWorkerHandler,
     ) {
     }
 
@@ -57,7 +43,7 @@ final class ProjectController
         );
 
         $command = RegisterProjectCommand::fromPrimitives($dto->name, $dto->ownerId);
-        $project = ($this->registerProjectHandler)($command);
+        $project = $this->commandBus->dispatch($command);
         $projectDto = $this->projectDtoMapper->toDto($project);
 
         return new JsonResponse($projectDto, JsonResponse::HTTP_CREATED);
@@ -67,7 +53,7 @@ final class ProjectController
     public function detail(string $id): JsonResponse
     {
         $query = GetProjectFullDetailQuery::fromPrimitives($id);
-        $dto = ($this->getProjectFullDetailHandler)($query);
+        $dto = $this->queryBus->dispatch($query);
 
         if (!$dto) {
             return new JsonResponse(['error' => 'Project not found'], JsonResponse::HTTP_NOT_FOUND);
@@ -92,7 +78,7 @@ final class ProjectController
             $dto->role,
             $dto->addedBy
         );
-        ($this->addProjectWorkerHandler)($command);
+        $this->commandBus->dispatch($command);
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
@@ -111,7 +97,7 @@ final class ProjectController
             $dto->userId,
             $dto->removedBy
         );
-        ($this->removeProjectWorkerHandler)($command);
+        $this->commandBus->dispatch($command);
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
 
@@ -125,7 +111,7 @@ final class ProjectController
         }
 
         $command = RenameProjectCommand::fromPrimitives($id, $data['name']);
-        $project = ($this->renameProjectHandler)($command);
+        $project = $this->commandBus->dispatch($command);
         $projectDto = $this->projectDtoMapper->toDto($project);
 
         return new JsonResponse($projectDto, JsonResponse::HTTP_OK);
@@ -135,7 +121,7 @@ final class ProjectController
     public function delete(string $id): JsonResponse
     {
         $command = DeleteProjectCommand::fromPrimitives($id);
-        ($this->deleteProjectHandler)($command);
+        $this->commandBus->dispatch($command);
 
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
@@ -144,7 +130,7 @@ final class ProjectController
     public function history(string $id): JsonResponse
     {
         $query = GetProjectHistoryQuery::fromPrimitives($id);
-        $history = ($this->getProjectHistoryHandler)($query);
+        $history = $this->queryBus->dispatch($query);
 
         return new JsonResponse($history, JsonResponse::HTTP_OK);
     }

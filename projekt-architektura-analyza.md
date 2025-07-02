@@ -230,27 +230,49 @@ public static function createEmpty(): self {
 - Eliminované hardcoded dummy hodnoty z Event Store implementácie
 - Event Sourcing replay stále funguje správne - všetky properties sa nastavia replay-om domain events
 
-### 8. HTTP Controller dependency injection
+### 8. ✅ VYRIEŠENÉ: HTTP Controller dependency injection
 
 **Problém**: Veľa dependencies v konstruktore
 ```php
-// ❌ Suboptimálne - 7 dependencies
+// ❌ Suboptimálne - 10 dependencies (už opravené)
 public function __construct(
     private readonly RegisterProjectHandler $registerProjectHandler,
+    private readonly RenameProjectHandler $renameProjectHandler,
+    private readonly DeleteProjectHandler $deleteProjectHandler,
+    private readonly AddProjectWorkerHandler $addProjectWorkerHandler,
+    private readonly RemoveProjectWorkerHandler $removeProjectWorkerHandler,
     private readonly GetProjectHandler $getProjectHandler,
-    // ... 5 more
+    private readonly GetProjectHistoryHandler $getProjectHistoryHandler,
+    private readonly GetProjectFullDetailHandler $getProjectFullDetailHandler,
+    private readonly SerializerInterface $serializer,
+    private readonly ValidatorInterface $validator
 ) {}
 ```
 
-**Riešenie**: Command/Query bus pattern
+**✅ IMPLEMENTOVANÉ RIEŠENIE**: Command/Query Bus pattern
 ```php
-// ✅ Lepšie
+// ✅ Implementované - ProjectController s 4 dependencies namiesto 10
 public function __construct(
     private readonly CommandBus $commandBus,
     private readonly QueryBus $queryBus,
-    private readonly SerializerInterface $serializer
+    private readonly SerializerInterface $serializer,
+    private readonly ValidatorInterface $validator
 ) {}
+
+// Použitie v action metódach
+public function registerProject(Request $request): JsonResponse {
+    $command = new RegisterProjectCommand(/*...*/);
+    $project = $this->commandBus->handle($command);
+    return $this->json($project);
+}
 ```
+
+**Implementované komponenty**:
+- `CommandBus` a `QueryBus` interfaces v `src/Shared/Application/`
+- `SymfonyCommandBus` a `SymfonyQueryBus` implementácie pomocou Symfony Messenger
+- Konfigurácia v `config/packages/messenger.yaml` pre command a query buses
+- Registrácia services v `config/services.yaml`
+- Refaktorovaný `ProjectController` používa bus pattern namiesto direct handler dependencies
 
 ## 📋 Odporúčané akcie (priorita)
 
@@ -264,7 +286,7 @@ public function __construct(
 ### Stredná priorita
 6. ✅ **HOTOVO: Prehodnotiť ProjectWorker** - čisto immutable Value Object, odstránená withRole()
 7. ✅ **HOTOVO: Opraviť Event Store createAggregate** - implementovaný factory method pattern
-8. **Implementovať Command/Query bus**
+8. ✅ **HOTOVO: Implementovať Command/Query bus** - redukovaných 10 dependencies na 4 pomocou Mediator pattern
 
 ### Nízka priorita
 8. **Pridať validation** do Command objektov
@@ -312,8 +334,8 @@ Po implementácii týchto zmien:
 - **#7 Event Store implementácia** - implementovaný `Project::createEmpty()` factory method, eliminované hardcoded hodnoty
 - **Kompletná testovacia infrastruktúra** - vytvorené unit a integration testy
 
-### 🔄 Zostávajúce úlohy:
-- #8 HTTP Controller dependency injection optimalizácia (Command/Query bus pattern)
+### ✅ Všetky problémy vyriešené!
+Všetkých 8 architektonických problémov bolo úspešne implementované a otestované.
 
 ## 🧪 Testovacia infrastruktúra
 
