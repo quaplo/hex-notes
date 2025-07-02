@@ -60,13 +60,4 @@ final class ProjectWorker
             && $this->addedBy->equals($other->addedBy);
     }
 
-    public function withRole(ProjectRole $role): self
-    {
-        return new self(
-            $this->userId,
-            $role,
-            $this->createdAt,
-            $this->addedBy
-        );
-    }
 }

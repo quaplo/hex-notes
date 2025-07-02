@@ -42,6 +42,20 @@ final class Project extends AggregateRoot
         return $project;
     }
 
+    /**
+     * Creates an empty Project aggregate for Event Sourcing replay.
+     * All properties will be set by replaying domain events.
+     */
+    public static function createEmpty(): self
+    {
+        return new self(
+            Uuid::create('00000000-0000-0000-0000-000000000000'), // Null UUID
+            new ProjectName('__EMPTY__'),     // Placeholder name - will be set by ProjectCreatedEvent
+            new DateTimeImmutable('1970-01-01T00:00:00+00:00'), // Epoch time
+            Uuid::create('00000000-0000-0000-0000-000000000000')  // Null owner ID
+        );
+    }
+
     public function getId(): Uuid
     {
         return $this->id;

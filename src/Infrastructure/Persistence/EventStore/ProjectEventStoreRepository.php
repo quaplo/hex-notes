@@ -66,11 +66,6 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
 
     private function createAggregate(): Project
     {
-        return new Project(
-            Uuid::generate(),
-            new \App\Project\Domain\ValueObject\ProjectName('Temporary'),
-            new \DateTimeImmutable(),
-            Uuid::generate()
-        );
+        return Project::createEmpty();
     }
 }

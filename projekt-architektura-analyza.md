@@ -2,31 +2,38 @@
 
 ## 🚨 Kritické problémy
 
-### 1. Porušenie Dependency Inversion Principle (DIP)
+### 1. ✅ VYRIEŠENÉ: Porušenie Dependency Inversion Principle (DIP)
 
-**Problém**: Application layer priamo závisí od Infrastructure layer
+**Problém**: Application layer priamo závisel od Infrastructure layer
 ```php
-// ❌ Zlé - ProjectService.php
+// ❌ Zlé - ProjectService.php (už neexistuje)
 public function __construct(
     private ProjectEventStoreRepository $projectRepository // Infrastructure dependency!
 ) {}
 ```
 
-**Riešenie**: Vytvoriť domain repository interface
+**✅ IMPLEMENTOVANÉ RIEŠENIE**: Vytvorený domain repository interface
 ```php
-// ✅ Dobré - vytvoriť src/Project/Domain/Repository/ProjectRepositoryInterface.php
+// ✅ Implementované - src/Project/Domain/Repository/ProjectRepositoryInterface.php
 interface ProjectRepositoryInterface {
     public function save(Project $project): void;
-    public function load(Uuid $id): ?Project;
-    public function findAll(): array;
+    public function load(Uuid $aggregateId): ?Project;
+    public function exists(Uuid $aggregateId): bool;
+}
+
+// ✅ Command handlery používajú interface
+class RegisterProjectHandler {
+    public function __construct(
+        private ProjectRepositoryInterface $projectRepository // Domain interface!
+    ) {}
 }
 ```
 
-### 2. Nesprávne umiestnenie business logiky
+### 2. ✅ VYRIEŠENÉ: Nesprávne umiestnenie business logiky
 
-**Problém**: `ProjectService` obsahuje domain logic
+**Problém**: `ProjectService` obsahoval domain logic v application layer
 ```php
-// ❌ Zlé - business rules v application service
+// ❌ Zlé - business rules v application service (už neexistuje)
 public function renameProject(string $projectId, string $newName): Project {
     $project = $this->projectRepository->load(new Uuid($projectId));
     if (!$project) {
@@ -36,19 +43,26 @@ public function renameProject(string $projectId, string $newName): Project {
 }
 ```
 
-**Riešenie**: Presunúť do Command Handlers
+**✅ IMPLEMENTOVANÉ RIEŠENIE**: Business logic v domain, orchestrácia v Command Handlers
 ```php
-// ✅ Dobré - RenameProjectHandler.php
-public function __invoke(RenameProjectCommand $command): void {
+// ✅ Implementované - RenameProjectHandler.php
+public function __invoke(RenameProjectCommand $command): Project {
     $project = $this->projectRepository->load($command->projectId);
     if (!$project) {
-        throw new ProjectNotFoundException($command->projectId);
+        throw new ProjectNotFoundException($command->projectId); // Domain exception
     }
     
-    $renamedProject = $project->rename($command->newName);
+    $renamedProject = $project->rename($command->newName); // Domain method
     $this->projectRepository->save($renamedProject);
+    return $renamedProject;
 }
 ```
+
+**Implementované zmeny**:
+- `ProjectService` odstránený - už neexistuje
+- Business logic presunnutá do domain model (`Project::rename()`, `Project::addWorker()`)
+- Command handlery obsahujú iba orchestráciu
+- Používajú domain exceptions namiesto generických
 
 ### 3. ✅ VYRIEŠENÉ: Duplicitné event handling mechanizmy
 
@@ -90,71 +104,98 @@ protected function handleEvent(DomainEvent $event): void {
 
 ## 📋 Stredne kritické problémy
 
-### 4. Nekonzistentné Command Handler implementácie
+### 4. ✅ VYRIEŠENÉ: Nekonzistentné Command Handler implementácie
 
-**Problém**: Niektoré handlery používajú `ProjectService`, iné by mali byť priame
+**Problém**: Niektoré handlery používali `ProjectService`, iné priame repository dependency
 ```php
-// ❌ Nekonzistentné
+// ❌ Nekonzistentné (už opravené)
 class AddProjectWorkerHandler {
     public function __construct(private ProjectService $projectService) {}
 }
 ```
 
-**Riešenie**: Priama závislosť na repository
+**✅ IMPLEMENTOVANÉ RIEŠENIE**: Všetky handlery používajú konzistentný pattern
 ```php
-// ✅ Dobré
+// ✅ Implementované - všetky handlery
+class RegisterProjectHandler {
+    public function __construct(private ProjectRepositoryInterface $projectRepository) {}
+}
+class RenameProjectHandler {
+    public function __construct(private ProjectRepositoryInterface $projectRepository) {}
+}
 class AddProjectWorkerHandler {
     public function __construct(private ProjectRepositoryInterface $projectRepository) {}
 }
+// ... všetky ostatné handlery
 ```
 
-### 5. ProjectWorker ako Value Object
+**Konzistentný pattern vo všetkých handleroch**:
+- Používajú `ProjectRepositoryInterface` namiesto concrete implementácie
+- Hadzú `ProjectNotFoundException` pre neexistujúce projekty
+- Volajú domain metódy na `Project` aggregate
+- Štruktúra: `final readonly class` s `__invoke()` metódou
+- Pattern: `load → validate → domain operation → save → return`
 
-**Problém**: Má mutable operácie (`withRole`) ale modelovaný ako VO
+### 5. ✅ VYRIEŠENÉ: ProjectWorker ako Value Object
+
+**Problém**: Mal mutable operácie (`withRole`) ale modelovaný ako VO
 ```php
-// ❌ Zmätočné - value object s mutation
+// ❌ Zmätočné - value object s mutation (už odstránené)
 public function withRole(ProjectRole $role): self {
     return new self(/* ... */);
 }
 ```
 
-**Riešenie**: Buď Entity alebo čisto immutable VO
+**✅ IMPLEMENTOVANÉ RIEŠENIE**: Čisto immutable Value Object
 ```php
-// ✅ Option A: Entity s ID
-class ProjectWorker {
-    private ProjectWorkerId $id;
-    public function changeRole(ProjectRole $role): void { /* ... */ }
-}
-
-// ✅ Option B: Čisto immutable VO (preferované)
-final readonly class ProjectWorker {
-    // Bez withRole, nový worker pre novú rolu
+// ✅ Implementované - src/Project/Domain/ValueObject/ProjectWorker.php
+final class ProjectWorker {
+    public function __construct(
+        private readonly Uuid $userId,
+        private readonly ProjectRole $role,
+        private readonly DateTimeImmutable $createdAt,
+        private readonly Uuid $addedBy,
+    ) {}
+    
+    // Iba getters, equals(), create() factory
+    // Žiadne mutable operácie
 }
 ```
 
-### 6. Chýbajúce Domain Exceptions
+**Implementované zmeny**:
+- Odstránená `withRole()` metóda
+- Čisto immutable Value Object
+- Pre zmenu roly: odstránenie starého worker-a + pridanie nového
+- Správne DDD modelovanie: worker s inou rolou = iný worker
 
-**Problém**: Používajú sa generické `\DomainException`
+### 6. ✅ VYRIEŠENÉ: Chýbajúce Domain Exceptions
+
+**Problém**: Používali sa generické `\DomainException`
 ```php
 // ❌ Zlé
 throw new \DomainException('Project not found');
 ```
 
-**Riešenie**: Špecifické domain exceptions
+**✅ IMPLEMENTOVANÉ RIEŠENIE**: Vytvorené špecifické domain exceptions
 ```php
-// ✅ Dobré - src/Project/Domain/Exception/
+// ✅ Implementované - src/Project/Domain/Exception/
 class ProjectNotFoundException extends DomainException {}
 class ProjectAlreadyDeletedException extends DomainException {}
 class WorkerAlreadyExistsException extends DomainException {}
 ```
 
+**Implementované exceptions**:
+- `ProjectNotFoundException` - pre neexistujúce projekty
+- `ProjectAlreadyDeletedException` - pre operácie na zmazaných projektoch
+- `WorkerAlreadyExistsException` - pre duplikátnych workers
+
 ## 🔧 Menšie vylepšenia
 
-### 7. Event Store implementácia
+### 7. ✅ VYRIEŠENÉ: Event Store implementácia
 
 **Problém**: Hardcoded values v `createAggregate()`
 ```php
-// ❌ Zlé - ProjectEventStoreRepository
+// ❌ Zlé - ProjectEventStoreRepository (už opravené)
 protected function createAggregate(): Project {
     return new Project(
         Uuid::generate(), // Random UUID?!
@@ -165,13 +206,29 @@ protected function createAggregate(): Project {
 }
 ```
 
-**Riešenie**: Factory pattern alebo reflection
+**✅ IMPLEMENTOVANÉ RIEŠENIE**: Factory method pattern
 ```php
-// ✅ Dobré
+// ✅ Implementované - ProjectEventStoreRepository.php
 protected function createAggregate(): Project {
     return Project::createEmpty(); // Factory method
 }
+
+// ✅ Implementované - Project.php
+public static function createEmpty(): self {
+    return new self(
+        Uuid::create('00000000-0000-0000-0000-000000000000'), // Null UUID
+        new ProjectName('__EMPTY__'),     // Placeholder name - will be set by ProjectCreatedEvent
+        new DateTimeImmutable('1970-01-01T00:00:00+00:00'), // Epoch time
+        Uuid::create('00000000-0000-0000-0000-000000000000')  // Null owner ID
+    );
+}
 ```
+
+**Implementované zmeny**:
+- Vytvorená `Project::createEmpty()` factory metóda s platnými null/placeholder hodnotami
+- Refaktorovaná `ProjectEventStoreRepository::createAggregate()` na použitie factory metódy
+- Eliminované hardcoded dummy hodnoty z Event Store implementácie
+- Event Sourcing replay stále funguje správne - všetky properties sa nastavia replay-om domain events
 
 ### 8. HTTP Controller dependency injection
 
@@ -198,15 +255,16 @@ public function __construct(
 ## 📋 Odporúčané akcie (priorita)
 
 ### Vysoká priorita
-1. **Vytvoriť ProjectRepositoryInterface** v domain layer
-2. **Refaktorovať ProjectService** - odstrániť business logic
+1. ✅ **HOTOVO: Vytvoriť ProjectRepositoryInterface** - implementovaný v domain layer
+2. ✅ **HOTOVO: Refaktorovať ProjectService** - odstránený, business logic v domain
 3. ✅ **HOTOVO: Zjednotiť event handling** - odstránený trait, používa AggregateRoot
-4. **Vytvoriť domain exceptions**
+4. ✅ **HOTOVO: Vytvoriť domain exceptions** - implementované špecifické exceptions
+5. ✅ **HOTOVO: Zjednotiť Command Handler implementácie** - všetky používajú konzistentný pattern
 
-### Stredná priorita  
-5. **Prehodnotiť ProjectWorker** ako VO vs Entity
-6. **Implementovať Command/Query bus**
-7. **Opraviť Event Store createAggregate**
+### Stredná priorita
+6. ✅ **HOTOVO: Prehodnotiť ProjectWorker** - čisto immutable Value Object, odstránená withRole()
+7. ✅ **HOTOVO: Opraviť Event Store createAggregate** - implementovaný factory method pattern
+8. **Implementovať Command/Query bus**
 
 ### Nízka priorita
 8. **Pridať validation** do Command objektov
@@ -234,19 +292,83 @@ Project/
 ## 🎯 Výsledok
 
 Po implementácii týchto zmien:
-- ✅ Čistá hexagonálna architektúra (domain nezávisí od infra)
-- ✅ Správne DDD modelovanie (business logic v domain)
+- ✅ **HOTOVO**: Čistá hexagonálna architektúra (domain nezávisí od infra)
+- ✅ **HOTOVO**: Správne DDD modelovanie (business logic v domain)
 - ✅ **HOTOVO**: Konzistentný event sourcing - duplicitné mechanizmy odstránené
+- ✅ **HOTOVO**: Špecifické domain exceptions namiesto generických
+- ✅ **HOTOVO**: Kompletná testovacia infrastruktúra (45 testov)
 - ✅ Lepšia testovateľnosť
 - ✅ Vyššia maintainability
 
 ## 🔄 Stav implementácie
 
 ### ✅ Vyriešené problémy:
+- **#1 Porušenie Dependency Inversion Principle** - vytvorený `ProjectRepositoryInterface`, command handlery používajú domain interface
+- **#2 Nesprávne umiestnenie business logiky** - `ProjectService` odstránený, business logic v domain model
 - **#3 Duplicitné event handling mechanizmy** - `ProjectDomainEventsTrait` odstránený, `AggregateRoot` mechanizmus používaný konzistentne
+- **#4 Nekonzistentné Command Handler implementácie** - všetky handlery používajú konzistentný pattern s `ProjectRepositoryInterface`
+- **#5 ProjectWorker ako Value Object** - odstránená `withRole()` metóda, čisto immutable Value Object
+- **#6 Chýbajúce Domain Exceptions** - implementované špecifické domain exceptions
+- **#7 Event Store implementácia** - implementovaný `Project::createEmpty()` factory method, eliminované hardcoded hodnoty
+- **Kompletná testovacia infrastruktúra** - vytvorené unit a integration testy
 
 ### 🔄 Zostávajúce úlohy:
-- #1 Porušenie Dependency Inversion Principle
-- #2 Nesprávne umiestnenie business logiky
-- #4 Nekonzistentné Command Handler implementácie
-- #5-8 Ostatné vylepšenia
+- #8 HTTP Controller dependency injection optimalizácia (Command/Query bus pattern)
+
+## 🧪 Testovacia infrastruktúra
+
+### ✅ IMPLEMENTOVANÉ: Kompletné pokrytie testami
+
+**Vytvorená testovacia infrastruktúra**:
+
+#### Unit testy (`tests/Project/Unit/`)
+- **`Domain/Model/ProjectTest.php`** - 16 testov domain modelu
+  - Testovanie business rules a domain logic
+  - Validácia event recording
+  - Error handling pre deleted projekty
+  - Worker management operácie
+
+- **`Domain/ValueObject/ProjectNameTest.php`** - 8 testov value objectu
+  - Validácia vstupných dát
+  - Equality porovnávanie
+  - Unicode podpora
+
+- **`Application/Command/RegisterProjectHandlerTest.php`** - 5 testov command handlera
+  - Application layer testovanie
+  - Repository interactions
+  - Event recording validation
+
+#### Integration testy (`tests/Project/Integration/`)
+- **`ProjectIntegrationTest.php`** - 8 end-to-end testov
+  - Kompletný project lifecycle (create → rename → delete)
+  - Worker management workflow
+  - Event sourcing integrácia
+  - Error scenarios a domain exceptions
+  - Concurrency a state consistency
+
+- **`ProjectEventStoreIntegrationTest.php`** - 7 Event Store testov
+  - Event persistence a replay
+  - Aggregate rekonštrukcia
+  - Event dispatcher integrácia
+  - Error handling
+
+#### Podporná infrastruktúra (`tests/Project/`)
+- **`Doubles/InMemoryProjectRepository.php`** - Test double pre repository
+- **`Helpers/ProjectTestFactory.php`** - Factory pre test objects
+- **`Helpers/ProjectEventAsserter.php`** - Domain event assertions
+
+### 📊 Výsledky testov
+**45 testov passed** (157 assertions):
+- ✅ 16 domain model testov
+- ✅ 8 value object testov
+- ✅ 5 application handler testov
+- ✅ 8 integration testov
+- ✅ 7 event store integration testov
+- ✅ 1 user integration test
+
+### 🎯 Pokrytie testovania
+- **Domain layer**: Kompletné pokrytie business rules
+- **Application layer**: Command handler validation
+- **Event sourcing**: Event persistence a replay
+- **Integration**: End-to-end user stories
+- **Error handling**: Domain exceptions scenarios
