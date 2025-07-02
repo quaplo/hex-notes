@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Composite\Query;
+namespace App\Shared\Application\CrossDomain\Query;
 
 use App\Shared\ValueObject\Uuid;
 
-final readonly class GetProjectFullDetailQuery
+final readonly class GetProjectWithUserDetailsQuery
 {
-    private function __construct(
-        public Uuid $id
+    public function __construct(
+        public Uuid $projectId
     ) {
     }
 

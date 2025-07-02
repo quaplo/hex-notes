@@ -5,7 +5,7 @@ namespace App\Infrastructure\Http\Mapper;
 use App\Infrastructure\Http\Dto\ProjectDto;
 use App\Project\Domain\Model\Project;
 
-final class ProjectDtoMapper
+final class ProjectDtoMapper implements ProjectDtoMapperInterface
 {
     public function toDto(Project $project): ProjectDto
     {

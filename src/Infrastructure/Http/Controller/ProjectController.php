@@ -9,7 +9,7 @@ use App\Project\Application\Command\RenameProjectCommand;
 use App\Project\Application\Command\DeleteProjectCommand;
 use App\Project\Application\Command\AddProjectWorkerCommand;
 use App\Project\Application\Command\RemoveProjectWorkerCommand;
-use App\Project\Application\Composite\Query\GetProjectFullDetailQuery;
+use App\Shared\Application\CrossDomain\Query\GetProjectWithUserDetailsQuery;
 use App\Project\Application\Query\GetProjectHistoryQuery;
 use App\Infrastructure\Http\Dto\CreateProjectRequestDto;
 use App\Infrastructure\Http\Dto\RenameProjectRequestDto;
@@ -59,7 +59,7 @@ final class ProjectController extends BaseController
     #[Route('/api/projects/{id}', name: 'get_project', methods: ['GET'])]
     public function detail(string $id): JsonResponse
     {
-        $query = GetProjectFullDetailQuery::fromPrimitives($id);
+        $query = GetProjectWithUserDetailsQuery::fromPrimitives($id);
         $dto = $this->queryBus->dispatch($query);
 
         if (!$dto) {
