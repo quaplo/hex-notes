@@ -10,6 +10,7 @@ use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
 use App\Project\Domain\ValueObject\ProjectName;
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Shared\Aggregate\AggregateRoot;
 use App\Shared\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Domain\Model;
+namespace App\Project\Domain\ValueObject;
 
 use App\Project\Domain\ValueObject\ProjectRole;
 use App\Shared\ValueObject\Uuid;
@@ -11,10 +11,10 @@ use DateTimeImmutable;
 final class ProjectWorker
 {
     public function __construct(
-        private Uuid $userId,
-        private ProjectRole $role,
-        private DateTimeImmutable $createdAt,
-        private Uuid $addedBy,
+        private readonly Uuid $userId,
+        private readonly ProjectRole $role,
+        private readonly DateTimeImmutable $createdAt,
+        private readonly Uuid $addedBy,
     ) {
     }
 
@@ -42,11 +42,6 @@ final class ProjectWorker
         return $this->role;
     }
 
-    public function setRole(ProjectRole $role): void
-    {
-        $this->role = $role;
-    }
-
     public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
@@ -55,5 +50,23 @@ final class ProjectWorker
     public function getAddedBy(): Uuid
     {
         return $this->addedBy;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->userId->equals($other->userId)
+            && $this->role->equals($other->role)
+            && $this->createdAt == $other->createdAt
+            && $this->addedBy->equals($other->addedBy);
+    }
+
+    public function withRole(ProjectRole $role): self
+    {
+        return new self(
+            $this->userId,
+            $role,
+            $this->createdAt,
+            $this->addedBy
+        );
     }
 }

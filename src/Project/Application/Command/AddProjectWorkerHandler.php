@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Project\Application\Command;
 
 use App\Project\Domain\Model\Project;
-use App\Project\Domain\Model\ProjectWorker;
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Project\Domain\ValueObject\ProjectRole;
 use App\Project\Application\ProjectService;
 use App\Shared\ValueObject\Uuid;
