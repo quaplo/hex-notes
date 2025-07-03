@@ -77,7 +77,6 @@ services:
 
     App\Shared\Event\EventDispatcher: '@App\Infrastructure\Event\SymfonyEventDispatcher'
     App\Shared\Event\EventStore: '@App\Infrastructure\Persistence\EventStore\DoctrineEventStore'
-    App\Infrastructure\Persistence\Projection\UserProjection: ~
     App\Project\Domain\Repository\ProjectRepositoryInterface: '@App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository'
     
     # Interface bindings
