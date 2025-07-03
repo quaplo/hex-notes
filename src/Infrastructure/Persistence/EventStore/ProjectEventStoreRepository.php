@@ -26,7 +26,6 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
             return;
         }
 
-        // Oprava: expectedVersion je aktuálna verzia aggregate
         $expectedVersion = $project->getVersion();
 
         $this->eventStore->append(
@@ -35,9 +34,7 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
             $expectedVersion
         );
 
-        // Dispatch events after successful save
         $this->eventDispatcher->dispatch($events);
-
         $project->clearDomainEvents();
     }
 
@@ -49,7 +46,7 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
             return null;
         }
 
-        $project = $this->createAggregate();
+        $project = Project::createEmpty();
 
         foreach ($events as $event) {
             $project->replayEvent($event);
@@ -62,10 +59,5 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
     {
         $events = $this->eventStore->getEvents($aggregateId);
         return !empty($events);
-    }
-
-    private function createAggregate(): Project
-    {
-        return Project::createEmpty();
     }
 }

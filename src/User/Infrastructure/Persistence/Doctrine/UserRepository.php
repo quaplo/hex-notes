@@ -7,14 +7,14 @@ use App\User\Domain\Repository\UserRepositoryInterface;
 use App\User\Domain\Model\User;
 use App\User\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
 use App\Shared\ValueObject\Email;
-use App\Shared\Infrastructure\Event\DomainEventDispatcher;
+use App\Shared\Event\EventDispatcher;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class UserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private DomainEventDispatcher $eventDispatcher
+        private EventDispatcher $eventDispatcher
     ) {
     }
 

@@ -38,7 +38,7 @@ final class Project extends AggregateRoot
     public static function create(ProjectName $name, Uuid $ownerId): self
     {
         $project = new self(Uuid::generate(), $name, new DateTimeImmutable(), $ownerId);
-        $project->recordEvent(new ProjectCreatedEvent($project->getId(), $name, $ownerId));
+        $project->apply(new ProjectCreatedEvent($project->getId(), $name, $ownerId));
         return $project;
     }
 
@@ -87,20 +87,9 @@ final class Project extends AggregateRoot
             throw new \DomainException('Project is already deleted');
         }
 
-        $project = new self(
-            $this->id,
-            $this->name,
-            $this->createdAt,
-            $this->ownerId,
-            new DateTimeImmutable()
-        );
+        $this->apply(new ProjectDeletedEvent($this->getId()));
 
-        $project->workers = $this->workers;
-        $project->setVersion($this->getVersion());
-
-        $project->recordEvent(new ProjectDeletedEvent($project->getId()));
-
-        return $project;
+        return $this;
     }
 
     public function rename(ProjectName $newName): self
@@ -110,21 +99,9 @@ final class Project extends AggregateRoot
         }
 
         $oldName = $this->name;
+        $this->apply(new ProjectRenamedEvent($this->getId(), $oldName, $newName));
 
-        $project = new self(
-            $this->id,
-            $newName,
-            $this->createdAt,
-            $this->ownerId,
-            $this->deletedAt
-        );
-
-        $project->workers = $this->workers;
-        $project->setVersion($this->getVersion());
-
-        $project->recordEvent(new ProjectRenamedEvent($project->getId(), $oldName, $newName));
-
-        return $project;
+        return $this;
     }
 
     /** @return ProjectWorker[] */
@@ -145,16 +122,13 @@ final class Project extends AggregateRoot
             }
         }
 
-        $project = clone $this;
-        $project->workers[] = $worker;
-        $project->setVersion($this->getVersion());
-        $project->recordEvent(new ProjectWorkerAddedEvent(
+        $this->apply(new ProjectWorkerAddedEvent(
             $this->id,
             $worker->getUserId(),
             $worker->getRole(),
             $worker->getAddedBy()
         ));
-        return $project;
+        return $this;
     }
 
     public function getOwnerId(): Uuid
@@ -179,18 +153,12 @@ final class Project extends AggregateRoot
             throw new \DomainException('Worker not found in project');
         }
 
-        $project = clone $this;
-        $project->workers = array_filter(
-            $this->workers,
-            fn($worker) => !$worker->getUserId()->equals($userId)
-        );
-        $project->setVersion($this->getVersion());
-        $project->recordEvent(new ProjectWorkerRemovedEvent(
+        $this->apply(new ProjectWorkerRemovedEvent(
             $this->id,
             $userId,
             $removedBy
         ));
-        return $project;
+        return $this;
     }
 
     /**
@@ -223,7 +191,7 @@ final class Project extends AggregateRoot
 
     private function handleProjectDeleted(ProjectDeletedEvent $event): void
     {
-        $this->deletedAt = new DateTimeImmutable();
+        $this->deletedAt = $event->getOccurredAt();
     }
 
     private function handleProjectWorkerAdded(ProjectWorkerAddedEvent $event): void

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Event;
 
-use App\Shared\Aggregate\AggregateRoot;
+use App\Shared\Domain\Model\AggregateRoot;
 use App\Shared\ValueObject\Uuid;
 
 interface EventStoreRepository
