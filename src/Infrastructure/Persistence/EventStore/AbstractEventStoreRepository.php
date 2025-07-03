@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\EventStore;
 
-use App\Shared\Aggregate\AggregateRoot;
+use App\Shared\Domain\Model\AggregateRoot;
 use App\Shared\Event\EventDispatcher;
 use App\Shared\Event\EventStore;
 use App\Shared\Event\EventStoreRepository;

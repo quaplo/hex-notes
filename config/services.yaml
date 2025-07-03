@@ -75,9 +75,30 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'App\User\Domain\Event\UserDeletedEvent' }
 
+    # Event Serializers
+    App\Project\Infrastructure\Event\ProjectEventSerializer: ~
+    App\User\Infrastructure\Event\UserEventSerializer: ~
+
+    App\Infrastructure\Event\CompositeEventSerializer:
+        arguments:
+            - '@App\Project\Infrastructure\Event\ProjectEventSerializer'
+            - '@App\User\Infrastructure\Event\UserEventSerializer'
+
+    App\Shared\Event\EventSerializer: '@App\Infrastructure\Event\CompositeEventSerializer'
     App\Shared\Event\EventDispatcher: '@App\Infrastructure\Event\SymfonyEventDispatcher'
     App\Shared\Event\EventStore: '@App\Infrastructure\Persistence\EventStore\DoctrineEventStore'
     App\Project\Domain\Repository\ProjectRepositoryInterface: '@App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository'
+    
+    # Read Model Repository
+    App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository: ~
+    
+    # Read Model Projection
+    App\Project\Infrastructure\Projection\ProjectReadModelProjection: ~
+    
+    # Optimized Query Handlers
+    App\Project\Application\Query\FindProjectsByOwnerOptimizedHandler:
+        tags:
+            - { name: messenger.message_handler, bus: query.bus }
     
     # Interface bindings
     App\Infrastructure\Http\Mapper\ProjectDtoMapperInterface: '@App\Infrastructure\Http\Mapper\ProjectDtoMapper'

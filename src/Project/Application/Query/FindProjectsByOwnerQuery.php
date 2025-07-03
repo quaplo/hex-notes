@@ -9,7 +9,7 @@ use App\Shared\ValueObject\Uuid;
 final readonly class FindProjectsByOwnerQuery
 {
     public function __construct(
-        private Uuid $ownerId
+        public readonly Uuid $ownerId
     ) {
     }
 
