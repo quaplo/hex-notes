@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
   db:
-    image: postgres:16
+    image: postgres:15
     environment:
       POSTGRES_DB: hex_notes
       POSTGRES_USER: symfony
