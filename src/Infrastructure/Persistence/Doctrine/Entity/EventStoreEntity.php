@@ -23,7 +23,7 @@ class EventStoreEntity
     #[ORM\Column(type: 'string', length: 255)]
     private string $eventType;
 
-    #[ORM\Column(type: 'text')]
+    #[ORM\Column(type: 'json')]
     private string $eventData;
 
     #[ORM\Column(type: 'integer')]
