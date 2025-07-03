@@ -22,4 +22,10 @@ interface EventStore
      * @return DomainEvent[]
      */
     public function getEventsFromVersion(Uuid $aggregateId, int $fromVersion): array;
+
+    /**
+     * Find all aggregate IDs by owner ID from ProjectCreatedEvent
+     * @return Uuid[]
+     */
+    public function findProjectAggregatesByOwnerId(Uuid $ownerId): array;
 }

@@ -11,7 +11,7 @@ use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
 use App\Project\Domain\ValueObject\ProjectName;
 use App\Project\Domain\ValueObject\ProjectRole;
-use App\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use PHPUnit\Framework\Assert;
 

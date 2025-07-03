@@ -7,7 +7,7 @@ namespace App\Project\Application\EventHandler;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
-use App\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 use Psr\Log\LoggerInterface;
 
 final readonly class ProjectEventHandler

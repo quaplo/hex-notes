@@ -39,9 +39,16 @@ final class Version20250603170826 extends AbstractMigration
             SQL);
         }
         
-        $this->addSql(<<<'SQL'
-            CREATE TABLE user_project (project_entity_id VARCHAR(36) NOT NULL, user_entity_id VARCHAR(36) NOT NULL, PRIMARY KEY(project_entity_id, user_entity_id))
-        SQL);
+        // Create user_project table with platform-specific types
+        if ($platform instanceof \Doctrine\DBAL\Platforms\PostgreSQLPlatform) {
+            $this->addSql(<<<'SQL'
+                CREATE TABLE user_project (project_entity_id UUID NOT NULL, user_entity_id UUID NOT NULL, PRIMARY KEY(project_entity_id, user_entity_id))
+            SQL);
+        } else {
+            $this->addSql(<<<'SQL'
+                CREATE TABLE user_project (project_entity_id VARCHAR(36) NOT NULL, user_entity_id VARCHAR(36) NOT NULL, PRIMARY KEY(project_entity_id, user_entity_id))
+            SQL);
+        }
         $this->addSql(<<<'SQL'
             CREATE INDEX IDX_77BECEE49019388A ON user_project (project_entity_id)
         SQL);

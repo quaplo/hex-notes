@@ -70,6 +70,11 @@ services:
         tags:
             - { name: messenger.message_handler, bus: query.bus }
 
+    # Event Handlers for domain events
+    App\Shared\Application\EventHandler\UserDeletedEventHandler:
+        tags:
+            - { name: kernel.event_listener, event: 'App\User\Domain\Event\UserDeletedEvent' }
+
     App\Shared\Event\EventDispatcher: '@App\Infrastructure\Event\SymfonyEventDispatcher'
     App\Shared\Event\EventStore: '@App\Infrastructure\Persistence\EventStore\DoctrineEventStore'
     App\Infrastructure\Persistence\Projection\UserProjection: ~
@@ -77,3 +82,6 @@ services:
     
     # Interface bindings
     App\Infrastructure\Http\Mapper\ProjectDtoMapperInterface: '@App\Infrastructure\Http\Mapper\ProjectDtoMapper'
+    
+    # Domain Event Dispatcher
+    App\Shared\Infrastructure\Event\DomainEventDispatcher: ~

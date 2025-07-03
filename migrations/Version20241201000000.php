@@ -27,7 +27,7 @@ final class Version20241201000000 extends AbstractMigration
                 id SERIAL PRIMARY KEY,
                 aggregate_id VARCHAR(36) NOT NULL,
                 event_type VARCHAR(255) NOT NULL,
-                event_data TEXT NOT NULL,
+                event_data JSONB NOT NULL,
                 version INTEGER NOT NULL,
                 occurred_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL
             )');

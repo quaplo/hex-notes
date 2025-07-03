@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Project\Domain\Event;
 
 use App\Project\Domain\ValueObject\ProjectName;
-use App\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 

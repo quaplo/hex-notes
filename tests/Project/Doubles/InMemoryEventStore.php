@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Project\Doubles;
 
-use App\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventStore;
 use App\Shared\ValueObject\Uuid;
 
@@ -48,6 +48,24 @@ final class InMemoryEventStore implements EventStore
         $allEvents = $this->events[$id] ?? [];
         
         return array_slice($allEvents, $fromVersion);
+    }
+
+    public function findProjectAggregatesByOwnerId(Uuid $ownerId): array
+    {
+        $aggregateIds = [];
+        
+        foreach ($this->events as $aggregateId => $events) {
+            foreach ($events as $event) {
+                if ($event instanceof \App\Project\Domain\Event\ProjectCreatedEvent) {
+                    if ($event->getOwnerId()->equals($ownerId)) {
+                        $aggregateIds[] = Uuid::create($aggregateId);
+                        break; // Only need to find one ProjectCreatedEvent per aggregate
+                    }
+                }
+            }
+        }
+        
+        return $aggregateIds;
     }
 
     public function getVersion(Uuid $aggregateId): int

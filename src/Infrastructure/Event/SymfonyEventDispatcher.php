@@ -6,7 +6,7 @@ namespace App\Infrastructure\Event;
 
 use App\Infrastructure\Persistence\Projection\UserProjection;
 use App\Project\Application\EventHandler\ProjectEventHandler;
-use App\Shared\Event\DomainEvent;
+use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventDispatcher;
 use Psr\Log\LoggerInterface;
 
@@ -46,7 +46,9 @@ final class SymfonyEventDispatcher implements EventDispatcher
         match (get_class($event)) {
             \App\Project\Domain\Event\ProjectCreatedEvent::class,
             \App\Project\Domain\Event\ProjectRenamedEvent::class,
-            \App\Project\Domain\Event\ProjectDeletedEvent::class => $this->projectEventHandler->handle($event),
+            \App\Project\Domain\Event\ProjectDeletedEvent::class,
+            \App\Project\Domain\Event\ProjectWorkerAddedEvent::class,
+            \App\Project\Domain\Event\ProjectWorkerRemovedEvent::class => $this->projectEventHandler->handle($event),
             \App\User\Domain\Event\UserCreatedEvent::class => $this->userProjection->dispatch([$event]),
             default => $this->logger->warning('No handler found for event', ['event' => get_class($event)])
         };

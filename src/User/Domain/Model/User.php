@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\User\Domain\Model;
 
+use App\Shared\Domain\Model\AggregateRoot;
+use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
+use App\User\Domain\Event\UserDeletedEvent;
 use App\User\Domain\ValueObject\UserStatus;
 use App\User\Domain\Exception\UserInactiveException;
 use DateTimeImmutable;
 
-final class User
+final class User extends AggregateRoot
 {
     private function __construct(
         private readonly Uuid $id,
@@ -78,11 +81,14 @@ final class User
     public function delete(): void
     {
         if ($this->isDeleted()) {
-            return; // Already deleted
+            return; // Already deleted - idempotent operation
         }
 
         $this->status = UserStatus::DELETED;
         $this->deletedAt = new DateTimeImmutable();
+        
+        // Record domain event for cross-domain communication
+        $this->recordEvent(UserDeletedEvent::create($this->id, $this->email));
     }
 
     public function isActive(): bool
@@ -139,5 +145,22 @@ final class User
     public function getDeletedAt(): ?DateTimeImmutable
     {
         return $this->deletedAt;
+    }
+
+    /**
+     * Implementation of abstract handleEvent method from AggregateRoot
+     */
+    protected function handleEvent(DomainEvent $event): void
+    {
+        match (get_class($event)) {
+            UserDeletedEvent::class => $this->handleUserDeleted($event),
+            default => throw new \RuntimeException('Unknown event type: ' . get_class($event))
+        };
+    }
+
+    private function handleUserDeleted(UserDeletedEvent $event): void
+    {
+        $this->status = UserStatus::DELETED;
+        $this->deletedAt = $event->getOccurredAt();
     }
 }

@@ -27,6 +27,12 @@ final readonly class DeleteUserHandler
             return; // Already deleted, no action needed
         }
         
-        $this->userRepository->delete($userId);
+        // Call domain method to handle business logic and record events
+        $user->delete();
+        
+        // Save the user with updated state
+        $this->userRepository->save($user);
+        
+        // Domain events will be dispatched by the repository or infrastructure layer
     }
 }
