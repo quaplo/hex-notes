@@ -85,7 +85,7 @@ services:
             - '@App\User\Infrastructure\Event\UserEventSerializer'
 
     App\Shared\Event\EventSerializer: '@App\Infrastructure\Event\CompositeEventSerializer'
-    App\Shared\Event\EventDispatcher: '@App\Infrastructure\Event\SymfonyEventDispatcher'
+    App\Shared\Event\EventDispatcher: '@App\Shared\Infrastructure\Event\DomainEventDispatcher'
     App\Shared\Event\EventStore: '@App\Infrastructure\Persistence\EventStore\DoctrineEventStore'
     App\Project\Domain\Repository\ProjectRepositoryInterface: '@App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository'
     

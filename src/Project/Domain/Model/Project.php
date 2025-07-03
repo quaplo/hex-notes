@@ -38,7 +38,7 @@ final class Project extends AggregateRoot
     public static function create(ProjectName $name, Uuid $ownerId): self
     {
         $project = new self(Uuid::generate(), $name, new DateTimeImmutable(), $ownerId);
-        $project->recordEvent(new ProjectCreatedEvent($project->getId(), $name, $ownerId));
+        $project->apply(new ProjectCreatedEvent($project->getId(), $name, $ownerId));
         return $project;
     }
 
@@ -87,8 +87,7 @@ final class Project extends AggregateRoot
             throw new \DomainException('Project is already deleted');
         }
 
-        $this->deletedAt = new DateTimeImmutable();
-        $this->recordEvent(new ProjectDeletedEvent($this->getId()));
+        $this->apply(new ProjectDeletedEvent($this->getId()));
 
         return $this;
     }
@@ -100,8 +99,7 @@ final class Project extends AggregateRoot
         }
 
         $oldName = $this->name;
-        $this->name = $newName;
-        $this->recordEvent(new ProjectRenamedEvent($this->getId(), $oldName, $newName));
+        $this->apply(new ProjectRenamedEvent($this->getId(), $oldName, $newName));
 
         return $this;
     }
@@ -124,8 +122,7 @@ final class Project extends AggregateRoot
             }
         }
 
-        $this->workers[] = $worker;
-        $this->recordEvent(new ProjectWorkerAddedEvent(
+        $this->apply(new ProjectWorkerAddedEvent(
             $this->id,
             $worker->getUserId(),
             $worker->getRole(),
@@ -156,11 +153,7 @@ final class Project extends AggregateRoot
             throw new \DomainException('Worker not found in project');
         }
 
-        $this->workers = array_filter(
-            $this->workers,
-            fn($worker) => !$worker->getUserId()->equals($userId)
-        );
-        $this->recordEvent(new ProjectWorkerRemovedEvent(
+        $this->apply(new ProjectWorkerRemovedEvent(
             $this->id,
             $userId,
             $removedBy
@@ -198,7 +191,7 @@ final class Project extends AggregateRoot
 
     private function handleProjectDeleted(ProjectDeletedEvent $event): void
     {
-        $this->deletedAt = new DateTimeImmutable();
+        $this->deletedAt = $event->getOccurredAt();
     }
 
     private function handleProjectWorkerAdded(ProjectWorkerAddedEvent $event): void

@@ -83,12 +83,9 @@ final class User extends AggregateRoot
         if ($this->isDeleted()) {
             return; // Already deleted - idempotent operation
         }
-
-        $this->status = UserStatus::DELETED;
-        $this->deletedAt = new DateTimeImmutable();
         
         // Record domain event for cross-domain communication
-        $this->recordEvent(UserDeletedEvent::create($this->id, $this->email));
+        $this->apply(UserDeletedEvent::create($this->id, $this->email));
     }
 
     public function isActive(): bool
