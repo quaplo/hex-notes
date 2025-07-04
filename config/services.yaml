@@ -71,9 +71,14 @@ services:
             - { name: messenger.message_handler, bus: query.bus }
 
     # Event Handlers for domain events
-    App\Shared\Application\EventHandler\UserDeletedEventHandler:
+    App\User\Application\EventHandler\UserDeletedDomainEventHandler:
         tags:
             - { name: kernel.event_listener, event: 'App\User\Domain\Event\UserDeletedEvent' }
+    
+    # Integration Event Handlers
+    App\Project\Application\EventHandler\UserDeletedIntegrationEventHandler:
+        tags:
+            - { name: kernel.event_listener, event: 'App\Shared\Domain\Event\UserDeletedIntegrationEvent' }
     
     # Project Event Handlers for read model projection and side effects
     App\Project\Application\EventHandler\ProjectEventHandler:
@@ -87,11 +92,13 @@ services:
     # Event Serializers
     App\Project\Infrastructure\Event\ProjectEventSerializer: ~
     App\User\Infrastructure\Event\UserEventSerializer: ~
+    App\Shared\Event\UserDeletedIntegrationEventSerializer: ~
 
     App\Infrastructure\Event\CompositeEventSerializer:
         arguments:
             - '@App\Project\Infrastructure\Event\ProjectEventSerializer'
             - '@App\User\Infrastructure\Event\UserEventSerializer'
+            - '@App\Shared\Event\UserDeletedIntegrationEventSerializer'
 
     App\Shared\Event\EventSerializer: '@App\Infrastructure\Event\CompositeEventSerializer'
     App\Shared\Event\EventDispatcher: '@App\Shared\Infrastructure\Event\DomainEventDispatcher'
