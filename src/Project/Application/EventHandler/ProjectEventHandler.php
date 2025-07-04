@@ -21,7 +21,7 @@ final readonly class ProjectEventHandler
     ) {
     }
 
-    public function handle(DomainEvent $event): void
+    public function __invoke(DomainEvent $event): void
     {
         // First update read model projection
         $this->readModelProjection->handle($event);
@@ -35,6 +35,11 @@ final readonly class ProjectEventHandler
             ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($event),
             default => $this->logger->info('Unhandled project event', ['event' => get_class($event)])
         };
+    }
+    
+    public function handle(DomainEvent $event): void
+    {
+        $this->__invoke($event);
     }
 
     private function handleProjectCreated(ProjectCreatedEvent $event): void
