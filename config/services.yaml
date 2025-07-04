@@ -74,6 +74,15 @@ services:
     App\Shared\Application\EventHandler\UserDeletedEventHandler:
         tags:
             - { name: kernel.event_listener, event: 'App\User\Domain\Event\UserDeletedEvent' }
+    
+    # Project Event Handlers for read model projection and side effects
+    App\Project\Application\EventHandler\ProjectEventHandler:
+        tags:
+            - { name: kernel.event_listener, event: 'App\Project\Domain\Event\ProjectCreatedEvent' }
+            - { name: kernel.event_listener, event: 'App\Project\Domain\Event\ProjectRenamedEvent' }
+            - { name: kernel.event_listener, event: 'App\Project\Domain\Event\ProjectDeletedEvent' }
+            - { name: kernel.event_listener, event: 'App\Project\Domain\Event\ProjectWorkerAddedEvent' }
+            - { name: kernel.event_listener, event: 'App\Project\Domain\Event\ProjectWorkerRemovedEvent' }
 
     # Event Serializers
     App\Project\Infrastructure\Event\ProjectEventSerializer: ~
@@ -88,6 +97,20 @@ services:
     App\Shared\Event\EventDispatcher: '@App\Shared\Infrastructure\Event\DomainEventDispatcher'
     App\Shared\Event\EventStore: '@App\Infrastructure\Persistence\EventStore\DoctrineEventStore'
     App\Project\Domain\Repository\ProjectRepositoryInterface: '@App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository'
+    
+    # Snapshot components
+    App\Shared\Event\SnapshotStore: '@App\Infrastructure\Persistence\Snapshot\DoctrineSnapshotStore'
+    App\Shared\Event\SnapshotStrategy: '@App\Infrastructure\Event\FrequencyBasedSnapshotStrategy'
+    
+    App\Infrastructure\Persistence\Snapshot\DoctrineSnapshotStore:
+        arguments:
+            $connection: '@doctrine.dbal.default_connection'
+    
+    App\Infrastructure\Event\FrequencyBasedSnapshotStrategy:
+        arguments:
+            $snapshotFrequency: 10  # Create snapshot every 10 events
+    
+    App\Project\Domain\Model\ProjectSnapshotFactory: ~
     
     # Read Model Repository
     App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository: ~

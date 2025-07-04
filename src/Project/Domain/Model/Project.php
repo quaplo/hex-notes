@@ -162,6 +162,14 @@ final class Project extends AggregateRoot
     }
 
     /**
+     * Add worker directly without domain events (for snapshot restoration)
+     */
+    public function restoreWorker(ProjectWorker $worker): void
+    {
+        $this->workers[] = $worker;
+    }
+
+    /**
      * Implementation of abstract handleEvent method from AggregateRoot
      */
     protected function handleEvent(DomainEvent $event): void

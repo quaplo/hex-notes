@@ -9,10 +9,13 @@ use App\Project\Application\Command\AddProjectWorkerHandler;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
+use App\Project\Domain\Model\ProjectSnapshotFactory;
 use App\Shared\Event\EventDispatcher;
 use App\Shared\Event\EventStore;
 use App\Tests\Project\Doubles\InMemoryEventStore;
 use App\Tests\Project\Doubles\InMemoryEventDispatcher;
+use App\Tests\Project\Doubles\InMemorySnapshotStore;
+use App\Tests\Project\Doubles\InMemorySnapshotStrategy;
 use App\Tests\Project\Helpers\ProjectTestFactory;
 
 describe('Project Event Store Integration Tests', function () {
@@ -20,7 +23,18 @@ describe('Project Event Store Integration Tests', function () {
     beforeEach(function () {
         $this->eventStore = new InMemoryEventStore();
         $this->eventDispatcher = new InMemoryEventDispatcher();
-        $this->repository = new ProjectEventStoreRepository($this->eventStore, $this->eventDispatcher);
+        $this->snapshotStore = new InMemorySnapshotStore();
+        $this->snapshotFactory = new ProjectSnapshotFactory();
+        $this->snapshotStrategy = new InMemorySnapshotStrategy();
+        
+        $this->repository = new ProjectEventStoreRepository(
+            $this->eventStore,
+            $this->eventDispatcher,
+            $this->snapshotStore,
+            $this->snapshotFactory,
+            $this->snapshotStrategy
+        );
+        
         $this->registerHandler = new RegisterProjectHandler($this->repository);
         $this->renameHandler = new RenameProjectHandler($this->repository);
         $this->addWorkerHandler = new AddProjectWorkerHandler($this->repository);
@@ -127,7 +141,13 @@ describe('Project Event Store Integration Tests', function () {
             ));
             
             // Clear in-memory state and reload from events
-            $this->repository = new ProjectEventStoreRepository($this->eventStore, $this->eventDispatcher);
+            $this->repository = new ProjectEventStoreRepository(
+                $this->eventStore,
+                $this->eventDispatcher,
+                $this->snapshotStore,
+                $this->snapshotFactory,
+                $this->snapshotStrategy
+            );
             
             $reconstructedProject = $this->repository->load($project->getId());
             

@@ -78,6 +78,14 @@ abstract class AggregateRoot
     }
 
     /**
+     * Set version for snapshot restoration (package-private)
+     */
+    public function restoreVersion(int $version): void
+    {
+        $this->version = $version;
+    }
+
+    /**
      * Get the unique identifier of this aggregate
      */
     abstract public function getId(): Uuid;
