@@ -7,9 +7,9 @@ namespace Tests\Shared\CrossDomain;
 use DateTimeImmutable;
 use ReflectionClass;
 use RuntimeException;
-use App\Infrastructure\Http\Dto\ProjectDto;
-use App\Infrastructure\Http\Dto\UserDto;
-use App\Infrastructure\Http\Mapper\ProjectDtoMapperInterface;
+use App\Shared\Application\Dto\ProjectDto;
+use App\User\Application\Dto\UserDto;
+use App\Shared\Application\Mapper\ProjectDtoMapperInterface;
 use App\Project\Application\Query\GetProjectQuery;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\ValueObject\ProjectName;
@@ -47,23 +47,28 @@ it('can get project with user details via cross-domain query', function (): void
     $ownerDto = new UserDto(
         id: '550e8400-e29b-41d4-a716-446655440001',
         email: 'owner@test.com',
-        createdAt: '2024-01-01 00:00:00'
+        isDeleted: false
     );
     
     $workerDto = new UserDto(
         id: '550e8400-e29b-41d4-a716-446655440002',
         email: 'worker@test.com',
-        createdAt: '2024-01-01 00:00:00'
+        isDeleted: false
     );
     
     
     // Mock QueryBus
-    $queryBus = new readonly class($project, $ownerDto, $workerDto) implements QueryBus {
-        public function __construct(
-            private Project $project,
-            private UserDto $ownerDto,
-            private UserDto $workerDto
-        ) {}
+    $queryBus = new class($project, $ownerDto, $workerDto) implements QueryBus {
+        private Project $project;
+        private UserDto $ownerDto;
+        private UserDto $workerDto;
+        
+        public function __construct(Project $project, UserDto $ownerDto, UserDto $workerDto)
+        {
+            $this->project = $project;
+            $this->ownerDto = $ownerDto;
+            $this->workerDto = $workerDto;
+        }
         
         public function dispatch(object $query): mixed
         {
@@ -82,12 +87,17 @@ it('can get project with user details via cross-domain query', function (): void
         id: $uuid->toString(),
         name: 'Test Project',
         ownerId: $ownerId->toString(),
-        createdAt: '2024-01-01 00:00:00',
-        deletedAt: null
+        workers: [],
+        isDeleted: false
     );
     
-    $projectDtoMapper = new readonly class($expectedProjectDto) implements ProjectDtoMapperInterface {
-        public function __construct(private ProjectDto $projectDto) {}
+    $projectDtoMapper = new class($expectedProjectDto) implements ProjectDtoMapperInterface {
+        private ProjectDto $projectDto;
+        
+        public function __construct(ProjectDto $projectDto)
+        {
+            $this->projectDto = $projectDto;
+        }
         
         public function toDto(Project $project): ProjectDto
         {

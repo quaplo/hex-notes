@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Query;
 
+use App\Project\Application\ReadModel\ProjectReadModelRepositoryInterface;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
-use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository;
 use App\Shared\ValueObject\Uuid;
 
 final readonly class FindProjectsForDeletionHandler
 {
     public function __construct(
-        private ProjectReadModelRepository $projectReadModelRepository,
+        private ProjectReadModelRepositoryInterface $projectReadModelRepository,
         private ProjectRepositoryInterface $projectRepository
     ) {
     }

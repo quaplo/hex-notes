@@ -8,6 +8,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    environment:
+      - DATABASE_URL=postgresql://symfony:symfony@db:5432/hex_notes?serverVersion=16&charset=utf8
   db:
     image: postgres:16
     environment:

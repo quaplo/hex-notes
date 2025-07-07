@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\CrossDomain\Query;
 
-use App\Infrastructure\Http\Mapper\ProjectDtoMapperInterface;
 use App\Project\Application\Query\GetProjectQuery;
 use App\Shared\Application\CrossDomain\Dto\ProjectWithUserDetailsDto;
+use App\Shared\Application\Mapper\ProjectDtoMapperInterface;
 use App\Shared\Application\QueryBus;
 use App\User\Application\Query\GetUserByIdQuery;
 

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Project\Application\EventHandler;
 
+use App\Project\Application\Projection\ProjectReadModelProjectionInterface;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
-use App\Project\Infrastructure\Projection\ProjectReadModelProjection;
 use App\Shared\Domain\Event\DomainEvent;
 use Psr\Log\LoggerInterface;
 
@@ -17,7 +17,7 @@ final readonly class ProjectEventHandler
 {
     public function __construct(
         private LoggerInterface $logger,
-        private ProjectReadModelProjection $projectReadModelProjection
+        private ProjectReadModelProjectionInterface $projectReadModelProjection
     ) {
     }
 

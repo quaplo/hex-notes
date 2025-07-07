@@ -1,0 +1,110 @@
+parameters:
+    paths:
+        - ./src
+    layers:
+        # Context-specific Domain layers
+        - name: Domain
+          collectors:
+              - type: directory
+                value: 'src/(Project|User)/Domain'
+        
+        # Context-specific Application layers
+        - name: Application
+          collectors:
+              - type: directory
+                value: 'src/(Project|User)/Application'
+        
+        # Context-specific Infrastructure layers
+        - name: Infrastructure
+          collectors:
+              - type: directory
+                value: 'src/(Project|User)/Infrastructure'
+              - type: directory
+                value: 'src/Infrastructure'
+        
+        # Shared Domain components
+        - name: SharedDomain
+          collectors:
+              - type: directory
+                value: 'src/Shared/Domain'
+        
+        # Shared Application components
+        - name: SharedApplication
+          collectors:
+              - type: directory
+                value: 'src/Shared/Application'
+        
+        # Shared Infrastructure components
+        - name: SharedInfrastructure
+          collectors:
+              - type: directory
+                value: 'src/Shared/Infrastructure'
+        
+        # Shared Value Objects
+        - name: SharedValueObject
+          collectors:
+              - type: directory
+                value: 'src/Shared/ValueObject'
+        
+        # Shared Events (Event Sourcing)
+        - name: SharedEvent
+          collectors:
+              - type: directory
+                value: 'src/Shared/Event'
+
+    ruleset:
+        # Context Domain layers - môžu závisieť len na Shared Domain komponentoch
+        Domain:
+            - SharedDomain
+            - SharedValueObject
+            - SharedEvent
+        
+        # Context Application layers - môžu závisieť na Domain a Shared komponentoch
+        Application:
+            - Domain
+            - SharedDomain
+            - SharedApplication
+            - SharedValueObject
+            - SharedEvent
+        
+        # Context Infrastructure layers - môžu závisieť na všetkých vrstvách
+        Infrastructure:
+            - Domain
+            - Application
+            - SharedDomain
+            - SharedApplication
+            - SharedInfrastructure
+            - SharedValueObject
+            - SharedEvent
+        
+        # Shared Domain - môže závisieť len na základných Shared komponentoch
+        SharedDomain:
+            - SharedValueObject
+            - SharedEvent
+        
+        # Shared Application - môže závisieť na Domain layers a koordinovať Application layers
+        SharedApplication:
+            - Domain
+            - Application
+            - SharedDomain
+            - SharedValueObject
+            - SharedEvent
+        
+        # Shared Infrastructure - môže závisieť na všetkých Shared vrstvách
+        SharedInfrastructure:
+            - SharedDomain
+            - SharedApplication
+            - SharedValueObject
+            - SharedEvent
+        
+        # Shared Value Objects - najnižšia vrstva, žiadne závislosti
+        SharedValueObject: []
+        
+        # Shared Events - môže závisieť na SharedDomain (Event Sourcing)
+        SharedEvent:
+            - SharedDomain
+            - SharedValueObject
+
+    skip_violations: []
+
+    baseline: deptrac-baseline.yaml

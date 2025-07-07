@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Persistence\ReadModel;
 
+use App\Project\Application\ReadModel\ProjectReadModelRepositoryInterface;
 use App\Shared\ValueObject\Uuid;
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class ProjectReadModelRepository
+final readonly class ProjectReadModelRepository implements ProjectReadModelRepositoryInterface
 {
     public function __construct(
         private EntityManagerInterface $entityManager

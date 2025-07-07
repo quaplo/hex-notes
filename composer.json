@@ -85,7 +85,10 @@
         "doctrine:sync": [
             "@doctrine:diff",
             "@doctrine:migrate"
-        ]
+        ],
+        "deptrac": "vendor/bin/deptrac analyse --config-file=deptrac.yaml",
+        "deptrac:baseline": "vendor/bin/deptrac analyse --config-file=deptrac.yaml --generate-baseline",
+        "deptrac:debug": "vendor/bin/deptrac debug:layer --config-file=deptrac.yaml"
     },
     "conflict": {
         "symfony/symfony": "*"
@@ -100,6 +103,7 @@
         "pestphp/pest": "^3.8.2",
         "pestphp/pest-plugin": "^3.0",
         "phpstan/phpstan": "^2.1.17",
+        "qossmic/deptrac": "^2.0",
         "rector/rector": "dev-main",
         "slevomat/coding-standard": "^8.19.1",
         "squizlabs/php_codesniffer": "^3.13.2",

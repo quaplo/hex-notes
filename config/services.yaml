@@ -130,7 +130,20 @@ services:
         tags:
             - { name: messenger.message_handler, bus: query.bus }
     
-    # Interface bindings
+    # Interface bindings for Application layer (Clean Architecture)
+    
+    # Project Application Interfaces
+    App\Project\Application\Projection\ProjectReadModelProjectionInterface: '@App\Project\Infrastructure\Projection\ProjectReadModelProjection'
+    App\Project\Application\ReadModel\ProjectReadModelRepositoryInterface: '@App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository'
+    App\Project\Application\Mapper\ProjectDtoMapperInterface: '@App\Project\Infrastructure\Mapper\ProjectDtoMapper'
+    
+    # User Application Interfaces
+    App\User\Application\Mapper\UserDtoMapperInterface: '@App\User\Infrastructure\Mapper\UserDtoMapper'
+    
+    # Shared Application Interfaces
+    App\Shared\Application\Mapper\ProjectDtoMapperInterface: '@App\Project\Infrastructure\Mapper\SharedProjectDtoMapper'
+    
+    # Legacy Infrastructure HTTP interfaces (keep for backward compatibility)
     App\Infrastructure\Http\Mapper\ProjectDtoMapperInterface: '@App\Infrastructure\Http\Mapper\ProjectDtoMapper'
     
     # Domain Event Dispatcher

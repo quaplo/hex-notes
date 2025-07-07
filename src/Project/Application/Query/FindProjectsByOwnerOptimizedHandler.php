@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Query;
 
-use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository;
+use App\Project\Application\ReadModel\ProjectReadModelRepositoryInterface;
 
 final readonly class FindProjectsByOwnerOptimizedHandler
 {
     public function __construct(
-        private ProjectReadModelRepository $projectReadModelRepository
+        private ProjectReadModelRepositoryInterface $projectReadModelRepository
     ) {
     }
 

@@ -6,6 +6,7 @@ namespace App\Project\Infrastructure\Projection;
 
 use Exception;
 use DateTimeInterface;
+use App\Project\Application\Projection\ProjectReadModelProjectionInterface;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
@@ -16,7 +17,7 @@ use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository;
 use App\Shared\Domain\Event\DomainEvent;
 use Psr\Log\LoggerInterface;
 
-final readonly class ProjectReadModelProjection
+final readonly class ProjectReadModelProjection implements ProjectReadModelProjectionInterface
 {
     public function __construct(
         private ProjectReadModelRepository $projectReadModelRepository,
