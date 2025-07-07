@@ -12,21 +12,21 @@ interface EventStore
     /**
      * @param DomainEvent[] $events
      */
-    public function append(Uuid $aggregateId, array $events, int $expectedVersion): void;
+    public function append(Uuid $uuid, array $events, int $expectedVersion): void;
 
     /**
      * @return DomainEvent[]
      */
-    public function getEvents(Uuid $aggregateId): array;
+    public function getEvents(Uuid $uuid): array;
 
     /**
      * @return DomainEvent[]
      */
-    public function getEventsFromVersion(Uuid $aggregateId, int $fromVersion): array;
+    public function getEventsFromVersion(Uuid $uuid, int $fromVersion): array;
 
     /**
      * Find all aggregate IDs by owner ID from ProjectCreatedEvent
      * @return Uuid[]
      */
-    public function findProjectAggregatesByOwnerId(Uuid $ownerId): array;
+    public function findProjectAggregatesByOwnerId(Uuid $uuid): array;
 }

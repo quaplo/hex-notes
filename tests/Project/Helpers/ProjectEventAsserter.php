@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Project\Helpers;
 
+use DateTimeImmutable;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
@@ -18,82 +19,72 @@ use PHPUnit\Framework\Assert;
 final class ProjectEventAsserter
 {
     public static function assertProjectCreatedEvent(
-        DomainEvent $event, 
+        DomainEvent $domainEvent, 
         Uuid $expectedId, 
-        ProjectName $expectedName,
+        ProjectName $projectName,
         Uuid $expectedOwnerId
     ): void {
-        Assert::assertInstanceOf(ProjectCreatedEvent::class, $event);
-        /** @var ProjectCreatedEvent $event */
-        
-        Assert::assertTrue($event->getProjectId()->equals($expectedId));
-        Assert::assertEquals((string)$expectedName, (string)$event->getName());
-        Assert::assertTrue($event->getOwnerId()->equals($expectedOwnerId));
-        Assert::assertInstanceOf(\DateTimeImmutable::class, $event->getOccurredAt());
+        Assert::assertInstanceOf(ProjectCreatedEvent::class, $domainEvent);
+        Assert::assertTrue($domainEvent->getProjectId()->equals($expectedId));
+        Assert::assertEquals((string)$projectName, (string)$domainEvent->getName());
+        Assert::assertTrue($domainEvent->getOwnerId()->equals($expectedOwnerId));
+        Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
     public static function assertProjectRenamedEvent(
-        DomainEvent $event, 
-        Uuid $expectedId,
+        DomainEvent $domainEvent, 
+        Uuid $uuid,
         ProjectName $expectedOldName, 
         ProjectName $expectedNewName
     ): void {
-        Assert::assertInstanceOf(ProjectRenamedEvent::class, $event);
-        /** @var ProjectRenamedEvent $event */
-        
-        Assert::assertTrue($event->getProjectId()->equals($expectedId));
-        Assert::assertEquals((string)$expectedOldName, (string)$event->getOldName());
-        Assert::assertEquals((string)$expectedNewName, (string)$event->getNewName());
-        Assert::assertInstanceOf(\DateTimeImmutable::class, $event->getOccurredAt());
+        Assert::assertInstanceOf(ProjectRenamedEvent::class, $domainEvent);
+        Assert::assertTrue($domainEvent->getProjectId()->equals($uuid));
+        Assert::assertEquals((string)$expectedOldName, (string)$domainEvent->getOldName());
+        Assert::assertEquals((string)$expectedNewName, (string)$domainEvent->getNewName());
+        Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
-    public static function assertProjectDeletedEvent(DomainEvent $event, Uuid $expectedId): void
+    public static function assertProjectDeletedEvent(DomainEvent $domainEvent, Uuid $uuid): void
     {
-        Assert::assertInstanceOf(ProjectDeletedEvent::class, $event);
-        /** @var ProjectDeletedEvent $event */
-        
-        Assert::assertTrue($event->getProjectId()->equals($expectedId));
-        Assert::assertInstanceOf(\DateTimeImmutable::class, $event->getOccurredAt());
+        Assert::assertInstanceOf(ProjectDeletedEvent::class, $domainEvent);
+        Assert::assertTrue($domainEvent->getProjectId()->equals($uuid));
+        Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
     public static function assertProjectWorkerAddedEvent(
-        DomainEvent $event,
+        DomainEvent $domainEvent,
         Uuid $expectedProjectId,
         Uuid $expectedUserId,
-        ProjectRole $expectedRole,
+        ProjectRole $projectRole,
         ?Uuid $expectedAddedBy = null
     ): void {
-        Assert::assertInstanceOf(ProjectWorkerAddedEvent::class, $event);
-        /** @var ProjectWorkerAddedEvent $event */
+        Assert::assertInstanceOf(ProjectWorkerAddedEvent::class, $domainEvent);
+        Assert::assertTrue($domainEvent->getProjectId()->equals($expectedProjectId));
+        Assert::assertTrue($domainEvent->getUserId()->equals($expectedUserId));
+        Assert::assertEquals((string)$projectRole, (string)$domainEvent->getRole());
         
-        Assert::assertTrue($event->getProjectId()->equals($expectedProjectId));
-        Assert::assertTrue($event->getUserId()->equals($expectedUserId));
-        Assert::assertEquals((string)$expectedRole, (string)$event->getRole());
-        
-        if ($expectedAddedBy !== null) {
-            Assert::assertTrue($event->getAddedBy()->equals($expectedAddedBy));
+        if ($expectedAddedBy instanceof Uuid) {
+            Assert::assertTrue($domainEvent->getAddedBy()->equals($expectedAddedBy));
         }
         
-        Assert::assertInstanceOf(\DateTimeImmutable::class, $event->getOccurredAt());
+        Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
     public static function assertProjectWorkerRemovedEvent(
-        DomainEvent $event,
+        DomainEvent $domainEvent,
         Uuid $expectedProjectId,
         Uuid $expectedUserId,
         ?Uuid $expectedRemovedBy = null
     ): void {
-        Assert::assertInstanceOf(ProjectWorkerRemovedEvent::class, $event);
-        /** @var ProjectWorkerRemovedEvent $event */
+        Assert::assertInstanceOf(ProjectWorkerRemovedEvent::class, $domainEvent);
+        Assert::assertTrue($domainEvent->getProjectId()->equals($expectedProjectId));
+        Assert::assertTrue($domainEvent->getUserId()->equals($expectedUserId));
         
-        Assert::assertTrue($event->getProjectId()->equals($expectedProjectId));
-        Assert::assertTrue($event->getUserId()->equals($expectedUserId));
-        
-        if ($expectedRemovedBy !== null) {
-            Assert::assertTrue($event->getRemovedBy()->equals($expectedRemovedBy));
+        if ($expectedRemovedBy instanceof Uuid) {
+            Assert::assertTrue($domainEvent->getRemovedBy()->equals($expectedRemovedBy));
         }
         
-        Assert::assertInstanceOf(\DateTimeImmutable::class, $event->getOccurredAt());
+        Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
     public static function assertEventCount(array $events, int $expectedCount): void

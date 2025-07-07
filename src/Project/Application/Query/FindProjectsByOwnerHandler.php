@@ -19,9 +19,9 @@ final readonly class FindProjectsByOwnerHandler
     /**
      * @return Project[]
      */
-    public function __invoke(FindProjectsByOwnerQuery $query): array
+    public function __invoke(FindProjectsByOwnerQuery $findProjectsByOwnerQuery): array
     {
-        $aggregateIds = $this->eventStore->findProjectAggregatesByOwnerId($query->getOwnerId());
+        $aggregateIds = $this->eventStore->findProjectAggregatesByOwnerId($findProjectsByOwnerQuery->getOwnerId());
         
         $projects = [];
         foreach ($aggregateIds as $aggregateId) {

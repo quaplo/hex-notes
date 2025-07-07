@@ -35,12 +35,12 @@ services:
     # Command Bus configuration
     App\Infrastructure\Bus\SymfonyCommandBus:
         arguments:
-            $commandBus: '@command.bus'
+            $messageBus: '@command.bus'
     
     # Query Bus configuration
     App\Infrastructure\Bus\SymfonyQueryBus:
         arguments:
-            $queryBus: '@query.bus'
+            $messageBus: '@query.bus'
     
     # Command Handlers
     App\Project\Application\Command\:

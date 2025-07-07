@@ -18,11 +18,11 @@ final readonly class GetProjectWithUserDetailsHandler
     ) {
     }
 
-    public function __invoke(GetProjectWithUserDetailsQuery $query): ?ProjectWithUserDetailsDto
+    public function __invoke(GetProjectWithUserDetailsQuery $getProjectWithUserDetailsQuery): ?ProjectWithUserDetailsDto
     {
         // Get project from Project domain
         $project = $this->queryBus->dispatch(
-            GetProjectQuery::fromPrimitives($query->projectId->toString())
+            GetProjectQuery::fromPrimitives($getProjectWithUserDetailsQuery->projectId->toString())
         );
         
         if (!$project) {

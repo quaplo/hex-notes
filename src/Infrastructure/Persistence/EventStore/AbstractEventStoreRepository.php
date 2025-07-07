@@ -18,19 +18,19 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
     ) {
     }
 
-    public function save(AggregateRoot $aggregate): void
+    public function save(AggregateRoot $aggregateRoot): void
     {
-        $events = $aggregate->getDomainEvents();
+        $events = $aggregateRoot->getDomainEvents();
 
-        if (empty($events)) {
+        if ($events === []) {
             return;
         }
 
         // Oprava: expectedVersion je aktuálna verzia aggregate
-        $expectedVersion = $aggregate->getVersion();
+        $expectedVersion = $aggregateRoot->getVersion();
 
         $this->eventStore->append(
-            $aggregate->getId(),
+            $aggregateRoot->getId(),
             $events,
             $expectedVersion
         );
@@ -38,30 +38,30 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
         // Dispatch events after successful save
         $this->eventDispatcher->dispatch($events);
 
-        $aggregate->clearDomainEvents();
+        $aggregateRoot->clearDomainEvents();
     }
 
-    public function load(Uuid $aggregateId): ?AggregateRoot
+    public function load(Uuid $uuid): ?AggregateRoot
     {
-        $events = $this->eventStore->getEvents($aggregateId);
+        $events = $this->eventStore->getEvents($uuid);
 
-        if (empty($events)) {
+        if ($events === []) {
             return null;
         }
 
-        $aggregate = $this->createAggregate();
+        $aggregateRoot = $this->createAggregate();
 
         foreach ($events as $event) {
-            $aggregate->replayEvent($event);
+            $aggregateRoot->replayEvent($event);
         }
 
-        return $aggregate;
+        return $aggregateRoot;
     }
 
-    public function exists(Uuid $aggregateId): bool
+    public function exists(Uuid $uuid): bool
     {
-        $events = $this->eventStore->getEvents($aggregateId);
-        return !empty($events);
+        $events = $this->eventStore->getEvents($uuid);
+        return $events !== [];
     }
 
     abstract protected function createAggregate(): AggregateRoot;

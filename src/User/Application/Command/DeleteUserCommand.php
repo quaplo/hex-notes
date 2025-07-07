@@ -6,10 +6,10 @@ namespace App\User\Application\Command;
 
 use App\Shared\ValueObject\Uuid;
 
-final class DeleteUserCommand
+final readonly class DeleteUserCommand
 {
     public function __construct(
-        public readonly string $userId
+        public string $userId
     ) {
     }
 

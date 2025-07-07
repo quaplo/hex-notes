@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\User\Infrastructure\Event;
 
+use RuntimeException;
+use DateTimeInterface;
+use DateTimeImmutable;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventSerializer;
 use App\Shared\ValueObject\Email;
@@ -24,16 +27,16 @@ final class UserEventSerializer implements EventSerializer
         return in_array($eventType, self::SUPPORTED_EVENTS, true);
     }
 
-    public function serialize(DomainEvent $event): string
+    public function serialize(DomainEvent $domainEvent): string
     {
         try {
-            return match (get_class($event)) {
-                UserCreatedEvent::class => $this->serializeUserCreatedEvent($event),
-                UserDeletedEvent::class => $this->serializeUserDeletedEvent($event),
-                default => throw new \RuntimeException("Unsupported event type for serialization: " . get_class($event))
+            return match ($domainEvent::class) {
+                UserCreatedEvent::class => $this->serializeUserCreatedEvent($domainEvent),
+                UserDeletedEvent::class => $this->serializeUserDeletedEvent($domainEvent),
+                default => throw new RuntimeException("Unsupported event type for serialization: " . $domainEvent::class)
             };
         } catch (JsonException $e) {
-            throw new \RuntimeException('Failed to serialize event', 0, $e);
+            throw new RuntimeException('Failed to serialize event', 0, $e);
         }
     }
 
@@ -45,29 +48,29 @@ final class UserEventSerializer implements EventSerializer
             return match ($eventType) {
                 UserCreatedEvent::class => $this->deserializeUserCreatedEvent($data),
                 UserDeletedEvent::class => $this->deserializeUserDeletedEvent($data),
-                default => throw new \RuntimeException("Unsupported event type for deserialization: $eventType")
+                default => throw new RuntimeException("Unsupported event type for deserialization: $eventType")
             };
         } catch (JsonException $e) {
-            throw new \RuntimeException('Failed to deserialize event', 0, $e);
+            throw new RuntimeException('Failed to deserialize event', 0, $e);
         }
     }
 
-    private function serializeUserCreatedEvent(UserCreatedEvent $event): string
+    private function serializeUserCreatedEvent(DomainEvent $domainEvent): string
     {
         $data = [
-            'userId' => $event->userId->toString(),
-            'email' => $event->email->__toString(),
-            'createdAt' => $event->createdAt->format(\DateTimeInterface::ATOM)
+            'userId' => $domainEvent->userId->toString(),
+            'email' => $domainEvent->email->__toString(),
+            'createdAt' => $domainEvent->createdAt->format(DateTimeInterface::ATOM)
         ];
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
-    private function serializeUserDeletedEvent(UserDeletedEvent $event): string
+    private function serializeUserDeletedEvent(UserDeletedEvent $userDeletedEvent): string
     {
         $data = [
-            'userId' => $event->getUserId()->toString(),
-            'email' => $event->getEmail()->__toString(),
-            'occurredAt' => $event->getOccurredAt()->format(\DateTimeInterface::ATOM)
+            'userId' => $userDeletedEvent->getUserId()->toString(),
+            'email' => $userDeletedEvent->getEmail()->__toString(),
+            'occurredAt' => $userDeletedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
         ];
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
@@ -77,7 +80,7 @@ final class UserEventSerializer implements EventSerializer
         return new UserCreatedEvent(
             Uuid::create($data['userId']),
             new Email($data['email']),
-            new \DateTimeImmutable($data['createdAt'])
+            new DateTimeImmutable($data['createdAt'])
         );
     }
 

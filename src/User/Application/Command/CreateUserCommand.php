@@ -6,10 +6,10 @@ namespace App\User\Application\Command;
 
 use App\Shared\ValueObject\Email;
 
-final class CreateUserCommand
+final readonly class CreateUserCommand
 {
     public function __construct(
-        public readonly string $email
+        public string $email
     ) {
     }
 

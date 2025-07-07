@@ -9,14 +9,14 @@ use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final class ProjectWorkerAddedEvent implements DomainEvent
+final readonly class ProjectWorkerAddedEvent implements DomainEvent
 {
     public function __construct(
-        private readonly Uuid $projectId,
-        private readonly Uuid $userId,
-        private readonly ProjectRole $role,
-        private readonly ?Uuid $addedBy = null,
-        private readonly DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private Uuid $projectId,
+        private Uuid $userId,
+        private ProjectRole $projectRole,
+        private ?Uuid $addedBy = null,
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
     ) {
     }
 
@@ -32,7 +32,7 @@ final class ProjectWorkerAddedEvent implements DomainEvent
 
     public function getRole(): ProjectRole
     {
-        return $this->role;
+        return $this->projectRole;
     }
 
     public function getAddedBy(): ?Uuid
@@ -60,7 +60,7 @@ final class ProjectWorkerAddedEvent implements DomainEvent
         return [
             'projectId' => $this->projectId->toString(),
             'userId' => $this->userId->toString(),
-            'role' => (string)$this->role,
+            'role' => (string)$this->projectRole,
             'addedBy' => $this->addedBy?->toString(),
             'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
         ];

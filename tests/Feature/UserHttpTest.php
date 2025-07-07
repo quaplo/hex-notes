@@ -6,7 +6,7 @@ use App\User\Application\Command\CreateUserCommand;
 use App\User\Application\Command\CreateUserHandler;
 use Symfony\Component\HttpFoundation\Response;
 
-it('can create user via HTTP API', function () {
+it('can create user via HTTP API', function (): void {
     $client = static::createClient();
     
     $email = 'http_test_' . uniqid() . '@example.com';
@@ -19,13 +19,13 @@ it('can create user via HTTP API', function () {
     
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_CREATED);
     
-    $responseData = json_decode($client->getResponse()->getContent(), true);
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['message'])->toBe('User created successfully');
     expect($responseData['email'])->toBe($email);
     expect($responseData['id'])->not()->toBeEmpty();
 });
 
-it('can get user by ID via HTTP API', function () {
+it('can get user by ID via HTTP API', function (): void {
     $client = static::createClient();
     
     // First create a user
@@ -40,12 +40,12 @@ it('can get user by ID via HTTP API', function () {
     
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
     
-    $responseData = json_decode($client->getResponse()->getContent(), true);
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['email'])->toBe($email);
     expect($responseData['id'])->toBe($user->getId()->toString());
 });
 
-it('can delete user via HTTP API', function () {
+it('can delete user via HTTP API', function (): void {
     $client = static::createClient();
     
     // First create a user
@@ -66,7 +66,7 @@ it('can delete user via HTTP API', function () {
     
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
     
-    $responseData = json_decode($client->getResponse()->getContent(), true);
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['message'])->toBe('User deleted successfully');
     
     // Verify user is no longer accessible via regular endpoint
@@ -74,7 +74,7 @@ it('can delete user via HTTP API', function () {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NOT_FOUND);
 });
 
-it('returns 404 when deleting non-existent user', function () {
+it('returns 404 when deleting non-existent user', function (): void {
     $client = static::createClient();
     
     $nonExistentId = '550e8400-e29b-41d4-a716-446655440000';
@@ -83,11 +83,11 @@ it('returns 404 when deleting non-existent user', function () {
     
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NOT_FOUND);
     
-    $responseData = json_decode($client->getResponse()->getContent(), true);
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['error'])->toBe('User not found');
 });
 
-it('delete operation is idempotent via HTTP API', function () {
+it('delete operation is idempotent via HTTP API', function (): void {
     $client = static::createClient();
     
     // First create a user
@@ -107,11 +107,11 @@ it('delete operation is idempotent via HTTP API', function () {
     $client->request('DELETE', '/api/users/' . $userId);
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
     
-    $responseData = json_decode($client->getResponse()->getContent(), true);
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['message'])->toBe('User deleted successfully');
 });
 
-it('validates email format when creating user', function () {
+it('validates email format when creating user', function (): void {
     $client = static::createClient();
     
     $client->request('POST', '/api/users', [], [], [
@@ -122,11 +122,11 @@ it('validates email format when creating user', function () {
     
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
     
-    $responseData = json_decode($client->getResponse()->getContent(), true);
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['violations'])->toHaveKey('email');
 });
 
-it('returns 404 when getting non-existent user', function () {
+it('returns 404 when getting non-existent user', function (): void {
     $client = static::createClient();
     
     $nonExistentId = '550e8400-e29b-41d4-a716-446655440000';
@@ -135,6 +135,6 @@ it('returns 404 when getting non-existent user', function () {
     
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NOT_FOUND);
     
-    $responseData = json_decode($client->getResponse()->getContent(), true);
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['error'])->toBe('User not found');
 });

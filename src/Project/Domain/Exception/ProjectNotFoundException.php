@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\Exception;
 
+use DomainException;
 use App\Shared\ValueObject\Uuid;
 
-final class ProjectNotFoundException extends \DomainException
+final class ProjectNotFoundException extends DomainException
 {
-    public function __construct(Uuid $projectId)
+    public function __construct(Uuid $uuid)
     {
-        parent::__construct("Project with id {$projectId} not found");
+        parent::__construct("Project with id {$uuid} not found");
     }
 }

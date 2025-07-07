@@ -31,10 +31,10 @@ abstract class BaseController
             'json'
         );
 
-        $violations = $this->validator->validate($dto);
+        $constraintViolationList = $this->validator->validate($dto);
 
-        if (count($violations) > 0) {
-            throw new ValidationException($violations);
+        if (count($constraintViolationList) > 0) {
+            throw new ValidationException($constraintViolationList);
         }
 
         return $dto;
@@ -43,10 +43,10 @@ abstract class BaseController
     /**
      * Create validation error response
      */
-    protected function createValidationErrorResponse(ConstraintViolationListInterface $violations): JsonResponse
+    protected function createValidationErrorResponse(ConstraintViolationListInterface $constraintViolationList): JsonResponse
     {
         $errors = [];
-        foreach ($violations as $violation) {
+        foreach ($constraintViolationList as $violation) {
             $errors[$violation->getPropertyPath()] = $violation->getMessage();
         }
 

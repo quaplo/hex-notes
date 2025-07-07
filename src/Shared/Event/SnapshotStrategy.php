@@ -11,5 +11,5 @@ interface SnapshotStrategy
     /**
      * Determine if a snapshot should be created for an aggregate
      */
-    public function shouldCreateSnapshot(Uuid $aggregateId, int $currentVersion): bool;
+    public function shouldCreateSnapshot(Uuid $uuid, int $currentVersion): bool;
 }

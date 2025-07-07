@@ -8,13 +8,13 @@ use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final class ProjectWorkerRemovedEvent implements DomainEvent
+final readonly class ProjectWorkerRemovedEvent implements DomainEvent
 {
     public function __construct(
-        private readonly Uuid $projectId,
-        private readonly Uuid $userId,
-        private readonly ?Uuid $removedBy = null,
-        private readonly DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private Uuid $projectId,
+        private Uuid $userId,
+        private ?Uuid $removedBy = null,
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
     ) {
     }
 

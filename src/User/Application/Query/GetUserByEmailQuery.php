@@ -6,10 +6,10 @@ namespace App\User\Application\Query;
 
 use App\Shared\ValueObject\Email;
 
-final class GetUserByEmailQuery
+final readonly class GetUserByEmailQuery
 {
     public function __construct(
-        public readonly string $email
+        public string $email
     ) {
     }
 

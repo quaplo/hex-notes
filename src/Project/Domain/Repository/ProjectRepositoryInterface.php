@@ -11,7 +11,7 @@ interface ProjectRepositoryInterface
 {
     public function save(Project $project): void;
     
-    public function load(Uuid $aggregateId): ?Project;
+    public function load(Uuid $uuid): ?Project;
     
-    public function exists(Uuid $aggregateId): bool;
+    public function exists(Uuid $uuid): bool;
 }

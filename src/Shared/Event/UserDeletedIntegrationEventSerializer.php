@@ -4,23 +4,25 @@ declare(strict_types=1);
 
 namespace App\Shared\Event;
 
+use InvalidArgumentException;
+use DateTimeInterface;
 use App\Shared\Domain\Event\UserDeletedIntegrationEvent;
 use App\Shared\Domain\Event\DomainEvent;
 
 final class UserDeletedIntegrationEventSerializer implements EventSerializer
 {
-    public function serialize(DomainEvent $event): string
+    public function serialize(DomainEvent $domainEvent): string
     {
-        if (!$event instanceof UserDeletedIntegrationEvent) {
-            throw new \InvalidArgumentException(
-                sprintf('Expected %s, got %s', UserDeletedIntegrationEvent::class, get_class($event))
+        if (!$domainEvent instanceof UserDeletedIntegrationEvent) {
+            throw new InvalidArgumentException(
+                sprintf('Expected %s, got %s', UserDeletedIntegrationEvent::class, $domainEvent::class)
             );
         }
 
         $data = [
-            'userId' => $event->getUserId()->toString(),
-            'userEmail' => $event->getUserEmail(),
-            'occurredAt' => $event->getOccurredAt()->format(\DateTimeInterface::ATOM)
+            'userId' => $domainEvent->getUserId()->toString(),
+            'userEmail' => $domainEvent->getUserEmail(),
+            'occurredAt' => $domainEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
         ];
         
         return json_encode($data, JSON_THROW_ON_ERROR);

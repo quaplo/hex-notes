@@ -13,20 +13,20 @@ final class InMemorySnapshotStore implements SnapshotStore
     /** @var array<string, array<int, AggregateSnapshot>> */
     private array $snapshots = [];
 
-    public function save(AggregateSnapshot $snapshot): void
+    public function save(AggregateSnapshot $aggregateSnapshot): void
     {
-        $key = $this->getKey($snapshot->getAggregateId(), $snapshot->getAggregateType());
+        $key = $this->getKey($aggregateSnapshot->getAggregateId(), $aggregateSnapshot->getAggregateType());
         
         if (!isset($this->snapshots[$key])) {
             $this->snapshots[$key] = [];
         }
         
-        $this->snapshots[$key][$snapshot->getVersion()] = $snapshot;
+        $this->snapshots[$key][$aggregateSnapshot->getVersion()] = $aggregateSnapshot;
     }
 
-    public function loadLatest(Uuid $aggregateId, string $aggregateType): ?AggregateSnapshot
+    public function loadLatest(Uuid $uuid, string $aggregateType): ?AggregateSnapshot
     {
-        $key = $this->getKey($aggregateId, $aggregateType);
+        $key = $this->getKey($uuid, $aggregateType);
         
         if (!isset($this->snapshots[$key]) || empty($this->snapshots[$key])) {
             return null;
@@ -36,29 +36,29 @@ final class InMemorySnapshotStore implements SnapshotStore
         return $this->snapshots[$key][$maxVersion];
     }
 
-    public function loadByVersion(Uuid $aggregateId, string $aggregateType, int $version): ?AggregateSnapshot
+    public function loadByVersion(Uuid $uuid, string $aggregateType, int $version): ?AggregateSnapshot
     {
-        $key = $this->getKey($aggregateId, $aggregateType);
+        $key = $this->getKey($uuid, $aggregateType);
         
         return $this->snapshots[$key][$version] ?? null;
     }
 
-    public function exists(Uuid $aggregateId, string $aggregateType): bool
+    public function exists(Uuid $uuid, string $aggregateType): bool
     {
-        $key = $this->getKey($aggregateId, $aggregateType);
+        $key = $this->getKey($uuid, $aggregateType);
         
         return isset($this->snapshots[$key]) && !empty($this->snapshots[$key]);
     }
 
-    public function removeAll(Uuid $aggregateId, string $aggregateType): void
+    public function removeAll(Uuid $uuid, string $aggregateType): void
     {
-        $key = $this->getKey($aggregateId, $aggregateType);
+        $key = $this->getKey($uuid, $aggregateType);
         unset($this->snapshots[$key]);
     }
 
-    public function getLatestVersion(Uuid $aggregateId, string $aggregateType): ?int
+    public function getLatestVersion(Uuid $uuid, string $aggregateType): ?int
     {
-        $key = $this->getKey($aggregateId, $aggregateType);
+        $key = $this->getKey($uuid, $aggregateType);
         
         if (!isset($this->snapshots[$key]) || empty($this->snapshots[$key])) {
             return null;
@@ -67,9 +67,9 @@ final class InMemorySnapshotStore implements SnapshotStore
         return max(array_keys($this->snapshots[$key]));
     }
 
-    private function getKey(Uuid $aggregateId, string $aggregateType): string
+    private function getKey(Uuid $uuid, string $aggregateType): string
     {
-        return $aggregateType . ':' . $aggregateId->toString();
+        return $aggregateType . ':' . $uuid->toString();
     }
 
     public function clear(): void

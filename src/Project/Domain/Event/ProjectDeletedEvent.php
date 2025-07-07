@@ -8,17 +8,17 @@ use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final class ProjectDeletedEvent implements DomainEvent
+final readonly class ProjectDeletedEvent implements DomainEvent
 {
     public function __construct(
-        private readonly Uuid $projectId,
-        private readonly DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private Uuid $uuid,
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
     ) {
     }
 
     public function getProjectId(): Uuid
     {
-        return $this->projectId;
+        return $this->uuid;
     }
 
     public function getOccurredAt(): DateTimeImmutable
@@ -28,7 +28,7 @@ final class ProjectDeletedEvent implements DomainEvent
 
     public function getAggregateId(): string
     {
-        return $this->projectId->toString();
+        return $this->uuid->toString();
     }
 
     public function getEventName(): string
@@ -39,7 +39,7 @@ final class ProjectDeletedEvent implements DomainEvent
     public function getEventData(): array
     {
         return [
-            'projectId' => $this->projectId->toString(),
+            'projectId' => $this->uuid->toString(),
             'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')
         ];
     }

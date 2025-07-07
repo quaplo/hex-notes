@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Query;
 
+use App\Project\Domain\Model\Project;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
 use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository;
 use App\Shared\ValueObject\Uuid;
 
-final class FindProjectsForDeletionHandler
+final readonly class FindProjectsForDeletionHandler
 {
     public function __construct(
-        private readonly ProjectReadModelRepository $readModelRepository,
-        private readonly ProjectRepositoryInterface $projectRepository
+        private ProjectReadModelRepository $projectReadModelRepository,
+        private ProjectRepositoryInterface $projectRepository
     ) {
     }
 
-    public function __invoke(FindProjectsForDeletionQuery $query): array
+    public function __invoke(FindProjectsForDeletionQuery $findProjectsForDeletionQuery): array
     {
-        $ownerId = $query->ownerId;
+        $ownerId = $findProjectsForDeletionQuery->ownerId;
         
         // First, find all projects owned by the user (including deleted ones)
         // We need the actual domain objects, not just read models
-        $readModels = $this->readModelRepository->findByOwnerIdIncludingDeleted($ownerId);
+        $readModels = $this->projectReadModelRepository->findByOwnerIdIncludingDeleted($ownerId);
         
         $projects = [];
         foreach ($readModels as $readModel) {
@@ -30,7 +31,7 @@ final class FindProjectsForDeletionHandler
             $projectId = Uuid::create($readModel->getId());
             $project = $this->projectRepository->load($projectId);
             
-            if ($project !== null && !$project->isDeleted()) {
+            if ($project instanceof Project && !$project->isDeleted()) {
                 // Only include non-deleted projects for cleanup
                 $projects[] = $project;
             }

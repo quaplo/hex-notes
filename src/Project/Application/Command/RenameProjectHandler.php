@@ -15,15 +15,15 @@ final readonly class RenameProjectHandler
     ) {
     }
 
-    public function __invoke(RenameProjectCommand $command): Project
+    public function __invoke(RenameProjectCommand $renameProjectCommand): Project
     {
-        $project = $this->projectRepository->load($command->projectId);
+        $project = $this->projectRepository->load($renameProjectCommand->projectId);
 
-        if (!$project) {
-            throw new ProjectNotFoundException($command->projectId);
+        if (!$project instanceof Project) {
+            throw new ProjectNotFoundException($renameProjectCommand->projectId);
         }
 
-        $renamedProject = $project->rename($command->newName);
+        $renamedProject = $project->rename($renameProjectCommand->newName);
         $this->projectRepository->save($renamedProject);
 
         return $renamedProject;

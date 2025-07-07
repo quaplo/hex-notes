@@ -11,7 +11,7 @@ use DateTimeImmutable;
 final readonly class ProjectSnapshot implements AggregateSnapshot
 {
     public function __construct(
-        private Uuid $aggregateId,
+        private Uuid $uuid,
         private int $version,
         private array $data,
         private DateTimeImmutable $createdAt
@@ -19,12 +19,12 @@ final readonly class ProjectSnapshot implements AggregateSnapshot
     }
 
     public static function create(
-        Uuid $aggregateId,
+        Uuid $uuid,
         int $version,
         array $projectData
     ): self {
         return new self(
-            $aggregateId,
+            $uuid,
             $version,
             $projectData,
             new DateTimeImmutable()
@@ -33,7 +33,7 @@ final readonly class ProjectSnapshot implements AggregateSnapshot
 
     public function getAggregateId(): Uuid
     {
-        return $this->aggregateId;
+        return $this->uuid;
     }
 
     public function getAggregateType(): string

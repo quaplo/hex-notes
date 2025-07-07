@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Shared\ValueObject;
 
+use Stringable;
 use InvalidArgumentException;
 
-final class Email
+final readonly class Email implements Stringable
 {
-    public function __construct(private readonly string $value)
+    public function __construct(private string $value)
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidArgumentException("Invalid email address: $value");

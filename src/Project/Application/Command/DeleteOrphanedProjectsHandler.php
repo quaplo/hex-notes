@@ -6,22 +6,21 @@ namespace App\Project\Application\Command;
 
 use App\Project\Application\Query\FindProjectsForDeletionQuery;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
+use App\Shared\Application\QueryBus;
 
 final readonly class DeleteOrphanedProjectsHandler
 {
     public function __construct(
         private ProjectRepositoryInterface $projectRepository,
-        private MessageBusInterface $queryBus
+        private QueryBus $queryBus
     ) {
     }
 
-    public function __invoke(DeleteOrphanedProjectsCommand $command): void
+    public function __invoke(DeleteOrphanedProjectsCommand $deleteOrphanedProjectsCommand): void
     {
         // Find all projects owned by the deleted user
-        $query = new FindProjectsForDeletionQuery($command->getDeletedUserId());
-        $envelope = $this->queryBus->dispatch($query);
-        $projects = $envelope->last(\Symfony\Component\Messenger\Stamp\HandledStamp::class)->getResult();
+        $findProjectsForDeletionQuery = new FindProjectsForDeletionQuery($deleteOrphanedProjectsCommand->getDeletedUserId());
+        $projects = $this->queryBus->dispatch($findProjectsForDeletionQuery);
         
         // Delete each project
         foreach ($projects as $project) {

@@ -8,8 +8,8 @@ use App\Shared\ValueObject\Uuid;
 
 final class UserNotFoundException extends DomainException
 {
-    public function __construct(Uuid $userId)
+    public function __construct(Uuid $uuid)
     {
-        parent::__construct(sprintf('User with id "%s" not found', $userId->toString()));
+        parent::__construct(sprintf('User with id "%s" not found', $uuid->toString()));
     }
 }

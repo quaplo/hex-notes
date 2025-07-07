@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Projection;
 
+use Exception;
+use DateTimeInterface;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
@@ -14,30 +16,30 @@ use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository;
 use App\Shared\Domain\Event\DomainEvent;
 use Psr\Log\LoggerInterface;
 
-final class ProjectReadModelProjection
+final readonly class ProjectReadModelProjection
 {
     public function __construct(
-        private readonly ProjectReadModelRepository $readModelRepository,
-        private readonly LoggerInterface $logger
+        private ProjectReadModelRepository $projectReadModelRepository,
+        private LoggerInterface $logger
     ) {
     }
 
-    public function handle(DomainEvent $event): void
+    public function handle(DomainEvent $domainEvent): void
     {
         try {
-            match (get_class($event)) {
-                ProjectCreatedEvent::class => $this->handleProjectCreated($event),
-                ProjectRenamedEvent::class => $this->handleProjectRenamed($event),
-                ProjectDeletedEvent::class => $this->handleProjectDeleted($event),
-                ProjectWorkerAddedEvent::class => $this->handleProjectWorkerAdded($event),
-                ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($event),
+            match ($domainEvent::class) {
+                ProjectCreatedEvent::class => $this->handleProjectCreated($domainEvent),
+                ProjectRenamedEvent::class => $this->handleProjectRenamed($domainEvent),
+                ProjectDeletedEvent::class => $this->handleProjectDeleted($domainEvent),
+                ProjectWorkerAddedEvent::class => $this->handleProjectWorkerAdded($domainEvent),
+                ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($domainEvent),
                 default => $this->logger->debug('Unhandled project event in read model projection', [
-                    'event' => get_class($event)
+                    'event' => $domainEvent::class
                 ])
             };
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Failed to update project read model', [
-                'event' => get_class($event),
+                'event' => $domainEvent::class,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -45,116 +47,116 @@ final class ProjectReadModelProjection
         }
     }
 
-    private function handleProjectCreated(ProjectCreatedEvent $event): void
+    private function handleProjectCreated(ProjectCreatedEvent $projectCreatedEvent): void
     {
-        $readModel = new ProjectReadModelEntity(
-            $event->getProjectId()->toString(),
-            $event->getName()->__toString(),
-            $event->getOwnerId()->toString(),
-            $event->getOccurredAt()
+        $projectReadModelEntity = new ProjectReadModelEntity(
+            $projectCreatedEvent->getProjectId()->toString(),
+            $projectCreatedEvent->getName()->__toString(),
+            $projectCreatedEvent->getOwnerId()->toString(),
+            $projectCreatedEvent->getOccurredAt()
         );
 
-        $this->readModelRepository->save($readModel);
+        $this->projectReadModelRepository->save($projectReadModelEntity);
 
         $this->logger->info('Project read model created', [
-            'projectId' => $event->getProjectId()->toString(),
-            'name' => $event->getName()->__toString()
+            'projectId' => $projectCreatedEvent->getProjectId()->toString(),
+            'name' => $projectCreatedEvent->getName()->__toString()
         ]);
     }
 
-    private function handleProjectRenamed(ProjectRenamedEvent $event): void
+    private function handleProjectRenamed(ProjectRenamedEvent $projectRenamedEvent): void
     {
-        $readModel = $this->readModelRepository->findById($event->getProjectId());
+        $readModel = $this->projectReadModelRepository->findById($projectRenamedEvent->getProjectId());
         
-        if (!$readModel) {
+        if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for rename', [
-                'projectId' => $event->getProjectId()->toString()
+                'projectId' => $projectRenamedEvent->getProjectId()->toString()
             ]);
             return;
         }
 
-        $readModel->setName($event->getNewName()->__toString());
+        $readModel->setName($projectRenamedEvent->getNewName()->__toString());
         $readModel->incrementVersion();
         
-        $this->readModelRepository->save($readModel);
+        $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project read model renamed', [
-            'projectId' => $event->getProjectId()->toString(),
-            'oldName' => $event->getOldName()->__toString(),
-            'newName' => $event->getNewName()->__toString()
+            'projectId' => $projectRenamedEvent->getProjectId()->toString(),
+            'oldName' => $projectRenamedEvent->getOldName()->__toString(),
+            'newName' => $projectRenamedEvent->getNewName()->__toString()
         ]);
     }
 
-    private function handleProjectDeleted(ProjectDeletedEvent $event): void
+    private function handleProjectDeleted(ProjectDeletedEvent $projectDeletedEvent): void
     {
-        $readModel = $this->readModelRepository->findById($event->getProjectId());
+        $readModel = $this->projectReadModelRepository->findById($projectDeletedEvent->getProjectId());
         
-        if (!$readModel) {
+        if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for deletion', [
-                'projectId' => $event->getProjectId()->toString()
+                'projectId' => $projectDeletedEvent->getProjectId()->toString()
             ]);
             return;
         }
 
-        $readModel->setDeletedAt($event->getOccurredAt());
+        $readModel->setDeletedAt($projectDeletedEvent->getOccurredAt());
         $readModel->incrementVersion();
         
-        $this->readModelRepository->save($readModel);
+        $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project read model deleted', [
-            'projectId' => $event->getProjectId()->toString()
+            'projectId' => $projectDeletedEvent->getProjectId()->toString()
         ]);
     }
 
-    private function handleProjectWorkerAdded(ProjectWorkerAddedEvent $event): void
+    private function handleProjectWorkerAdded(ProjectWorkerAddedEvent $projectWorkerAddedEvent): void
     {
-        $readModel = $this->readModelRepository->findById($event->getProjectId());
+        $readModel = $this->projectReadModelRepository->findById($projectWorkerAddedEvent->getProjectId());
         
-        if (!$readModel) {
+        if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for worker addition', [
-                'projectId' => $event->getProjectId()->toString()
+                'projectId' => $projectWorkerAddedEvent->getProjectId()->toString()
             ]);
             return;
         }
 
         $workerData = [
-            'userId' => $event->getUserId()->toString(),
-            'role' => (string)$event->getRole(),
-            'addedBy' => $event->getAddedBy()?->toString(),
-            'addedAt' => $event->getOccurredAt()->format(\DateTimeInterface::ATOM)
+            'userId' => $projectWorkerAddedEvent->getUserId()->toString(),
+            'role' => (string)$projectWorkerAddedEvent->getRole(),
+            'addedBy' => $projectWorkerAddedEvent->getAddedBy()?->toString(),
+            'addedAt' => $projectWorkerAddedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
         ];
 
         $readModel->addWorker($workerData);
         $readModel->incrementVersion();
         
-        $this->readModelRepository->save($readModel);
+        $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project worker added to read model', [
-            'projectId' => $event->getProjectId()->toString(),
-            'userId' => $event->getUserId()->toString(),
-            'role' => (string)$event->getRole()
+            'projectId' => $projectWorkerAddedEvent->getProjectId()->toString(),
+            'userId' => $projectWorkerAddedEvent->getUserId()->toString(),
+            'role' => (string)$projectWorkerAddedEvent->getRole()
         ]);
     }
 
-    private function handleProjectWorkerRemoved(ProjectWorkerRemovedEvent $event): void
+    private function handleProjectWorkerRemoved(ProjectWorkerRemovedEvent $projectWorkerRemovedEvent): void
     {
-        $readModel = $this->readModelRepository->findById($event->getProjectId());
+        $readModel = $this->projectReadModelRepository->findById($projectWorkerRemovedEvent->getProjectId());
         
-        if (!$readModel) {
+        if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for worker removal', [
-                'projectId' => $event->getProjectId()->toString()
+                'projectId' => $projectWorkerRemovedEvent->getProjectId()->toString()
             ]);
             return;
         }
 
-        $readModel->removeWorker($event->getUserId()->toString());
+        $readModel->removeWorker($projectWorkerRemovedEvent->getUserId()->toString());
         $readModel->incrementVersion();
         
-        $this->readModelRepository->save($readModel);
+        $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project worker removed from read model', [
-            'projectId' => $event->getProjectId()->toString(),
-            'userId' => $event->getUserId()->toString()
+            'projectId' => $projectWorkerRemovedEvent->getProjectId()->toString(),
+            'userId' => $projectWorkerRemovedEvent->getUserId()->toString()
         ]);
     }
 }

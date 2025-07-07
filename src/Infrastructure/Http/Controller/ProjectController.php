@@ -59,8 +59,8 @@ final class ProjectController extends BaseController
     #[Route('/api/projects/{id}', name: 'get_project', methods: ['GET'])]
     public function detail(string $id): JsonResponse
     {
-        $query = GetProjectWithUserDetailsQuery::fromPrimitives($id);
-        $dto = $this->queryBus->dispatch($query);
+        $getProjectWithUserDetailsQuery = GetProjectWithUserDetailsQuery::fromPrimitives($id);
+        $dto = $this->queryBus->dispatch($getProjectWithUserDetailsQuery);
 
         if (!$dto) {
             return new JsonResponse(['error' => 'Project not found'], JsonResponse::HTTP_NOT_FOUND);
@@ -130,8 +130,8 @@ final class ProjectController extends BaseController
     #[Route('/api/projects/{id}', name: 'delete_project', methods: ['DELETE'])]
     public function delete(string $id): JsonResponse
     {
-        $command = DeleteProjectCommand::fromPrimitives($id);
-        $this->commandBus->dispatch($command);
+        $deleteProjectCommand = DeleteProjectCommand::fromPrimitives($id);
+        $this->commandBus->dispatch($deleteProjectCommand);
 
         return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
     }
@@ -139,8 +139,8 @@ final class ProjectController extends BaseController
     #[Route('/api/projects/{id}/history', name: 'get_project_history', methods: ['GET'])]
     public function history(string $id): JsonResponse
     {
-        $query = GetProjectHistoryQuery::fromPrimitives($id);
-        $history = $this->queryBus->dispatch($query);
+        $getProjectHistoryQuery = GetProjectHistoryQuery::fromPrimitives($id);
+        $history = $this->queryBus->dispatch($getProjectHistoryQuery);
 
         return new JsonResponse($history, JsonResponse::HTTP_OK);
     }

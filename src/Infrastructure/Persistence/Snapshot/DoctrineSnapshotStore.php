@@ -4,22 +4,25 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Snapshot;
 
+use App\Project\Domain\Model\ProjectSnapshot;
+use RuntimeException;
+use JsonException;
 use App\Shared\Event\SnapshotStore;
 use App\Shared\Domain\Model\AggregateSnapshot;
 use App\Shared\ValueObject\Uuid;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
-final class DoctrineSnapshotStore implements SnapshotStore
+final readonly class DoctrineSnapshotStore implements SnapshotStore
 {
     public function __construct(
-        private readonly Connection $connection
+        private Connection $connection
     ) {}
 
     /**
      * @throws Exception
      */
-    public function save(AggregateSnapshot $snapshot): void
+    public function save(AggregateSnapshot $aggregateSnapshot): void
     {
         $sql = '
             INSERT INTO aggregate_snapshots (
@@ -36,10 +39,10 @@ final class DoctrineSnapshotStore implements SnapshotStore
         ';
 
         $this->connection->executeStatement($sql, [
-            $snapshot->getAggregateId()->toString(),
-            $this->getAggregateType($snapshot),
-            $snapshot->getVersion(),
-            json_encode($snapshot->getData(), JSON_THROW_ON_ERROR),
+            $aggregateSnapshot->getAggregateId()->toString(),
+            $this->getAggregateType($aggregateSnapshot),
+            $aggregateSnapshot->getVersion(),
+            json_encode($aggregateSnapshot->getData(), JSON_THROW_ON_ERROR),
             date('Y-m-d H:i:s')
         ]);
     }
@@ -47,7 +50,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
     /**
      * @throws Exception
      */
-    public function loadLatest(Uuid $aggregateId, string $aggregateType): ?AggregateSnapshot
+    public function loadLatest(Uuid $uuid, string $aggregateType): ?AggregateSnapshot
     {
         $sql = '
             SELECT aggregate_id, aggregate_type, version, data, created_at
@@ -58,7 +61,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
         ';
 
         $row = $this->connection->fetchAssociative($sql, [
-            $aggregateId->toString(),
+            $uuid->toString(),
             $aggregateType
         ]);
 
@@ -72,7 +75,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
     /**
      * @throws Exception
      */
-    public function loadByVersion(Uuid $aggregateId, string $aggregateType, int $version): ?AggregateSnapshot
+    public function loadByVersion(Uuid $uuid, string $aggregateType, int $version): ?AggregateSnapshot
     {
         $sql = '
             SELECT aggregate_id, aggregate_type, version, data, created_at
@@ -81,7 +84,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
         ';
 
         $row = $this->connection->fetchAssociative($sql, [
-            $aggregateId->toString(),
+            $uuid->toString(),
             $aggregateType,
             $version
         ]);
@@ -96,7 +99,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
     /**
      * @throws Exception
      */
-    public function deleteOlderThan(Uuid $aggregateId, string $aggregateType, int $version): void
+    public function deleteOlderThan(Uuid $uuid, string $aggregateType, int $version): void
     {
         $sql = '
             DELETE FROM aggregate_snapshots 
@@ -104,7 +107,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
         ';
 
         $this->connection->executeStatement($sql, [
-            $aggregateId->toString(),
+            $uuid->toString(),
             $aggregateType,
             $version
         ]);
@@ -113,7 +116,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
     /**
      * @throws Exception
      */
-    public function exists(Uuid $aggregateId, string $aggregateType): bool
+    public function exists(Uuid $uuid, string $aggregateType): bool
     {
         $sql = '
             SELECT COUNT(*) as count
@@ -122,7 +125,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
         ';
 
         $result = $this->connection->fetchAssociative($sql, [
-            $aggregateId->toString(),
+            $uuid->toString(),
             $aggregateType
         ]);
 
@@ -132,7 +135,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
     /**
      * @throws Exception
      */
-    public function removeAll(Uuid $aggregateId, string $aggregateType): void
+    public function removeAll(Uuid $uuid, string $aggregateType): void
     {
         $sql = '
             DELETE FROM aggregate_snapshots
@@ -140,7 +143,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
         ';
 
         $this->connection->executeStatement($sql, [
-            $aggregateId->toString(),
+            $uuid->toString(),
             $aggregateType
         ]);
     }
@@ -148,7 +151,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
     /**
      * @throws Exception
      */
-    public function getLatestVersion(Uuid $aggregateId, string $aggregateType): ?int
+    public function getLatestVersion(Uuid $uuid, string $aggregateType): ?int
     {
         $sql = '
             SELECT MAX(version) as latest_version
@@ -157,7 +160,7 @@ final class DoctrineSnapshotStore implements SnapshotStore
         ';
 
         $result = $this->connection->fetchAssociative($sql, [
-            $aggregateId->toString(),
+            $uuid->toString(),
             $aggregateType
         ]);
 
@@ -166,35 +169,35 @@ final class DoctrineSnapshotStore implements SnapshotStore
 
     /**
      * Create specific snapshot instance from database row
-     * 
+     *
      * @param array<string, mixed> $row
-     * @throws \JsonException
+     * @throws JsonException
      */
     private function createSnapshotFromRow(array $row): AggregateSnapshot
     {
-        $aggregateId = Uuid::create($row['aggregate_id']);
+        $uuid = Uuid::create($row['aggregate_id']);
         $version = (int) $row['version'];
-        $data = json_decode($row['data'], true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) $row['data'], true, 512, JSON_THROW_ON_ERROR);
 
         // Factory pattern based on aggregate type
         return match ($row['aggregate_type']) {
-            'Project' => \App\Project\Domain\Model\ProjectSnapshot::create($aggregateId, $version, $data),
-            default => throw new \RuntimeException('Unknown aggregate type: ' . $row['aggregate_type'])
+            'Project' => ProjectSnapshot::create($uuid, $version, $data),
+            default => throw new RuntimeException('Unknown aggregate type: ' . $row['aggregate_type'])
         };
     }
 
     /**
      * Get aggregate type from snapshot class name
      */
-    private function getAggregateType(AggregateSnapshot $snapshot): string
+    private function getAggregateType(AggregateSnapshot $aggregateSnapshot): string
     {
-        $className = get_class($snapshot);
+        $className = $aggregateSnapshot::class;
         
         // Extract type from class name (e.g., ProjectSnapshot -> Project)
         if (preg_match('/([A-Z][a-z]+)Snapshot$/', $className, $matches)) {
             return $matches[1];
         }
         
-        throw new \RuntimeException('Cannot determine aggregate type from snapshot class: ' . $className);
+        throw new RuntimeException('Cannot determine aggregate type from snapshot class: ' . $className);
     }
 }

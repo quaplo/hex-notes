@@ -11,15 +11,15 @@ use App\Project\Application\Command\DeleteOrphanedProjectsCommand;
 final readonly class UserDeletedIntegrationEventHandler
 {
     public function __construct(
-        private MessageBusInterface $commandBus
+        private MessageBusInterface $messageBus
     ) {
     }
 
-    public function __invoke(UserDeletedIntegrationEvent $event): void
+    public function __invoke(UserDeletedIntegrationEvent $userDeletedIntegrationEvent): void
     {
         // Integration Event → Project domain command
-        $this->commandBus->dispatch(
-            new DeleteOrphanedProjectsCommand($event->getUserId())
+        $this->messageBus->dispatch(
+            new DeleteOrphanedProjectsCommand($userDeletedIntegrationEvent->getUserId())
         );
     }
 }

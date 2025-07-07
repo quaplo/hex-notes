@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\User\Domain\Model;
 
+use RuntimeException;
 use App\Shared\Domain\Model\AggregateRoot;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Email;
@@ -16,9 +17,9 @@ use DateTimeImmutable;
 final class User extends AggregateRoot
 {
     private function __construct(
-        private readonly Uuid $id,
+        private readonly Uuid $uuid,
         private Email $email,
-        private UserStatus $status,
+        private UserStatus $userStatus,
         private readonly DateTimeImmutable $createdAt,
         private ?DateTimeImmutable $deletedAt = null
     ) {
@@ -57,7 +58,7 @@ final class User extends AggregateRoot
         }
 
         if (!$this->canChangeEmail()) {
-            throw new UserInactiveException($this->id);
+            throw new UserInactiveException($this->uuid);
         }
 
         $this->email = $newEmail;
@@ -65,17 +66,17 @@ final class User extends AggregateRoot
 
     public function activate(): void
     {
-        $this->status = UserStatus::ACTIVE;
+        $this->userStatus = UserStatus::ACTIVE;
     }
 
     public function deactivate(): void
     {
-        $this->status = UserStatus::INACTIVE;
+        $this->userStatus = UserStatus::INACTIVE;
     }
 
     public function suspend(): void
     {
-        $this->status = UserStatus::SUSPENDED;
+        $this->userStatus = UserStatus::SUSPENDED;
     }
 
     public function delete(): void
@@ -85,43 +86,43 @@ final class User extends AggregateRoot
         }
         
         // Record domain event for cross-domain communication
-        $this->apply(UserDeletedEvent::create($this->id, $this->email));
+        $this->apply(UserDeletedEvent::create($this->uuid, $this->email));
     }
 
     public function isActive(): bool
     {
-        return $this->status->isActive();
+        return $this->userStatus->isActive();
     }
 
     public function isInactive(): bool
     {
-        return $this->status->isInactive();
+        return $this->userStatus->isInactive();
     }
 
     public function isSuspended(): bool
     {
-        return $this->status->isSuspended();
+        return $this->userStatus->isSuspended();
     }
 
     public function isDeleted(): bool
     {
-        return $this->status->isDeleted();
+        return $this->userStatus->isDeleted();
     }
 
     public function canChangeEmail(): bool
     {
-        return $this->status->canPerformActions();
+        return $this->userStatus->canPerformActions();
     }
 
     public function canPerformActions(): bool
     {
-        return $this->status->canPerformActions();
+        return $this->userStatus->canPerformActions();
     }
 
     // Getters
     public function getId(): Uuid
     {
-        return $this->id;
+        return $this->uuid;
     }
 
     public function getEmail(): Email
@@ -131,7 +132,7 @@ final class User extends AggregateRoot
 
     public function getStatus(): UserStatus
     {
-        return $this->status;
+        return $this->userStatus;
     }
 
     public function getCreatedAt(): DateTimeImmutable
@@ -147,17 +148,17 @@ final class User extends AggregateRoot
     /**
      * Implementation of abstract handleEvent method from AggregateRoot
      */
-    protected function handleEvent(DomainEvent $event): void
+    protected function handleEvent(DomainEvent $domainEvent): void
     {
-        match (get_class($event)) {
-            UserDeletedEvent::class => $this->handleUserDeleted($event),
-            default => throw new \RuntimeException('Unknown event type: ' . get_class($event))
+        match ($domainEvent::class) {
+            UserDeletedEvent::class => $this->handleUserDeleted($domainEvent),
+            default => throw new RuntimeException('Unknown event type: ' . $domainEvent::class)
         };
     }
 
-    private function handleUserDeleted(UserDeletedEvent $event): void
+    private function handleUserDeleted(UserDeletedEvent $userDeletedEvent): void
     {
-        $this->status = UserStatus::DELETED;
-        $this->deletedAt = $event->getOccurredAt();
+        $this->userStatus = UserStatus::DELETED;
+        $this->deletedAt = $userDeletedEvent->getOccurredAt();
     }
 }

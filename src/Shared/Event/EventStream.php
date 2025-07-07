@@ -7,21 +7,21 @@ namespace App\Shared\Event;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 
-final class EventStream
+final readonly class EventStream
 {
     /**
      * @param DomainEvent[] $events
      */
     public function __construct(
-        private readonly Uuid $aggregateId,
-        private readonly array $events,
-        private readonly int $version
+        private Uuid $uuid,
+        private array $events,
+        private int $version
     ) {
     }
 
     public function getAggregateId(): Uuid
     {
-        return $this->aggregateId;
+        return $this->uuid;
     }
 
     /**
@@ -39,7 +39,7 @@ final class EventStream
 
     public function isEmpty(): bool
     {
-        return empty($this->events);
+        return $this->events === [];
     }
 
     public function count(): int

@@ -6,10 +6,10 @@ namespace App\User\Application\Query;
 
 use App\Shared\ValueObject\Uuid;
 
-final class GetUserByIdQuery
+final readonly class GetUserByIdQuery
 {
     public function __construct(
-        public readonly string $userId
+        public string $userId
     ) {
     }
 

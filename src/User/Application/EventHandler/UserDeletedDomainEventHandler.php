@@ -18,12 +18,12 @@ final readonly class UserDeletedDomainEventHandler
     public function __invoke(UserDeletedEvent $userDeletedEvent): void
     {
         // Transform Domain Event → Integration Event
-        $integrationEvent = UserDeletedIntegrationEvent::create(
+        $userDeletedIntegrationEvent = UserDeletedIntegrationEvent::create(
             $userDeletedEvent->getUserId(),
             $userDeletedEvent->getEmail()->__toString()
         );
 
         // Publish Integration Event for other domains to consume
-        $this->eventDispatcher->dispatch([$integrationEvent]);
+        $this->eventDispatcher->dispatch([$userDeletedIntegrationEvent]);
     }
 }

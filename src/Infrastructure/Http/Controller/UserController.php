@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Controller;
 
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
+use App\User\Application\Exception\UserNotFoundException;
 use App\Infrastructure\Http\Dto\CreateUserRequestDto;
 use App\Infrastructure\Http\Exception\ValidationException;
 use App\User\Application\Command\CreateUserCommand;
@@ -35,8 +37,8 @@ final class UserController extends BaseController
             /** @var CreateUserRequestDto $dto */
             $dto = $this->deserializeAndValidate($request, CreateUserRequestDto::class);
 
-            $command = new CreateUserCommand($dto->email);
-            $user = $this->commandBus->dispatch($command);
+            $createUserCommand = new CreateUserCommand($dto->email);
+            $user = $this->commandBus->dispatch($createUserCommand);
 
             return new JsonResponse([
                 'message' => 'User created successfully',
@@ -51,8 +53,8 @@ final class UserController extends BaseController
     #[Route('/api/users/{id}', name: 'get_user_by_id', methods: ['GET'])]
     public function getById(string $id): JsonResponse
     {
-        $query = new GetUserByIdQuery($id);
-        $userDto = $this->queryBus->dispatch($query);
+        $getUserByIdQuery = new GetUserByIdQuery($id);
+        $userDto = $this->queryBus->dispatch($getUserByIdQuery);
 
         if (!$userDto) {
             return new JsonResponse(['error' => 'User not found'], JsonResponse::HTTP_NOT_FOUND);
@@ -65,16 +67,16 @@ final class UserController extends BaseController
     public function delete(string $id): JsonResponse
     {
         try {
-            $command = new DeleteUserCommand($id);
-            $this->commandBus->dispatch($command);
+            $deleteUserCommand = new DeleteUserCommand($id);
+            $this->commandBus->dispatch($deleteUserCommand);
 
             return new JsonResponse([
                 'message' => 'User deleted successfully'
             ], JsonResponse::HTTP_OK);
-        } catch (\Symfony\Component\Messenger\Exception\HandlerFailedException $e) {
+        } catch (HandlerFailedException $e) {
             // Check if the original exception is UserNotFoundException
             $previous = $e->getPrevious();
-            if ($previous instanceof \App\User\Application\Exception\UserNotFoundException) {
+            if ($previous instanceof UserNotFoundException) {
                 return new JsonResponse([
                     'error' => 'User not found'
                 ], JsonResponse::HTTP_NOT_FOUND);
@@ -82,7 +84,7 @@ final class UserController extends BaseController
             
             // Re-throw if it's a different exception
             throw $e;
-        } catch (\App\User\Application\Exception\UserNotFoundException $e) {
+        } catch (UserNotFoundException) {
             return new JsonResponse([
                 'error' => 'User not found'
             ], JsonResponse::HTTP_NOT_FOUND);

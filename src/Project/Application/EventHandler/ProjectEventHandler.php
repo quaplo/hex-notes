@@ -17,36 +17,36 @@ final readonly class ProjectEventHandler
 {
     public function __construct(
         private LoggerInterface $logger,
-        private ProjectReadModelProjection $readModelProjection
+        private ProjectReadModelProjection $projectReadModelProjection
     ) {
     }
 
-    public function __invoke(DomainEvent $event): void
+    public function __invoke(DomainEvent $domainEvent): void
     {
         // First update read model projection
-        $this->readModelProjection->handle($event);
+        $this->projectReadModelProjection->handle($domainEvent);
 
         // Then handle other side effects
-        match (get_class($event)) {
-            ProjectCreatedEvent::class => $this->handleProjectCreated($event),
-            ProjectRenamedEvent::class => $this->handleProjectRenamed($event),
-            ProjectDeletedEvent::class => $this->handleProjectDeleted($event),
-            ProjectWorkerAddedEvent::class => $this->handleProjectWorkerAdded($event),
-            ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($event),
-            default => $this->logger->info('Unhandled project event', ['event' => get_class($event)])
+        match ($domainEvent::class) {
+            ProjectCreatedEvent::class => $this->handleProjectCreated($domainEvent),
+            ProjectRenamedEvent::class => $this->handleProjectRenamed($domainEvent),
+            ProjectDeletedEvent::class => $this->handleProjectDeleted($domainEvent),
+            ProjectWorkerAddedEvent::class => $this->handleProjectWorkerAdded($domainEvent),
+            ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($domainEvent),
+            default => $this->logger->info('Unhandled project event', ['event' => $domainEvent::class])
         };
     }
     
-    public function handle(DomainEvent $event): void
+    public function handle(DomainEvent $domainEvent): void
     {
-        $this->__invoke($event);
+        $this->__invoke($domainEvent);
     }
 
-    private function handleProjectCreated(ProjectCreatedEvent $event): void
+    private function handleProjectCreated(ProjectCreatedEvent $projectCreatedEvent): void
     {
         $this->logger->info('Project created - side effects processing', [
-            'projectId' => $event->getProjectId()->toString(),
-            'name' => $event->getName()->__toString()
+            'projectId' => $projectCreatedEvent->getProjectId()->toString(),
+            'name' => $projectCreatedEvent->getName()->__toString()
         ]);
 
         // Additional side effects:
@@ -56,12 +56,12 @@ final readonly class ProjectEventHandler
         // - Update external systems
     }
 
-    private function handleProjectRenamed(ProjectRenamedEvent $event): void
+    private function handleProjectRenamed(ProjectRenamedEvent $projectRenamedEvent): void
     {
         $this->logger->info('Project renamed - side effects processing', [
-            'projectId' => $event->getProjectId()->toString(),
-            'oldName' => $event->getOldName()->__toString(),
-            'newName' => $event->getNewName()->__toString()
+            'projectId' => $projectRenamedEvent->getProjectId()->toString(),
+            'oldName' => $projectRenamedEvent->getOldName()->__toString(),
+            'newName' => $projectRenamedEvent->getNewName()->__toString()
         ]);
 
         // Additional side effects:
@@ -70,10 +70,10 @@ final readonly class ProjectEventHandler
         // - Update external integrations
     }
 
-    private function handleProjectDeleted(ProjectDeletedEvent $event): void
+    private function handleProjectDeleted(ProjectDeletedEvent $projectDeletedEvent): void
     {
         $this->logger->info('Project deleted - side effects processing', [
-            'projectId' => $event->getProjectId()->toString()
+            'projectId' => $projectDeletedEvent->getProjectId()->toString()
         ]);
 
         // Additional side effects:
@@ -83,12 +83,12 @@ final readonly class ProjectEventHandler
         // - Update external systems
     }
 
-    private function handleProjectWorkerAdded(ProjectWorkerAddedEvent $event): void
+    private function handleProjectWorkerAdded(ProjectWorkerAddedEvent $projectWorkerAddedEvent): void
     {
         $this->logger->info('Project worker added - side effects processing', [
-            'projectId' => $event->getProjectId()->toString(),
-            'userId' => $event->getUserId()->toString(),
-            'role' => (string)$event->getRole()
+            'projectId' => $projectWorkerAddedEvent->getProjectId()->toString(),
+            'userId' => $projectWorkerAddedEvent->getUserId()->toString(),
+            'role' => (string)$projectWorkerAddedEvent->getRole()
         ]);
 
         // Additional side effects:
@@ -97,11 +97,11 @@ final readonly class ProjectEventHandler
         // - Send notification to project owner
     }
 
-    private function handleProjectWorkerRemoved(ProjectWorkerRemovedEvent $event): void
+    private function handleProjectWorkerRemoved(ProjectWorkerRemovedEvent $projectWorkerRemovedEvent): void
     {
         $this->logger->info('Project worker removed - side effects processing', [
-            'projectId' => $event->getProjectId()->toString(),
-            'userId' => $event->getUserId()->toString()
+            'projectId' => $projectWorkerRemovedEvent->getProjectId()->toString(),
+            'userId' => $projectWorkerRemovedEvent->getUserId()->toString()
         ]);
 
         // Additional side effects:

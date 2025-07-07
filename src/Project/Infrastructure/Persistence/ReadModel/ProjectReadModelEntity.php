@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Persistence\ReadModel;
 
-use App\Shared\ValueObject\Uuid;
+use Doctrine\DBAL\Types\Types;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -14,38 +14,27 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Index(columns: ['deleted_at'], name: 'idx_project_deleted')]
 class ProjectReadModelEntity
 {
-    #[ORM\Id]
-    #[ORM\Column(type: 'string', length: 36)]
-    private string $id;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $name;
-
-    #[ORM\Column(type: 'string', length: 36, name: 'owner_id')]
-    private string $ownerId;
-
-    #[ORM\Column(type: 'datetime_immutable', name: 'created_at')]
-    private DateTimeImmutable $createdAt;
-
-    #[ORM\Column(type: 'datetime_immutable', name: 'deleted_at', nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, name: 'deleted_at', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
-    #[ORM\Column(type: 'json', name: 'workers')]
+    #[ORM\Column(type: Types::JSON, name: 'workers')]
     private array $workers = [];
 
-    #[ORM\Column(type: 'integer', name: 'version')]
+    #[ORM\Column(type: Types::INTEGER, name: 'version')]
     private int $version = 0;
 
     public function __construct(
-        string $id,
-        string $name,
-        string $ownerId,
-        DateTimeImmutable $createdAt
-    ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->ownerId = $ownerId;
-        $this->createdAt = $createdAt;
+        #[ORM\Id]
+        #[ORM\Column(type: Types::STRING, length: 36)]
+        private string $id,
+        #[ORM\Column(type: Types::STRING, length: 255)]
+        private string $name,
+        #[ORM\Column(type: Types::STRING, length: 36, name: 'owner_id')]
+        private string $ownerId,
+        #[ORM\Column(type: Types::DATETIME_IMMUTABLE, name: 'created_at')]
+        private DateTimeImmutable $createdAt
+    )
+    {
     }
 
     public function getId(): string
@@ -85,7 +74,7 @@ class ProjectReadModelEntity
 
     public function isDeleted(): bool
     {
-        return $this->deletedAt !== null;
+        return $this->deletedAt instanceof DateTimeImmutable;
     }
 
     public function getWorkers(): array
@@ -107,7 +96,7 @@ class ProjectReadModelEntity
     {
         $this->workers = array_filter(
             $this->workers,
-            fn(array $worker) => $worker['userId'] !== $userId
+            fn(array $worker): bool => $worker['userId'] !== $userId
         );
         $this->workers = array_values($this->workers); // Reindex
     }

@@ -9,14 +9,11 @@ use App\Shared\ValueObject\Uuid;
 
 final class InMemorySnapshotStrategy implements SnapshotStrategy
 {
-    private int $frequency;
-
-    public function __construct(int $frequency = 10)
+    public function __construct(private int $frequency = 10)
     {
-        $this->frequency = $frequency;
     }
 
-    public function shouldCreateSnapshot(Uuid $aggregateId, int $currentVersion): bool
+    public function shouldCreateSnapshot(Uuid $uuid, int $currentVersion): bool
     {
         return $currentVersion % $this->frequency === 0;
     }

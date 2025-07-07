@@ -9,12 +9,12 @@ use App\Shared\ValueObject\Uuid;
 final readonly class DeleteOrphanedProjectsCommand
 {
     public function __construct(
-        private Uuid $deletedUserId
+        private Uuid $uuid
     ) {
     }
 
     public function getDeletedUserId(): Uuid
     {
-        return $this->deletedUserId;
+        return $this->uuid;
     }
 }

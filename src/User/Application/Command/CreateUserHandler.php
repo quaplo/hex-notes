@@ -15,12 +15,12 @@ final readonly class CreateUserHandler
     ) {
     }
 
-    public function __invoke(CreateUserCommand $command): User
+    public function __invoke(CreateUserCommand $createUserCommand): User
     {
-        $email = $command->getEmail();
+        $email = $createUserCommand->getEmail();
         
         $existingUser = $this->userRepository->findByEmailIncludingDeleted($email);
-        if ($existingUser) {
+        if ($existingUser instanceof User) {
             throw new UserAlreadyExistsException($email);
         }
         

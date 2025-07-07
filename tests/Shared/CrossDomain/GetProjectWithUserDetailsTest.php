@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Shared\CrossDomain;
 
+use DateTimeImmutable;
+use ReflectionClass;
+use RuntimeException;
 use App\Infrastructure\Http\Dto\ProjectDto;
 use App\Infrastructure\Http\Dto\UserDto;
 use App\Infrastructure\Http\Mapper\ProjectDtoMapperInterface;
@@ -18,28 +21,27 @@ use App\Shared\Application\CrossDomain\Query\GetProjectWithUserDetailsQuery;
 use App\Shared\Application\QueryBus;
 use App\Shared\ValueObject\Uuid;
 use App\User\Application\Query\GetUserByIdQuery;
-use PHPUnit\Framework\TestCase;
 
-it('can get project with user details via cross-domain query', function () {
+it('can get project with user details via cross-domain query', function (): void {
     // Mock project data
-    $projectId = Uuid::generate();
+    $uuid = Uuid::generate();
     $ownerId = Uuid::create('550e8400-e29b-41d4-a716-446655440001');
     $workerId = Uuid::create('550e8400-e29b-41d4-a716-446655440002');
     
     // Create a real Project object for testing
     $project = new Project(
-        $projectId,
+        $uuid,
         new ProjectName('Test Project'),
-        new \DateTimeImmutable('2024-01-01 00:00:00'),
+        new DateTimeImmutable('2024-01-01 00:00:00'),
         $ownerId
     );
     
     // Add a worker using reflection to bypass business rules for testing
-    $reflectionClass = new \ReflectionClass($project);
-    $workersProperty = $reflectionClass->getProperty('workers');
-    $workersProperty->setAccessible(true);
-    $workersProperty->setValue($project, [
-        ProjectWorker::create($workerId, ProjectRole::participant(), $ownerId, new \DateTimeImmutable('2024-01-01 00:00:00'))
+    $reflectionClass = new ReflectionClass($project);
+    $reflectionProperty = $reflectionClass->getProperty('workers');
+    $reflectionProperty->setAccessible(true);
+    $reflectionProperty->setValue($project, [
+        ProjectWorker::create($workerId, ProjectRole::participant(), $ownerId, new DateTimeImmutable('2024-01-01 00:00:00'))
     ]);
     
     $ownerDto = new UserDto(
@@ -58,14 +60,14 @@ it('can get project with user details via cross-domain query', function () {
     // Mock QueryBus
     $queryBus = new class($project, $ownerDto, $workerDto) implements QueryBus {
         public function __construct(
-            private Project $project,
-            private UserDto $ownerDto,
-            private UserDto $workerDto
+            private readonly Project $project,
+            private readonly UserDto $ownerDto,
+            private readonly UserDto $workerDto
         ) {}
         
         public function dispatch(object $query): mixed
         {
-            return match(get_class($query)) {
+            return match($query::class) {
                 GetProjectQuery::class => $this->project,
                 GetUserByIdQuery::class => $query->userId === $this->project->getOwnerId()->toString()
                     ? $this->ownerDto
@@ -77,7 +79,7 @@ it('can get project with user details via cross-domain query', function () {
     
     // Mock ProjectDtoMapper
     $expectedProjectDto = new ProjectDto(
-        id: $projectId->toString(),
+        id: $uuid->toString(),
         name: 'Test Project',
         ownerId: $ownerId->toString(),
         createdAt: '2024-01-01 00:00:00',
@@ -85,16 +87,16 @@ it('can get project with user details via cross-domain query', function () {
     );
     
     $projectDtoMapper = new class($expectedProjectDto) implements ProjectDtoMapperInterface {
-        public function __construct(private ProjectDto $expectedDto) {}
+        public function __construct(private readonly ProjectDto $projectDto) {}
         
         public function toDto(Project $project): ProjectDto
         {
-            return $this->expectedDto;
+            return $this->projectDto;
         }
     };
     
     $handler = new GetProjectWithUserDetailsHandler($queryBus, $projectDtoMapper);
-    $query = new GetProjectWithUserDetailsQuery($projectId);
+    $query = new GetProjectWithUserDetailsQuery($uuid);
     
     $result = $handler($query);
     
@@ -105,7 +107,7 @@ it('can get project with user details via cross-domain query', function () {
         ->and($result->workers[0])->toEqual($workerDto);
 });
 
-it('returns null when project not found', function () {
+it('returns null when project not found', function (): void {
     $queryBus = new class() implements QueryBus {
         public function dispatch(object $query): mixed
         {
@@ -117,7 +119,7 @@ it('returns null when project not found', function () {
         public function toDto(Project $project): ProjectDto
         {
             // This should never be called in this test
-            throw new \RuntimeException('ProjectDtoMapper should not be called when project is null');
+            throw new RuntimeException('ProjectDtoMapper should not be called when project is null');
         }
     };
     

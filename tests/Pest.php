@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -11,7 +13,7 @@
 |
 */
 
-pest()->extend(Symfony\Bundle\FrameworkBundle\Test\WebTestCase::class)->in('Feature');
+pest()->extend(WebTestCase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -24,9 +26,7 @@ pest()->extend(Symfony\Bundle\FrameworkBundle\Test\WebTestCase::class)->in('Feat
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
+expect()->extend('toBeOne', fn() => $this->toBe(1));
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +39,7 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function something(): void
 {
     // ..
 }

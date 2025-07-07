@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\ValueObject;
 
+use Stringable;
 use InvalidArgumentException;
 
-final class ProjectRole
+final readonly class ProjectRole implements Stringable
 {
     public const OWNER = 'owner';
     public const PARTICIPANT = 'participant';

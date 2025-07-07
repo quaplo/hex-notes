@@ -39,14 +39,14 @@ final class InMemoryEventDispatcher implements EventDispatcher
     {
         return array_filter(
             $this->dispatchedEvents,
-            fn(DomainEvent $event) => $event instanceof $eventClass
+            fn(DomainEvent $domainEvent): bool => $domainEvent instanceof $eventClass
         );
     }
 
     public function hasEventOfType(string $eventClass): bool
     {
-        foreach ($this->dispatchedEvents as $event) {
-            if ($event instanceof $eventClass) {
+        foreach ($this->dispatchedEvents as $dispatchedEvent) {
+            if ($dispatchedEvent instanceof $eventClass) {
                 return true;
             }
         }
@@ -60,7 +60,7 @@ final class InMemoryEventDispatcher implements EventDispatcher
 
     public function getLastDispatchedEvent(): ?DomainEvent
     {
-        if (empty($this->dispatchedEvents)) {
+        if ($this->dispatchedEvents === []) {
             return null;
         }
         

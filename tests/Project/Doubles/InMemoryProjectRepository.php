@@ -23,7 +23,7 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
         
         // Track events for testing purposes
         $events = $project->getDomainEvents();
-        if (!empty($events)) {
+        if ($events !== []) {
             if (!isset($this->savedEvents[$id])) {
                 $this->savedEvents[$id] = [];
             }
@@ -33,9 +33,9 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
         $project->clearDomainEvents();
     }
 
-    public function load(Uuid $aggregateId): ?Project
+    public function load(Uuid $uuid): ?Project
     {
-        $id = (string)$aggregateId;
+        $id = (string)$uuid;
         return $this->projects[$id] ?? null;
     }
 
@@ -44,9 +44,9 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
         return array_values($this->projects);
     }
 
-    public function exists(Uuid $aggregateId): bool
+    public function exists(Uuid $uuid): bool
     {
-        $id = (string)$aggregateId;
+        $id = (string)$uuid;
         return isset($this->projects[$id]);
     }
 
@@ -71,19 +71,19 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
         return $this->savedEvents;
     }
 
-    public function getEventsForProject(Uuid $projectId): array
+    public function getEventsForProject(Uuid $uuid): array
     {
-        $id = (string)$projectId;
+        $id = (string)$uuid;
         return $this->savedEvents[$id] ?? [];
     }
 
-    public function hasProject(Uuid $projectId): bool
+    public function hasProject(Uuid $uuid): bool
     {
-        return $this->exists($projectId);
+        return $this->exists($uuid);
     }
 
-    public function getProject(Uuid $projectId): ?Project
+    public function getProject(Uuid $uuid): ?Project
     {
-        return $this->load($projectId);
+        return $this->load($uuid);
     }
 }

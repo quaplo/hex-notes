@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Project\Doubles;
 
+use RuntimeException;
+use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventStore;
 use App\Shared\ValueObject\Uuid;
@@ -16,9 +18,9 @@ final class InMemoryEventStore implements EventStore
     /** @var array<string, int> */
     private array $versions = [];
 
-    public function append(Uuid $aggregateId, array $events, int $expectedVersion): void
+    public function append(Uuid $uuid, array $events, int $expectedVersion): void
     {
-        $id = (string)$aggregateId;
+        $id = (string)$uuid;
         
         if (!isset($this->events[$id])) {
             $this->events[$id] = [];
@@ -27,7 +29,7 @@ final class InMemoryEventStore implements EventStore
         
         // Version check for concurrency control
         if ($this->versions[$id] !== $expectedVersion) {
-            throw new \RuntimeException("Concurrency conflict: expected version {$expectedVersion}, got {$this->versions[$id]}");
+            throw new RuntimeException("Concurrency conflict: expected version {$expectedVersion}, got {$this->versions[$id]}");
         }
         
         foreach ($events as $event) {
@@ -36,41 +38,44 @@ final class InMemoryEventStore implements EventStore
         }
     }
 
-    public function getEvents(Uuid $aggregateId): array
+    public function getEvents(Uuid $uuid): array
     {
-        $id = (string)$aggregateId;
+        $id = (string)$uuid;
         return $this->events[$id] ?? [];
     }
 
-    public function getEventsFromVersion(Uuid $aggregateId, int $fromVersion): array
+    public function getEventsFromVersion(Uuid $uuid, int $fromVersion): array
     {
-        $id = (string)$aggregateId;
+        $id = (string)$uuid;
         $allEvents = $this->events[$id] ?? [];
         
         return array_slice($allEvents, $fromVersion);
     }
 
-    public function findProjectAggregatesByOwnerId(Uuid $ownerId): array
+    public function findProjectAggregatesByOwnerId(Uuid $uuid): array
     {
         $aggregateIds = [];
         
         foreach ($this->events as $aggregateId => $events) {
             foreach ($events as $event) {
-                if ($event instanceof \App\Project\Domain\Event\ProjectCreatedEvent) {
-                    if ($event->getOwnerId()->equals($ownerId)) {
-                        $aggregateIds[] = Uuid::create($aggregateId);
-                        break; // Only need to find one ProjectCreatedEvent per aggregate
-                    }
+                if (!$event instanceof ProjectCreatedEvent) {
+                    continue;
                 }
+                if (!$event->getOwnerId()->equals($uuid)) {
+                    continue;
+                }
+                $aggregateIds[] = Uuid::create($aggregateId);
+                break;
+                // Only need to find one ProjectCreatedEvent per aggregate
             }
         }
         
         return $aggregateIds;
     }
 
-    public function getVersion(Uuid $aggregateId): int
+    public function getVersion(Uuid $uuid): int
     {
-        $id = (string)$aggregateId;
+        $id = (string)$uuid;
         return $this->versions[$id] ?? 0;
     }
 
@@ -82,17 +87,17 @@ final class InMemoryEventStore implements EventStore
         $this->versions = [];
     }
 
-    public function getEventCount(Uuid $aggregateId): int
+    public function getEventCount(Uuid $uuid): int
     {
-        $id = (string)$aggregateId;
+        $id = (string)$uuid;
         return count($this->events[$id] ?? []);
     }
 
     public function getAllEvents(): array
     {
         $allEvents = [];
-        foreach ($this->events as $aggregateEvents) {
-            $allEvents = array_merge($allEvents, $aggregateEvents);
+        foreach ($this->events as $event) {
+            $allEvents = array_merge($allEvents, $event);
         }
         return $allEvents;
     }

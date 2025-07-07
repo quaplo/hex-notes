@@ -9,13 +9,13 @@ use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final class ProjectCreatedEvent implements DomainEvent
+final readonly class ProjectCreatedEvent implements DomainEvent
 {
     public function __construct(
-        private readonly Uuid $projectId,
-        private readonly ProjectName $name,
-        private readonly Uuid $ownerId,
-        private readonly DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private Uuid $projectId,
+        private ProjectName $projectName,
+        private Uuid $ownerId,
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
     ) {
     }
 
@@ -26,7 +26,7 @@ final class ProjectCreatedEvent implements DomainEvent
 
     public function getName(): ProjectName
     {
-        return $this->name;
+        return $this->projectName;
     }
 
     public function getOwnerId(): Uuid
@@ -53,7 +53,7 @@ final class ProjectCreatedEvent implements DomainEvent
     {
         return [
             'projectId' => $this->projectId->toString(),
-            'name' => $this->name->__toString(),
+            'name' => $this->projectName->__toString(),
             'ownerId' => $this->ownerId->toString(),
             'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')
         ];

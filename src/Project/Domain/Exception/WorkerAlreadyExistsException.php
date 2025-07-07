@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\Exception;
 
+use DomainException;
 use App\Shared\ValueObject\Uuid;
 
-final class WorkerAlreadyExistsException extends \DomainException
+final class WorkerAlreadyExistsException extends DomainException
 {
     public function __construct(Uuid $projectId, Uuid $userId)
     {

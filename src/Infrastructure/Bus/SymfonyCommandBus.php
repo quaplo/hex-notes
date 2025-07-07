@@ -8,15 +8,15 @@ use App\Shared\Application\CommandBus;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 
-final class SymfonyCommandBus implements CommandBus
+final readonly class SymfonyCommandBus implements CommandBus
 {
     public function __construct(
-        private readonly MessageBusInterface $commandBus
+        private MessageBusInterface $messageBus
     ) {}
 
     public function dispatch(object $command): mixed
     {
-        $envelope = $this->commandBus->dispatch($command);
+        $envelope = $this->messageBus->dispatch($command);
         
         /** @var HandledStamp|null $handledStamp */
         $handledStamp = $envelope->last(HandledStamp::class);

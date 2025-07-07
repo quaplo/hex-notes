@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\EventStore;
 
+use Exception;
+use App\Shared\Domain\Model\AggregateSnapshot;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Model\ProjectSnapshotFactory;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
@@ -13,16 +15,16 @@ use App\Shared\Event\SnapshotStore;
 use App\Shared\Event\SnapshotStrategy;
 use App\Shared\ValueObject\Uuid;
 
-final class ProjectEventStoreRepository implements ProjectRepositoryInterface
+final readonly class ProjectEventStoreRepository implements ProjectRepositoryInterface
 {
     private const AGGREGATE_TYPE = 'Project';
 
     public function __construct(
-        private readonly EventStore $eventStore,
-        private readonly EventDispatcher $eventDispatcher,
-        private readonly SnapshotStore $snapshotStore,
-        private readonly ProjectSnapshotFactory $snapshotFactory,
-        private readonly SnapshotStrategy $snapshotStrategy
+        private EventStore $eventStore,
+        private EventDispatcher $eventDispatcher,
+        private SnapshotStore $snapshotStore,
+        private ProjectSnapshotFactory $projectSnapshotFactory,
+        private SnapshotStrategy $snapshotStrategy
     ) {
     }
 
@@ -30,7 +32,7 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
     {
         $events = $project->getDomainEvents();
 
-        if (empty($events)) {
+        if ($events === []) {
             return;
         }
 
@@ -49,9 +51,9 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
         // Check if we should create a snapshot
         if ($this->snapshotStrategy->shouldCreateSnapshot($project->getId(), $newVersion)) {
             try {
-                $snapshot = $this->snapshotFactory->createSnapshot($project, $newVersion);
+                $snapshot = $this->projectSnapshotFactory->createSnapshot($project, $newVersion);
                 $this->snapshotStore->save($snapshot);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Log error but don't fail the save operation
                 // Snapshots are for performance optimization, not critical for correctness
                 error_log("Failed to create snapshot for project {$project->getId()}: " . $e->getMessage());
@@ -63,33 +65,33 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
         $project->clearDomainEvents();
     }
 
-    public function load(Uuid $aggregateId): ?Project
+    public function load(Uuid $uuid): ?Project
     {
         // Try to load from snapshot first
-        $snapshot = $this->snapshotStore->loadLatest($aggregateId, self::AGGREGATE_TYPE);
+        $snapshot = $this->snapshotStore->loadLatest($uuid, self::AGGREGATE_TYPE);
         
-        if ($snapshot !== null) {
+        if ($snapshot instanceof AggregateSnapshot) {
             // Restore project from snapshot
-            $project = $this->snapshotFactory->restoreFromSnapshot($snapshot);
+            $project = $this->projectSnapshotFactory->restoreFromSnapshot($snapshot);
             
             // Load events after the snapshot version
             $eventsAfterSnapshot = $this->eventStore->getEventsFromVersion(
-                $aggregateId,
+                $uuid,
                 $snapshot->getVersion() + 1
             );
             
             // Replay events after snapshot
-            foreach ($eventsAfterSnapshot as $event) {
-                $project->replayEvent($event);
+            foreach ($eventsAfterSnapshot as $eventAfterSnapshot) {
+                $project->replayEvent($eventAfterSnapshot);
             }
             
             return $project;
         }
 
         // No snapshot found, load all events (traditional event sourcing)
-        $events = $this->eventStore->getEvents($aggregateId);
+        $events = $this->eventStore->getEvents($uuid);
 
-        if (empty($events)) {
+        if ($events === []) {
             return null;
         }
 
@@ -102,9 +104,9 @@ final class ProjectEventStoreRepository implements ProjectRepositoryInterface
         return $project;
     }
 
-    public function exists(Uuid $aggregateId): bool
+    public function exists(Uuid $uuid): bool
     {
-        $events = $this->eventStore->getEvents($aggregateId);
-        return !empty($events);
+        $events = $this->eventStore->getEvents($uuid);
+        return $events !== [];
     }
 }

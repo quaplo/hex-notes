@@ -4,25 +4,27 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\Event;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use App\Shared\ValueObject\Uuid;
 
 final readonly class UserDeletedIntegrationEvent implements DomainEvent
 {
     public function __construct(
-        private Uuid $userId,
+        private Uuid $uuid,
         private string $userEmail,
-        private \DateTimeImmutable $occurredAt
+        private DateTimeImmutable $occurredAt
     ) {
     }
 
-    public static function create(Uuid $userId, string $userEmail): self
+    public static function create(Uuid $uuid, string $userEmail): self
     {
-        return new self($userId, $userEmail, new \DateTimeImmutable());
+        return new self($uuid, $userEmail, new DateTimeImmutable());
     }
 
     public function getUserId(): Uuid
     {
-        return $this->userId;
+        return $this->uuid;
     }
 
     public function getUserEmail(): string
@@ -30,7 +32,7 @@ final readonly class UserDeletedIntegrationEvent implements DomainEvent
         return $this->userEmail;
     }
 
-    public function getOccurredAt(): \DateTimeImmutable
+    public function getOccurredAt(): DateTimeImmutable
     {
         return $this->occurredAt;
     }
@@ -38,9 +40,9 @@ final readonly class UserDeletedIntegrationEvent implements DomainEvent
     public function toArray(): array
     {
         return [
-            'userId' => $this->userId->toString(),
+            'userId' => $this->uuid->toString(),
             'userEmail' => $this->userEmail,
-            'occurredAt' => $this->occurredAt->format(\DateTimeInterface::ATOM),
+            'occurredAt' => $this->occurredAt->format(DateTimeInterface::ATOM),
         ];
     }
 
@@ -49,7 +51,7 @@ final readonly class UserDeletedIntegrationEvent implements DomainEvent
         return new self(
             Uuid::create($data['userId']),
             $data['userEmail'],
-            new \DateTimeImmutable($data['occurredAt'])
+            new DateTimeImmutable($data['occurredAt'])
         );
     }
 }

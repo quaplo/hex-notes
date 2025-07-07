@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\EventStore;
 
+use RuntimeException;
+use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventSerializer;
 use App\Shared\Event\EventStore;
@@ -12,24 +14,24 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Types;
 
-final class DoctrineEventStore implements EventStore
+final readonly class DoctrineEventStore implements EventStore
 {
     public function __construct(
-        private readonly Connection $connection,
-        private readonly EventSerializer $eventSerializer
+        private Connection $connection,
+        private EventSerializer $eventSerializer
     ) {
     }
 
-    public function append(Uuid $aggregateId, array $events, int $expectedVersion): void
+    public function append(Uuid $uuid, array $events, int $expectedVersion): void
     {
         $this->connection->beginTransaction();
 
         try {
             // Check optimistic concurrency
-            $currentVersion = $this->getCurrentVersion($aggregateId);
+            $currentVersion = $this->getCurrentVersion($uuid);
 
             if ($currentVersion !== $expectedVersion) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf(
                         'Concurrency conflict: expected version %d, got %d',
                         $expectedVersion,
@@ -41,7 +43,7 @@ final class DoctrineEventStore implements EventStore
             $nextVersion = $expectedVersion + 1;
 
             foreach ($events as $event) {
-                $this->insertEvent($aggregateId, $event, $nextVersion++);
+                $this->insertEvent($uuid, $event, $nextVersion++);
             }
 
             $this->connection->commit();
@@ -51,15 +53,15 @@ final class DoctrineEventStore implements EventStore
         }
     }
 
-    public function getEvents(Uuid $aggregateId): array
+    public function getEvents(Uuid $uuid): array
     {
         $sql = 'SELECT event_data, event_type, version FROM event_store 
                 WHERE aggregate_id = ? 
                 ORDER BY version ASC';
 
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(1, $aggregateId->toString(), Types::STRING);
-        $result = $stmt->executeQuery();
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(1, $uuid->toString(), Types::STRING);
+        $result = $statement->executeQuery();
 
         $events = [];
         while ($row = $result->fetchAssociative()) {
@@ -69,16 +71,16 @@ final class DoctrineEventStore implements EventStore
         return $events;
     }
 
-    public function getEventsFromVersion(Uuid $aggregateId, int $fromVersion): array
+    public function getEventsFromVersion(Uuid $uuid, int $fromVersion): array
     {
         $sql = 'SELECT event_data, event_type, version FROM event_store 
                 WHERE aggregate_id = ? AND version >= ? 
                 ORDER BY version ASC';
 
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(1, $aggregateId->toString(), Types::STRING);
-        $stmt->bindValue(2, $fromVersion, Types::INTEGER);
-        $result = $stmt->executeQuery();
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(1, $uuid->toString(), Types::STRING);
+        $statement->bindValue(2, $fromVersion, Types::INTEGER);
+        $result = $statement->executeQuery();
 
         $events = [];
         while ($row = $result->fetchAssociative()) {
@@ -88,16 +90,16 @@ final class DoctrineEventStore implements EventStore
         return $events;
     }
 
-    public function findProjectAggregatesByOwnerId(Uuid $ownerId): array
+    public function findProjectAggregatesByOwnerId(Uuid $uuid): array
     {
         // PostgreSQL syntax for JSON extraction
         $sql = 'SELECT DISTINCT aggregate_id FROM event_store
                 WHERE event_type = ? AND event_data->>\'ownerId\' = ?';
 
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(1, 'App\\Project\\Domain\\Event\\ProjectCreatedEvent', Types::STRING);
-        $stmt->bindValue(2, $ownerId->toString(), Types::STRING);
-        $result = $stmt->executeQuery();
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(1, ProjectCreatedEvent::class, Types::STRING);
+        $statement->bindValue(2, $uuid->toString(), Types::STRING);
+        $result = $statement->executeQuery();
 
         $aggregateIds = [];
         while ($row = $result->fetchAssociative()) {
@@ -107,35 +109,35 @@ final class DoctrineEventStore implements EventStore
         return $aggregateIds;
     }
 
-    private function getCurrentVersion(Uuid $aggregateId): int
+    private function getCurrentVersion(Uuid $uuid): int
     {
         $sql = 'SELECT MAX(version) as version FROM event_store WHERE aggregate_id = ?';
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(1, $aggregateId->toString(), Types::STRING);
-        $result = $stmt->executeQuery();
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(1, $uuid->toString(), Types::STRING);
+        $result = $statement->executeQuery();
         $row = $result->fetchAssociative();
 
         return $row['version'] ?? 0;
     }
 
-    private function insertEvent(Uuid $aggregateId, DomainEvent $event, int $version): void
+    private function insertEvent(Uuid $uuid, DomainEvent $domainEvent, int $version): void
     {
         $sql = 'INSERT INTO event_store (aggregate_id, event_type, event_data, version, occurred_at) 
                 VALUES (?, ?, ?, ?, ?)';
 
-        $stmt = $this->connection->prepare($sql);
-        $stmt->bindValue(1, $aggregateId->toString(), Types::STRING);
-        $stmt->bindValue(2, get_class($event), Types::STRING);
-        $stmt->bindValue(3, $this->serializeEvent($event), Types::TEXT);
-        $stmt->bindValue(4, $version, Types::INTEGER);
-        $stmt->bindValue(5, $event->getOccurredAt(), Types::DATETIME_IMMUTABLE);
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(1, $uuid->toString(), Types::STRING);
+        $statement->bindValue(2, $domainEvent::class, Types::STRING);
+        $statement->bindValue(3, $this->serializeEvent($domainEvent), Types::TEXT);
+        $statement->bindValue(4, $version, Types::INTEGER);
+        $statement->bindValue(5, $domainEvent->getOccurredAt(), Types::DATETIME_IMMUTABLE);
 
-        $stmt->executeStatement();
+        $statement->executeStatement();
     }
 
-    private function serializeEvent(DomainEvent $event): string
+    private function serializeEvent(DomainEvent $domainEvent): string
     {
-        return $this->eventSerializer->serialize($event);
+        return $this->eventSerializer->serialize($domainEvent);
     }
 
 

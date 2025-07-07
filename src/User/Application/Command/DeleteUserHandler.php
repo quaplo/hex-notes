@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\User\Application\Command;
 
+use App\User\Domain\Model\User;
 use App\User\Application\Exception\UserNotFoundException;
 use App\User\Domain\Repository\UserRepositoryInterface;
 
@@ -14,25 +15,25 @@ final readonly class DeleteUserHandler
     ) {
     }
 
-    public function __invoke(DeleteUserCommand $command): void
+    public function __invoke(DeleteUserCommand $deleteUserCommand): void
     {
-        $userId = $command->getUserId();
-        
-        $user = $this->userRepository->findByIdIncludingDeleted($userId);
-        if (!$user) {
-            throw new UserNotFoundException($userId->toString());
+        $uuid = $deleteUserCommand->getUserId();
+
+        $user = $this->userRepository->findByIdIncludingDeleted($uuid);
+        if (!$user instanceof User) {
+            throw new UserNotFoundException($uuid->toString());
         }
-        
+
         if ($user->isDeleted()) {
             return; // Already deleted, no action needed
         }
-        
+
         // Call domain method to handle business logic and record events
         $user->delete();
-        
+
         // Save the user with updated state
         $this->userRepository->save($user);
-        
+
         // Domain events will be dispatched by the repository or infrastructure layer
     }
 }

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Project\Application\Command\RenameProjectCommand;
+use App\Project\Application\Command\DeleteProjectCommand;
+use App\Project\Application\Command\AddProjectWorkerCommand;
+use App\Project\Application\Command\RemoveProjectWorkerCommand;
 use App\Project\Application\Command\RegisterProjectHandler;
 use App\Project\Application\Command\RenameProjectHandler;
 use App\Project\Application\Command\DeleteProjectHandler;
@@ -11,16 +15,14 @@ use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
-use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
 use App\Project\Domain\Exception\ProjectNotFoundException;
-use App\Project\Domain\ValueObject\ProjectRole;
 use App\Tests\Project\Doubles\InMemoryProjectRepository;
 use App\Tests\Project\Helpers\ProjectTestFactory;
 use App\Tests\Project\Helpers\ProjectEventAsserter;
 
-describe('Project Integration Tests', function () {
-    
-    beforeEach(function () {
+describe('Project Integration Tests', function (): void {
+
+    beforeEach(function (): void {
         $this->repository = new InMemoryProjectRepository();
         $this->registerHandler = new RegisterProjectHandler($this->repository);
         $this->renameHandler = new RenameProjectHandler($this->repository);
@@ -29,82 +31,82 @@ describe('Project Integration Tests', function () {
         $this->removeWorkerHandler = new RemoveProjectWorkerHandler($this->repository);
     });
 
-    describe('Complete Project Lifecycle', function () {
-        
-        test('project can be created, renamed, and deleted', function () {
+    describe('Complete Project Lifecycle', function (): void {
+
+        test('project can be created, renamed, and deleted', function (): void {
             // Create project
-            $registerCommand = ProjectTestFactory::createValidRegisterProjectCommand([
+            $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
                 'name' => 'Initial Project'
             ]);
-            $project = ($this->registerHandler)($registerCommand);
-            
+            $project = ($this->registerHandler)($registerProjectCommand);
+
             expect((string)$project->getName())->toBe('Initial Project');
             expect($project->isDeleted())->toBeFalse();
             expect($this->repository->count())->toBe(1);
 
             // Rename project
-            $renameCommand = \App\Project\Application\Command\RenameProjectCommand::fromPrimitives(
+            $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                 (string)$project->getId(),
                 'Renamed Project'
             );
-            $renamedProject = ($this->renameHandler)($renameCommand);
-            
+            $renamedProject = ($this->renameHandler)($renameProjectCommand);
+
             expect((string)$renamedProject->getName())->toBe('Renamed Project');
             expect($renamedProject->getId()->equals($project->getId()))->toBeTrue();
 
             // Delete project
-            $deleteCommand = \App\Project\Application\Command\DeleteProjectCommand::fromPrimitives(
+            $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
                 (string)$project->getId()
             );
-            $deletedProject = ($this->deleteHandler)($deleteCommand);
-            
+            $deletedProject = ($this->deleteHandler)($deleteProjectCommand);
+
             expect($deletedProject->isDeleted())->toBeTrue();
             expect($deletedProject->getId()->equals($project->getId()))->toBeTrue();
         });
 
-        test('project worker management workflow', function () {
+        test('project worker management workflow', function (): void {
             // Create project
-            $registerCommand = ProjectTestFactory::createValidRegisterProjectCommand([
+            $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
                 'name' => 'Team Project'
             ]);
-            $project = ($this->registerHandler)($registerCommand);
-            
-            $userId1 = ProjectTestFactory::createValidUuid();
+            $project = ($this->registerHandler)($registerProjectCommand);
+
+            $uuid = ProjectTestFactory::createValidUuid();
             $userId2 = ProjectTestFactory::createValidUuid();
             $addedBy = ProjectTestFactory::createValidUuid();
 
             // Add first worker
-            $addWorkerCommand1 = \App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+            $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(),
-                (string)$userId1,
+                (string)$uuid,
                 'participant',
                 (string)$addedBy
             );
-            $projectWithWorker1 = ($this->addWorkerHandler)($addWorkerCommand1);
-            
+            $projectWithWorker1 = ($this->addWorkerHandler)($addProjectWorkerCommand);
+
             expect($projectWithWorker1->getWorkers())->toHaveCount(1);
 
             // Add second worker
-            $addWorkerCommand2 = \App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+            $addWorkerCommand2 = AddProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(),
                 (string)$userId2,
                 'owner',
                 (string)$addedBy
             );
             $projectWithWorker2 = ($this->addWorkerHandler)($addWorkerCommand2);
-            
+
             expect($projectWithWorker2->getWorkers())->toHaveCount(2);
 
             // Remove first worker
-            $removeWorkerCommand = \App\Project\Application\Command\RemoveProjectWorkerCommand::fromPrimitives(
+            $removeProjectWorkerCommand = RemoveProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(),
-                (string)$userId1,
+                (string)$uuid,
                 (string)$addedBy
             );
-            $projectWithRemovedWorker = ($this->removeWorkerHandler)($removeWorkerCommand);
-            
+            $projectWithRemovedWorker = ($this->removeWorkerHandler)($removeProjectWorkerCommand);
+
             expect($projectWithRemovedWorker->getWorkers())->toHaveCount(1);
-            
+
             // Verify remaining worker is the second one
             $workers = $projectWithRemovedWorker->getWorkers();
             expect($workers)->toHaveCount(1);
@@ -115,49 +117,49 @@ describe('Project Integration Tests', function () {
 
     });
 
-    describe('Event Sourcing Integration', function () {
-        
-        test('all operations record appropriate domain events', function () {
+    describe('Event Sourcing Integration', function (): void {
+
+        test('all operations record appropriate domain events', function (): void {
             // Register project
-            $registerCommand = ProjectTestFactory::createValidRegisterProjectCommand([
+            $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
                 'name' => 'Event Test Project'
             ]);
-            $project = ($this->registerHandler)($registerCommand);
-            
+            $project = ($this->registerHandler)($registerProjectCommand);
+
             $events = $this->repository->getEventsForProject($project->getId());
             ProjectEventAsserter::assertEventCount($events, 1);
             ProjectEventAsserter::assertContainsEventType($events, ProjectCreatedEvent::class);
 
             // Rename project
-            $renameCommand = \App\Project\Application\Command\RenameProjectCommand::fromPrimitives(
+            $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                 (string)$project->getId(),
                 'Renamed Event Project'
             );
-            ($this->renameHandler)($renameCommand);
-            
+            ($this->renameHandler)($renameProjectCommand);
+
             $events = $this->repository->getEventsForProject($project->getId());
             ProjectEventAsserter::assertEventCount($events, 2);
             ProjectEventAsserter::assertContainsEventType($events, ProjectRenamedEvent::class);
 
             // Add worker
-            $addWorkerCommand = \App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+            $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(),
                 (string)ProjectTestFactory::createValidUuid(),
                 'participant',
                 (string)ProjectTestFactory::createValidUuid()
             );
-            ($this->addWorkerHandler)($addWorkerCommand);
-            
+            ($this->addWorkerHandler)($addProjectWorkerCommand);
+
             $events = $this->repository->getEventsForProject($project->getId());
             ProjectEventAsserter::assertEventCount($events, 3);
             ProjectEventAsserter::assertContainsEventType($events, ProjectWorkerAddedEvent::class);
 
             // Delete project
-            $deleteCommand = \App\Project\Application\Command\DeleteProjectCommand::fromPrimitives(
+            $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
                 (string)$project->getId()
             );
-            ($this->deleteHandler)($deleteCommand);
-            
+            ($this->deleteHandler)($deleteProjectCommand);
+
             $events = $this->repository->getEventsForProject($project->getId());
             ProjectEventAsserter::assertEventCount($events, 4);
             ProjectEventAsserter::assertContainsEventType($events, ProjectDeletedEvent::class);
@@ -165,166 +167,166 @@ describe('Project Integration Tests', function () {
 
     });
 
-    describe('Error Scenarios', function () {
-        
-        test('operations on non-existent project throw ProjectNotFoundException', function () {
-            $nonExistentId = ProjectTestFactory::createValidUuid();
+    describe('Error Scenarios', function (): void {
+
+        test('operations on non-existent project throw ProjectNotFoundException', function (): void {
+            $uuid = ProjectTestFactory::createValidUuid();
 
             // Rename non-existent project
-            expect(function () use ($nonExistentId) {
-                $renameCommand = \App\Project\Application\Command\RenameProjectCommand::fromPrimitives(
-                    (string)$nonExistentId,
+            expect(function () use ($uuid): void {
+                $renameProjectCommand = RenameProjectCommand::fromPrimitives(
+                    (string)$uuid,
                     'New Name'
                 );
-                ($this->renameHandler)($renameCommand);
+                ($this->renameHandler)($renameProjectCommand);
             })->toThrow(ProjectNotFoundException::class);
 
             // Delete non-existent project
-            expect(function () use ($nonExistentId) {
-                $deleteCommand = \App\Project\Application\Command\DeleteProjectCommand::fromPrimitives(
-                    (string)$nonExistentId
+            expect(function () use ($uuid): void {
+                $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
+                    (string)$uuid
                 );
-                ($this->deleteHandler)($deleteCommand);
+                ($this->deleteHandler)($deleteProjectCommand);
             })->toThrow(ProjectNotFoundException::class);
 
             // Add worker to non-existent project
-            expect(function () use ($nonExistentId) {
-                $addWorkerCommand = \App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
-                    (string)$nonExistentId,
+            expect(function () use ($uuid): void {
+                $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
+                    (string)$uuid,
                     (string)ProjectTestFactory::createValidUuid(),
                     'participant',
                     (string)ProjectTestFactory::createValidUuid()
                 );
-                ($this->addWorkerHandler)($addWorkerCommand);
+                ($this->addWorkerHandler)($addProjectWorkerCommand);
             })->toThrow(ProjectNotFoundException::class);
 
             // Remove worker from non-existent project
-            expect(function () use ($nonExistentId) {
-                $removeWorkerCommand = \App\Project\Application\Command\RemoveProjectWorkerCommand::fromPrimitives(
-                    (string)$nonExistentId,
+            expect(function () use ($uuid): void {
+                $removeProjectWorkerCommand = RemoveProjectWorkerCommand::fromPrimitives(
+                    (string)$uuid,
                     (string)ProjectTestFactory::createValidUuid()
                 );
-                ($this->removeWorkerHandler)($removeWorkerCommand);
+                ($this->removeWorkerHandler)($removeProjectWorkerCommand);
             })->toThrow(ProjectNotFoundException::class);
         });
 
-        test('operations on deleted project throw domain exceptions', function () {
+        test('operations on deleted project throw domain exceptions', function (): void {
             // Create and delete project
-            $registerCommand = ProjectTestFactory::createValidRegisterProjectCommand([
+            $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
                 'name' => 'To Be Deleted'
             ]);
-            $project = ($this->registerHandler)($registerCommand);
-            
-            $deleteCommand = \App\Project\Application\Command\DeleteProjectCommand::fromPrimitives(
+            $project = ($this->registerHandler)($registerProjectCommand);
+
+            $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
                 (string)$project->getId()
             );
-            ($this->deleteHandler)($deleteCommand);
+            ($this->deleteHandler)($deleteProjectCommand);
 
             // Try to rename deleted project
-            expect(function () use ($project) {
-                $renameCommand = \App\Project\Application\Command\RenameProjectCommand::fromPrimitives(
+            expect(function () use ($project): void {
+                $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                     (string)$project->getId(),
                     'New Name'
                 );
-                ($this->renameHandler)($renameCommand);
+                ($this->renameHandler)($renameProjectCommand);
             })->toThrow(DomainException::class, 'Cannot rename deleted project');
 
             // Try to add worker to deleted project
-            expect(function () use ($project) {
-                $addWorkerCommand = \App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+            expect(function () use ($project): void {
+                $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
                     (string)$project->getId(),
                     (string)ProjectTestFactory::createValidUuid(),
                     'participant',
                     (string)ProjectTestFactory::createValidUuid()
                 );
-                ($this->addWorkerHandler)($addWorkerCommand);
+                ($this->addWorkerHandler)($addProjectWorkerCommand);
             })->toThrow(DomainException::class, 'Cannot add worker to deleted project');
         });
 
-        test('duplicate worker cannot be added', function () {
+        test('duplicate worker cannot be added', function (): void {
             // Create project
-            $registerCommand = ProjectTestFactory::createValidRegisterProjectCommand();
-            $project = ($this->registerHandler)($registerCommand);
-            
-            $userId = ProjectTestFactory::createValidUuid();
+            $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand();
+            $project = ($this->registerHandler)($registerProjectCommand);
+
+            $uuid = ProjectTestFactory::createValidUuid();
             $addedBy = ProjectTestFactory::createValidUuid();
 
             // Add worker first time
-            $addWorkerCommand1 = \App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+            $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(),
-                (string)$userId,
+                (string)$uuid,
                 'participant',
                 (string)$addedBy
             );
-            $projectWithWorker = ($this->addWorkerHandler)($addWorkerCommand1);
+            $projectWithWorker = ($this->addWorkerHandler)($addProjectWorkerCommand);
             expect($projectWithWorker->getWorkers())->toHaveCount(1);
 
             // Try to add same worker again
-            $addWorkerCommand2 = \App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+            $addWorkerCommand2 = AddProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(),
-                (string)$userId,
+                (string)$uuid,
                 'owner',
                 (string)$addedBy
             );
             $finalProject = ($this->addWorkerHandler)($addWorkerCommand2);
-            
+
             // Should still have only 1 worker (duplicate ignored)
             expect($finalProject->getWorkers())->toHaveCount(1);
         });
 
-        test('removing non-existent worker throws exception', function () {
+        test('removing non-existent worker throws exception', function (): void {
             // Create project
-            $registerCommand = ProjectTestFactory::createValidRegisterProjectCommand();
-            $project = ($this->registerHandler)($registerCommand);
-            
-            $nonExistentUserId = ProjectTestFactory::createValidUuid();
+            $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand();
+            $project = ($this->registerHandler)($registerProjectCommand);
 
-            expect(function () use ($project, $nonExistentUserId) {
-                $removeWorkerCommand = \App\Project\Application\Command\RemoveProjectWorkerCommand::fromPrimitives(
+            $uuid = ProjectTestFactory::createValidUuid();
+
+            expect(function () use ($project, $uuid): void {
+                $removeProjectWorkerCommand = RemoveProjectWorkerCommand::fromPrimitives(
                     (string)$project->getId(),
-                    (string)$nonExistentUserId
+                    (string)$uuid
                 );
-                ($this->removeWorkerHandler)($removeWorkerCommand);
+                ($this->removeWorkerHandler)($removeProjectWorkerCommand);
             })->toThrow(DomainException::class, 'Worker not found in project');
         });
 
     });
 
-    describe('Concurrency and State Consistency', function () {
-        
-        test('multiple operations maintain consistent state', function () {
+    describe('Concurrency and State Consistency', function (): void {
+
+        test('multiple operations maintain consistent state', function (): void {
             // Create project
-            $registerCommand = ProjectTestFactory::createValidRegisterProjectCommand([
+            $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
                 'name' => 'Concurrency Test'
             ]);
-            $project = ($this->registerHandler)($registerCommand);
-            
+            $project = ($this->registerHandler)($registerProjectCommand);
+
             // Simulate concurrent operations
-            $userId1 = ProjectTestFactory::createValidUuid();
+            $uuid = ProjectTestFactory::createValidUuid();
             $userId2 = ProjectTestFactory::createValidUuid();
             $userId3 = ProjectTestFactory::createValidUuid();
             $addedBy = ProjectTestFactory::createValidUuid();
 
             // Add multiple workers
-            ($this->addWorkerHandler)(\App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(), (string)$userId1, 'participant', (string)$addedBy
+            ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
+                (string)$project->getId(), (string)$uuid, 'participant', (string)$addedBy
             ));
-            
-            ($this->addWorkerHandler)(\App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+
+            ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(), (string)$userId2, 'owner', (string)$addedBy
             ));
-            
-            ($this->addWorkerHandler)(\App\Project\Application\Command\AddProjectWorkerCommand::fromPrimitives(
+
+            ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(), (string)$userId3, 'participant', (string)$addedBy
             ));
 
             // Rename project
-            ($this->renameHandler)(\App\Project\Application\Command\RenameProjectCommand::fromPrimitives(
+            ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
                 (string)$project->getId(), 'Renamed Concurrency Test'
             ));
 
             // Remove one worker
-            ($this->removeWorkerHandler)(\App\Project\Application\Command\RemoveProjectWorkerCommand::fromPrimitives(
+            ($this->removeWorkerHandler)(RemoveProjectWorkerCommand::fromPrimitives(
                 (string)$project->getId(), (string)$userId2, (string)$addedBy
             ));
 

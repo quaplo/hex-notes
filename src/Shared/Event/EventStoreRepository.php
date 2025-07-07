@@ -9,9 +9,9 @@ use App\Shared\ValueObject\Uuid;
 
 interface EventStoreRepository
 {
-    public function save(AggregateRoot $aggregate): void;
+    public function save(AggregateRoot $aggregateRoot): void;
 
-    public function load(Uuid $aggregateId): ?AggregateRoot;
+    public function load(Uuid $uuid): ?AggregateRoot;
 
-    public function exists(Uuid $aggregateId): bool;
+    public function exists(Uuid $uuid): bool;
 }

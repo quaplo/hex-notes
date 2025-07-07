@@ -2,9 +2,10 @@
 
 namespace App\Project\Domain\ValueObject;
 
+use Stringable;
 use InvalidArgumentException;
 
-final class ProjectName
+final readonly class ProjectName implements Stringable
 {
     public function __construct(private string $value)
     {

@@ -21,7 +21,7 @@ final readonly class DomainEventDispatcher implements EventDispatcher
     public function dispatch(array $events): void
     {
         foreach ($events as $event) {
-            $this->eventDispatcher->dispatch($event, get_class($event));
+            $this->eventDispatcher->dispatch($event, $event::class);
         }
     }
 }

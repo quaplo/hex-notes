@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Event;
 
+use RuntimeException;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventSerializer;
 
-final class CompositeEventSerializer implements EventSerializer
+final readonly class CompositeEventSerializer implements EventSerializer
 {
     /**
      * @var EventSerializer[]
@@ -19,17 +20,17 @@ final class CompositeEventSerializer implements EventSerializer
         $this->serializers = $serializers;
     }
 
-    public function serialize(DomainEvent $event): string
+    public function serialize(DomainEvent $domainEvent): string
     {
-        $eventType = get_class($event);
+        $eventType = $domainEvent::class;
         
         foreach ($this->serializers as $serializer) {
             if ($serializer->supports($eventType)) {
-                return $serializer->serialize($event);
+                return $serializer->serialize($domainEvent);
             }
         }
 
-        throw new \RuntimeException("No serializer found for event type: $eventType");
+        throw new RuntimeException("No serializer found for event type: $eventType");
     }
 
     public function deserialize(string $eventData, string $eventType): DomainEvent
@@ -40,7 +41,7 @@ final class CompositeEventSerializer implements EventSerializer
             }
         }
 
-        throw new \RuntimeException("No serializer found for event type: $eventType");
+        throw new RuntimeException("No serializer found for event type: $eventType");
     }
 
     public function supports(string $eventType): bool

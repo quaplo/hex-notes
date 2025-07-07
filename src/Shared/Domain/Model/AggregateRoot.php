@@ -13,18 +13,18 @@ abstract class AggregateRoot
     private array $domainEvents = [];
     private int $version = 0;
 
-    protected function recordEvent(DomainEvent $event): void
+    protected function recordEvent(DomainEvent $domainEvent): void
     {
-        $this->domainEvents[] = $event;
+        $this->domainEvents[] = $domainEvent;
     }
 
     /**
      * Apply event to aggregate state and record it
      */
-    protected function apply(DomainEvent $event): void
+    protected function apply(DomainEvent $domainEvent): void
     {
-        $this->handleEvent($event);
-        $this->recordEvent($event);
+        $this->handleEvent($domainEvent);
+        $this->recordEvent($domainEvent);
     }
 
     /**
@@ -61,9 +61,9 @@ abstract class AggregateRoot
     /**
      * Public method for replaying events during aggregate reconstruction
      */
-    public function replayEvent(DomainEvent $event): void
+    public function replayEvent(DomainEvent $domainEvent): void
     {
-        $this->handleEvent($event);
+        $this->handleEvent($domainEvent);
         $this->version++;
     }
 
@@ -93,5 +93,5 @@ abstract class AggregateRoot
     /**
      * Handle domain event for Event Sourcing replay and state changes
      */
-    abstract protected function handleEvent(DomainEvent $event): void;
+    abstract protected function handleEvent(DomainEvent $domainEvent): void;
 }

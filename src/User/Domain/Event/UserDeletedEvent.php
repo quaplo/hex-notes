@@ -12,16 +12,16 @@ use DateTimeImmutable;
 final readonly class UserDeletedEvent implements DomainEvent
 {
     public function __construct(
-        private Uuid $userId,
+        private Uuid $uuid,
         private Email $email,
         private DateTimeImmutable $occurredAt
     ) {
     }
 
-    public static function create(Uuid $userId, Email $email): self
+    public static function create(Uuid $uuid, Email $email): self
     {
         return new self(
-            $userId,
+            $uuid,
             $email,
             new DateTimeImmutable()
         );
@@ -29,7 +29,7 @@ final readonly class UserDeletedEvent implements DomainEvent
 
     public function getUserId(): Uuid
     {
-        return $this->userId;
+        return $this->uuid;
     }
 
     public function getEmail(): Email

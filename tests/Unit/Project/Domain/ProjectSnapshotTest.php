@@ -11,52 +11,51 @@ use App\Project\Domain\ValueObject\ProjectName;
 use App\Project\Domain\ValueObject\ProjectRole;
 use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Shared\ValueObject\Uuid;
-use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class ProjectSnapshotTest extends TestCase
 {
-    private ProjectSnapshotFactory $snapshotFactory;
+    private ProjectSnapshotFactory $projectSnapshotFactory;
 
     protected function setUp(): void
     {
-        $this->snapshotFactory = new ProjectSnapshotFactory();
+        $this->projectSnapshotFactory = new ProjectSnapshotFactory();
     }
 
     public function testCreateSnapshotFromProject(): void
     {
         // Arrange - Create a project with some data
-        $projectId = Uuid::generate();
-        $ownerId = Uuid::generate();
+        Uuid::generate();
+        $uuid = Uuid::generate();
         $projectName = new ProjectName('Test Project');
         
-        $project = Project::create($projectName, $ownerId);
+        $project = Project::create($projectName, $uuid);
         
         // Add some workers
         $worker1Id = Uuid::generate();
         $worker2Id = Uuid::generate();
         $addedBy = Uuid::generate();
         
-        $worker1 = ProjectWorker::create($worker1Id, ProjectRole::participant(), $addedBy);
+        $projectWorker = ProjectWorker::create($worker1Id, ProjectRole::participant(), $addedBy);
         $worker2 = ProjectWorker::create($worker2Id, ProjectRole::owner(), $addedBy);
         
-        $project->addWorker($worker1);
+        $project->addWorker($projectWorker);
         $project->addWorker($worker2);
         
         $version = 5;
 
         // Act - Create snapshot
-        $snapshot = $this->snapshotFactory->createSnapshot($project, $version);
+        $projectSnapshot = $this->projectSnapshotFactory->createSnapshot($project, $version);
 
         // Assert
-        $this->assertInstanceOf(ProjectSnapshot::class, $snapshot);
-        $this->assertEquals($project->getId(), $snapshot->getAggregateId());
-        $this->assertEquals($version, $snapshot->getVersion());
+        $this->assertInstanceOf(ProjectSnapshot::class, $projectSnapshot);
+        $this->assertEquals($project->getId(), $projectSnapshot->getAggregateId());
+        $this->assertEquals($version, $projectSnapshot->getVersion());
         
-        $data = $snapshot->getData();
+        $data = $projectSnapshot->getData();
         $this->assertEquals($project->getId()->toString(), $data['id']);
         $this->assertEquals('Test Project', $data['name']);
-        $this->assertEquals($ownerId->toString(), $data['ownerId']);
+        $this->assertEquals($uuid->toString(), $data['ownerId']);
         $this->assertArrayHasKey('createdAt', $data);
         $this->assertNull($data['deletedAt']);
         $this->assertCount(2, $data['workers']);
@@ -74,24 +73,24 @@ class ProjectSnapshotTest extends TestCase
     public function testRestoreProjectFromSnapshot(): void
     {
         // Arrange - Create original project
-        $projectId = Uuid::generate();
-        $ownerId = Uuid::generate();
+        Uuid::generate();
+        $uuid = Uuid::generate();
         $projectName = new ProjectName('Restored Project');
         
-        $originalProject = Project::create($projectName, $ownerId);
+        $originalProject = Project::create($projectName, $uuid);
         
         // Add worker to original
         $workerId = Uuid::generate();
         $addedBy = Uuid::generate();
-        $worker = ProjectWorker::create($workerId, ProjectRole::participant(), $addedBy);
-        $originalProject->addWorker($worker);
+        $projectWorker = ProjectWorker::create($workerId, ProjectRole::participant(), $addedBy);
+        $originalProject->addWorker($projectWorker);
         
         // Create snapshot
         $version = 3;
-        $snapshot = $this->snapshotFactory->createSnapshot($originalProject, $version);
+        $projectSnapshot = $this->projectSnapshotFactory->createSnapshot($originalProject, $version);
 
         // Act - Restore from snapshot
-        $restoredProject = $this->snapshotFactory->restoreFromSnapshot($snapshot);
+        $restoredProject = $this->projectSnapshotFactory->restoreFromSnapshot($projectSnapshot);
 
         // Assert - Compare restored project with original
         $this->assertEquals($originalProject->getId(), $restoredProject->getId());
@@ -129,24 +128,24 @@ class ProjectSnapshotTest extends TestCase
     public function testSnapshotWithDeletedProject(): void
     {
         // Arrange
-        $projectId = Uuid::generate();
-        $ownerId = Uuid::generate();
+        Uuid::generate();
+        $uuid = Uuid::generate();
         $projectName = new ProjectName('Deleted Project');
         
-        $project = Project::create($projectName, $ownerId);
+        $project = Project::create($projectName, $uuid);
         $project->delete();
         
         $version = 2;
 
         // Act
-        $snapshot = $this->snapshotFactory->createSnapshot($project, $version);
+        $projectSnapshot = $this->projectSnapshotFactory->createSnapshot($project, $version);
 
         // Assert
-        $data = $snapshot->getData();
+        $data = $projectSnapshot->getData();
         $this->assertNotNull($data['deletedAt']);
         
         // Restore and verify
-        $restoredProject = $this->snapshotFactory->restoreFromSnapshot($snapshot);
+        $restoredProject = $this->projectSnapshotFactory->restoreFromSnapshot($projectSnapshot);
         $this->assertTrue($restoredProject->isDeleted());
         
         // Compare only the timestamp part (ignore microseconds differences)
@@ -159,38 +158,38 @@ class ProjectSnapshotTest extends TestCase
     public function testSnapshotWithNoWorkers(): void
     {
         // Arrange
-        $projectId = Uuid::generate();
-        $ownerId = Uuid::generate();
+        Uuid::generate();
+        $uuid = Uuid::generate();
         $projectName = new ProjectName('Empty Project');
         
-        $project = Project::create($projectName, $ownerId);
+        $project = Project::create($projectName, $uuid);
         $version = 1;
 
         // Act
-        $snapshot = $this->snapshotFactory->createSnapshot($project, $version);
+        $projectSnapshot = $this->projectSnapshotFactory->createSnapshot($project, $version);
 
         // Assert
-        $data = $snapshot->getData();
+        $data = $projectSnapshot->getData();
         $this->assertEmpty($data['workers']);
         
         // Restore and verify
-        $restoredProject = $this->snapshotFactory->restoreFromSnapshot($snapshot);
+        $restoredProject = $this->projectSnapshotFactory->restoreFromSnapshot($projectSnapshot);
         $this->assertEmpty($restoredProject->getWorkers());
     }
 
     public function testSnapshotDataSerialization(): void
     {
         // Arrange
-        $projectId = Uuid::generate();
-        $ownerId = Uuid::generate();
+        Uuid::generate();
+        $uuid = Uuid::generate();
         $projectName = new ProjectName('Serialization Test');
         
-        $project = Project::create($projectName, $ownerId);
+        $project = Project::create($projectName, $uuid);
         $version = 1;
 
         // Act
-        $snapshot = $this->snapshotFactory->createSnapshot($project, $version);
-        $jsonData = json_encode($snapshot->getData());
+        $projectSnapshot = $this->projectSnapshotFactory->createSnapshot($project, $version);
+        $jsonData = json_encode($projectSnapshot->getData());
         $decodedData = json_decode($jsonData, true);
 
         // Assert - Verify data can be serialized and deserialized
@@ -198,6 +197,6 @@ class ProjectSnapshotTest extends TestCase
         $this->assertIsArray($decodedData);
         $this->assertEquals($project->getId()->toString(), $decodedData['id']);
         $this->assertEquals((string) $projectName, $decodedData['name']);
-        $this->assertEquals($ownerId->toString(), $decodedData['ownerId']);
+        $this->assertEquals($uuid->toString(), $decodedData['ownerId']);
     }
 }

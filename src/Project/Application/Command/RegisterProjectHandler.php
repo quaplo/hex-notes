@@ -14,9 +14,9 @@ final readonly class RegisterProjectHandler
     ) {
     }
 
-    public function __invoke(RegisterProjectCommand $command): Project
+    public function __invoke(RegisterProjectCommand $registerProjectCommand): Project
     {
-        $project = Project::create($command->name, $command->ownerId);
+        $project = Project::create($registerProjectCommand->name, $registerProjectCommand->ownerId);
         $this->projectRepository->save($project);
         
         return $project;

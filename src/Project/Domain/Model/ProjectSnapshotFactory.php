@@ -18,12 +18,12 @@ final class ProjectSnapshotFactory
     public function createSnapshot(Project $project, int $version): ProjectSnapshot
     {
         $workersData = [];
-        foreach ($project->getWorkers() as $worker) {
+        foreach ($project->getWorkers() as $projectWorker) {
             $workersData[] = [
-                'userId' => $worker->getUserId()->toString(),
-                'role' => (string) $worker->getRole(),
-                'createdAt' => $worker->getCreatedAt()->format(DateTimeImmutable::ATOM),
-                'addedBy' => $worker->getAddedBy()->toString(),
+                'userId' => $projectWorker->getUserId()->toString(),
+                'role' => (string) $projectWorker->getRole(),
+                'createdAt' => $projectWorker->getCreatedAt()->format(DateTimeImmutable::ATOM),
+                'addedBy' => $projectWorker->getAddedBy()->toString(),
             ];
         }
 
@@ -46,9 +46,9 @@ final class ProjectSnapshotFactory
     /**
      * Restore Project aggregate from snapshot
      */
-    public function restoreFromSnapshot(ProjectSnapshot $snapshot): Project
+    public function restoreFromSnapshot(ProjectSnapshot $projectSnapshot): Project
     {
-        $data = $snapshot->getData();
+        $data = $projectSnapshot->getData();
 
         // Create Project with restored state
         $project = new Project(
@@ -73,7 +73,7 @@ final class ProjectSnapshotFactory
         }
 
         // Set the version from snapshot
-        $project->restoreVersion($snapshot->getVersion());
+        $project->restoreVersion($projectSnapshot->getVersion());
 
         return $project;
     }

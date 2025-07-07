@@ -20,7 +20,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
 {
     private CreateUserHandler $createUserHandler;
     private DeleteUserHandler $deleteUserHandler;
-    private GetUserByIdHandler $getUserHandler;
+    private GetUserByIdHandler $getUserByIdHandler;
     private RegisterProjectHandler $registerProjectHandler;
     private GetProjectHandler $getProjectHandler;
 
@@ -31,7 +31,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         
         $this->createUserHandler = $container->get(CreateUserHandler::class);
         $this->deleteUserHandler = $container->get(DeleteUserHandler::class);
-        $this->getUserHandler = $container->get(GetUserByIdHandler::class);
+        $this->getUserByIdHandler = $container->get(GetUserByIdHandler::class);
         $this->registerProjectHandler = $container->get(RegisterProjectHandler::class);
         $this->getProjectHandler = $container->get(GetProjectHandler::class);
     }
@@ -42,22 +42,22 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         $userEmail = 'test-owner-' . uniqid() . '@example.com';
         
         $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
-        $userId = $user->getId();
+        $uuid = $user->getId();
 
         // Verify user was created
-        $userDto = ($this->getUserHandler)(new GetUserByIdQuery($userId->toString()));
+        $userDto = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
         expect($userDto)->not()->toBeNull();
-        expect($userDto->id)->toEqual($userId->toString());
+        expect($userDto->id)->toEqual($uuid->toString());
 
         // Given: Create projects owned by this user
         $project1 = ($this->registerProjectHandler)(RegisterProjectCommand::fromPrimitives(
             'User Project 1',
-            $userId->toString()
+            $uuid->toString()
         ));
 
         $project2 = ($this->registerProjectHandler)(RegisterProjectCommand::fromPrimitives(
             'User Project 2', 
-            $userId->toString()
+            $uuid->toString()
         ));
 
         // Verify projects were created and are accessible
@@ -66,14 +66,14 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         
         expect($project1Query)->not()->toBeNull();
         expect($project2Query)->not()->toBeNull();
-        expect($project1Query->getOwnerId())->toEqual($userId);
-        expect($project2Query->getOwnerId())->toEqual($userId);
+        expect($project1Query->getOwnerId())->toEqual($uuid);
+        expect($project2Query->getOwnerId())->toEqual($uuid);
 
         // When: Delete the user (triggers event-driven cleanup)
-        ($this->deleteUserHandler)(new DeleteUserCommand($userId->toString()));
+        ($this->deleteUserHandler)(new DeleteUserCommand($uuid->toString()));
 
         // Then: User should be soft deleted
-        $deletedUser = ($this->getUserHandler)(new GetUserByIdQuery($userId->toString()));
+        $deletedUser = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
         expect($deletedUser)->toBeNull(); // Soft deleted users are not returned by queries
 
         // Then: Projects should be cleaned up automatically via event handlers
@@ -94,17 +94,17 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         $userEmail = 'no-projects-' . uniqid() . '@example.com';
         
         $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
-        $userId = $user->getId();
+        $uuid = $user->getId();
 
         // Verify user was created
-        $userDto = ($this->getUserHandler)(new GetUserByIdQuery($userId->toString()));
+        $userDto = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
         expect($userDto)->not()->toBeNull();
 
         // When: Delete the user (no projects to clean up)
-        ($this->deleteUserHandler)(new DeleteUserCommand($userId->toString()));
+        ($this->deleteUserHandler)(new DeleteUserCommand($uuid->toString()));
 
         // Then: User should be soft deleted without any errors
-        $deletedUser = ($this->getUserHandler)(new GetUserByIdQuery($userId->toString()));
+        $deletedUser = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
         expect($deletedUser)->toBeNull();
     }
 
@@ -114,13 +114,13 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         $user1 = ($this->createUserHandler)(new CreateUserCommand('user1-' . uniqid() . '@example.com'));
         $user2 = ($this->createUserHandler)(new CreateUserCommand('user2-' . uniqid() . '@example.com'));
         
-        $user1Id = $user1->getId();
+        $uuid = $user1->getId();
         $user2Id = $user2->getId();
 
         // Given: Create projects for each user
         $user1Project = ($this->registerProjectHandler)(RegisterProjectCommand::fromPrimitives(
             'User 1 Project',
-            $user1Id->toString()
+            $uuid->toString()
         ));
 
         $user2Project = ($this->registerProjectHandler)(RegisterProjectCommand::fromPrimitives(
@@ -129,7 +129,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         ));
 
         // When: Delete only user1
-        ($this->deleteUserHandler)(new DeleteUserCommand($user1Id->toString()));
+        ($this->deleteUserHandler)(new DeleteUserCommand($uuid->toString()));
 
         // Then: Only user1's projects should be cleaned up
         $user1ProjectAfterDeletion = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($user1Project->getId()->toString()));
@@ -140,7 +140,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         expect($user2ProjectAfterDeletion->getOwnerId())->toEqual($user2Id);
 
         // And user2 should still exist
-        $user2AfterUser1Deletion = ($this->getUserHandler)(new GetUserByIdQuery($user2Id->toString()));
+        $user2AfterUser1Deletion = ($this->getUserByIdHandler)(new GetUserByIdQuery($user2Id->toString()));
         expect($user2AfterUser1Deletion)->not()->toBeNull();
     }
 }

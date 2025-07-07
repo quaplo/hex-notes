@@ -8,7 +8,7 @@ use App\Shared\Domain\Event\DomainEvent;
 
 interface EventSerializer
 {
-    public function serialize(DomainEvent $event): string;
+    public function serialize(DomainEvent $domainEvent): string;
     
     public function deserialize(string $eventData, string $eventType): DomainEvent;
     
