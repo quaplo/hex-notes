@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b51e6e6344d5c2d74b9c086fb0af6441",
+    "content-hash": "5fb24ac896620e7dff545c47d051c30c",
     "packages": [
         {
             "name": "brick/math",
@@ -6818,6 +6818,67 @@
             "time": "2021-10-29T13:26:27+00:00"
         },
         {
+            "name": "rector/rector",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rectorphp/rector.git",
+                "reference": "c243796b35fa46cb68ca08b4386931e1e1c3b05f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/c243796b35fa46cb68ca08b4386931e1e1c3b05f",
+                "reference": "c243796b35fa46cb68ca08b4386931e1e1c3b05f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4|^8.0",
+                "phpstan/phpstan": "^2.1.17"
+            },
+            "conflict": {
+                "rector/rector-doctrine": "*",
+                "rector/rector-downgrade-php": "*",
+                "rector/rector-phpunit": "*",
+                "rector/rector-symfony": "*"
+            },
+            "suggest": {
+                "ext-dom": "To manipulate phpunit.xml via the custom-rule command"
+            },
+            "default-branch": true,
+            "bin": [
+                "bin/rector"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Instant Upgrade and Automated Refactoring of any PHP code",
+            "homepage": "https://getrector.com/",
+            "keywords": [
+                "automation",
+                "dev",
+                "migration",
+                "refactoring"
+            ],
+            "support": {
+                "issues": "https://github.com/rectorphp/rector/issues",
+                "source": "https://github.com/rectorphp/rector/tree/main"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/tomasvotruba",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-07-07T17:14:01+00:00"
+        },
+        {
             "name": "sebastian/cli-parser",
             "version": "3.0.2",
             "source": {
@@ -8414,7 +8475,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "rector/rector": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
