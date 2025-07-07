@@ -9,8 +9,8 @@ use InvalidArgumentException;
 
 final readonly class ProjectRole implements Stringable
 {
-    public const OWNER = 'owner';
-    public const PARTICIPANT = 'participant';
+    public const string OWNER = 'owner';
+    public const string PARTICIPANT = 'participant';
 
     private string $value;
 

@@ -21,7 +21,7 @@ use JsonException;
 
 final class ProjectEventSerializer implements EventSerializer
 {
-    private const SUPPORTED_EVENTS = [
+    private const array SUPPORTED_EVENTS = [
         ProjectCreatedEvent::class,
         ProjectRenamedEvent::class,
         ProjectDeletedEvent::class,

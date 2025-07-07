@@ -17,7 +17,7 @@ use App\Shared\ValueObject\Uuid;
 
 final readonly class ProjectEventStoreRepository implements ProjectRepositoryInterface
 {
-    private const AGGREGATE_TYPE = 'Project';
+    private const string AGGREGATE_TYPE = 'Project';
 
     public function __construct(
         private EventStore $eventStore,

@@ -17,7 +17,7 @@ use JsonException;
 
 final class UserEventSerializer implements EventSerializer
 {
-    private const SUPPORTED_EVENTS = [
+    private const array SUPPORTED_EVENTS = [
         UserCreatedEvent::class,
         UserDeletedEvent::class,
     ];

@@ -58,11 +58,11 @@ it('can get project with user details via cross-domain query', function (): void
     
     
     // Mock QueryBus
-    $queryBus = new class($project, $ownerDto, $workerDto) implements QueryBus {
+    $queryBus = new readonly class($project, $ownerDto, $workerDto) implements QueryBus {
         public function __construct(
-            private readonly Project $project,
-            private readonly UserDto $ownerDto,
-            private readonly UserDto $workerDto
+            private Project $project,
+            private UserDto $ownerDto,
+            private UserDto $workerDto
         ) {}
         
         public function dispatch(object $query): mixed
@@ -86,8 +86,8 @@ it('can get project with user details via cross-domain query', function (): void
         deletedAt: null
     );
     
-    $projectDtoMapper = new class($expectedProjectDto) implements ProjectDtoMapperInterface {
-        public function __construct(private readonly ProjectDto $projectDto) {}
+    $projectDtoMapper = new readonly class($expectedProjectDto) implements ProjectDtoMapperInterface {
+        public function __construct(private ProjectDto $projectDto) {}
         
         public function toDto(Project $project): ProjectDto
         {
