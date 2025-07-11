@@ -26,16 +26,17 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
     {
         $sql = '
             INSERT INTO aggregate_snapshots (
-                aggregate_id, 
-                aggregate_type, 
-                version, 
-                data, 
+                aggregate_id,
+                aggregate_type,
+                version,
+                data,
                 created_at
             ) VALUES (?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                version = VALUES(version),
-                data = VALUES(data),
-                created_at = VALUES(created_at)
+            ON CONFLICT (aggregate_id, aggregate_type)
+            DO UPDATE SET
+                version = EXCLUDED.version,
+                data = EXCLUDED.data,
+                created_at = EXCLUDED.created_at
         ';
 
         $this->connection->executeStatement($sql, [
