@@ -33,8 +33,7 @@ class ProjectReadModelEntity
         private string $ownerId,
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE, name: 'created_at')]
         private DateTimeImmutable $createdAt
-    )
-    {
+    ) {
     }
 
     public function getId(): string

@@ -22,7 +22,7 @@ final readonly class FindProjectsByOwnerHandler
     public function __invoke(FindProjectsByOwnerQuery $findProjectsByOwnerQuery): array
     {
         $aggregateIds = $this->eventStore->findProjectAggregatesByOwnerId($findProjectsByOwnerQuery->getOwnerId());
-        
+
         $projects = [];
         foreach ($aggregateIds as $aggregateId) {
             $project = $this->projectRepository->load($aggregateId);
@@ -30,7 +30,7 @@ final readonly class FindProjectsByOwnerHandler
                 $projects[] = $project;
             }
         }
-        
+
         return $projects;
     }
 }

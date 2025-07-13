@@ -23,7 +23,7 @@ final readonly class CompositeEventSerializer implements EventSerializer
     public function serialize(DomainEvent $domainEvent): string
     {
         $eventType = $domainEvent::class;
-        
+
         foreach ($this->serializers as $serializer) {
             if ($serializer->supports($eventType)) {
                 return $serializer->serialize($domainEvent);

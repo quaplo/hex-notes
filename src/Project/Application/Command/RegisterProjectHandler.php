@@ -18,7 +18,7 @@ final readonly class RegisterProjectHandler
     {
         $project = Project::create($registerProjectCommand->name, $registerProjectCommand->ownerId);
         $this->projectRepository->save($project);
-        
+
         return $project;
     }
 }

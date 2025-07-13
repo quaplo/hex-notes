@@ -27,7 +27,7 @@ it('can get project with user details via cross-domain query', function (): void
     $uuid = Uuid::generate();
     $ownerId = Uuid::create('550e8400-e29b-41d4-a716-446655440001');
     $workerId = Uuid::create('550e8400-e29b-41d4-a716-446655440002');
-    
+
     // Create a real Project object for testing
     $project = new Project(
         $uuid,
@@ -35,7 +35,7 @@ it('can get project with user details via cross-domain query', function (): void
         new DateTimeImmutable('2024-01-01 00:00:00'),
         $ownerId
     );
-    
+
     // Add a worker using reflection to bypass business rules for testing
     $reflectionClass = new ReflectionClass($project);
     $reflectionProperty = $reflectionClass->getProperty('workers');
@@ -43,36 +43,29 @@ it('can get project with user details via cross-domain query', function (): void
     $reflectionProperty->setValue($project, [
         ProjectWorker::create($workerId, ProjectRole::participant(), $ownerId, new DateTimeImmutable('2024-01-01 00:00:00'))
     ]);
-    
+
     $ownerDto = new UserDto(
         id: '550e8400-e29b-41d4-a716-446655440001',
         email: 'owner@test.com',
         isDeleted: false
     );
-    
+
     $workerDto = new UserDto(
         id: '550e8400-e29b-41d4-a716-446655440002',
         email: 'worker@test.com',
         isDeleted: false
     );
-    
-    
+
+
     // Mock QueryBus
-    $queryBus = new class($project, $ownerDto, $workerDto) implements QueryBus {
-        private Project $project;
-        private UserDto $ownerDto;
-        private UserDto $workerDto;
-        
-        public function __construct(Project $project, UserDto $ownerDto, UserDto $workerDto)
+    $queryBus = new readonly class ($project, $ownerDto, $workerDto) implements QueryBus {
+        public function __construct(private Project $project, private UserDto $ownerDto, private UserDto $workerDto)
         {
-            $this->project = $project;
-            $this->ownerDto = $ownerDto;
-            $this->workerDto = $workerDto;
         }
-        
+
         public function dispatch(object $query): mixed
         {
-            return match($query::class) {
+            return match ($query::class) {
                 GetProjectQuery::class => $this->project,
                 GetUserByIdQuery::class => $query->userId === $this->project->getOwnerId()->toString()
                     ? $this->ownerDto
@@ -81,7 +74,7 @@ it('can get project with user details via cross-domain query', function (): void
             };
         }
     };
-    
+
     // Mock ProjectDtoMapper
     $expectedProjectDto = new ProjectDto(
         id: $uuid->toString(),
@@ -90,26 +83,23 @@ it('can get project with user details via cross-domain query', function (): void
         workers: [],
         isDeleted: false
     );
-    
-    $projectDtoMapper = new class($expectedProjectDto) implements ProjectDtoMapperInterface {
-        private ProjectDto $projectDto;
-        
-        public function __construct(ProjectDto $projectDto)
+
+    $projectDtoMapper = new readonly class ($expectedProjectDto) implements ProjectDtoMapperInterface {
+        public function __construct(private ProjectDto $projectDto)
         {
-            $this->projectDto = $projectDto;
         }
-        
+
         public function toDto(Project $project): ProjectDto
         {
             return $this->projectDto;
         }
     };
-    
+
     $handler = new GetProjectWithUserDetailsHandler($queryBus, $projectDtoMapper);
     $query = new GetProjectWithUserDetailsQuery($uuid);
-    
+
     $result = $handler($query);
-    
+
     expect($result)->toBeInstanceOf(ProjectWithUserDetailsDto::class)
         ->and($result->project)->toBeInstanceOf(ProjectDto::class)
         ->and($result->owner)->toEqual($ownerDto)
@@ -118,25 +108,25 @@ it('can get project with user details via cross-domain query', function (): void
 });
 
 it('returns null when project not found', function (): void {
-    $queryBus = new class() implements QueryBus {
+    $queryBus = new class () implements QueryBus {
         public function dispatch(object $query): mixed
         {
             return null; // Project not found
         }
     };
-    
-    $projectDtoMapper = new class() implements ProjectDtoMapperInterface {
+
+    $projectDtoMapper = new class () implements ProjectDtoMapperInterface {
         public function toDto(Project $project): ProjectDto
         {
             // This should never be called in this test
             throw new RuntimeException('ProjectDtoMapper should not be called when project is null');
         }
     };
-    
+
     $handler = new GetProjectWithUserDetailsHandler($queryBus, $projectDtoMapper);
     $query = new GetProjectWithUserDetailsQuery(Uuid::generate());
-    
+
     $result = $handler($query);
-    
+
     expect($result)->toBeNull();
 });

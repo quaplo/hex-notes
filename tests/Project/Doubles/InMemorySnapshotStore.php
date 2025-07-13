@@ -16,22 +16,22 @@ final class InMemorySnapshotStore implements SnapshotStore
     public function save(AggregateSnapshot $aggregateSnapshot): void
     {
         $key = $this->getKey($aggregateSnapshot->getAggregateId(), $aggregateSnapshot->getAggregateType());
-        
+
         if (!isset($this->snapshots[$key])) {
             $this->snapshots[$key] = [];
         }
-        
+
         $this->snapshots[$key][$aggregateSnapshot->getVersion()] = $aggregateSnapshot;
     }
 
     public function loadLatest(Uuid $uuid, string $aggregateType): ?AggregateSnapshot
     {
         $key = $this->getKey($uuid, $aggregateType);
-        
+
         if (!isset($this->snapshots[$key]) || empty($this->snapshots[$key])) {
             return null;
         }
-        
+
         $maxVersion = max(array_keys($this->snapshots[$key]));
         return $this->snapshots[$key][$maxVersion];
     }
@@ -39,14 +39,14 @@ final class InMemorySnapshotStore implements SnapshotStore
     public function loadByVersion(Uuid $uuid, string $aggregateType, int $version): ?AggregateSnapshot
     {
         $key = $this->getKey($uuid, $aggregateType);
-        
+
         return $this->snapshots[$key][$version] ?? null;
     }
 
     public function exists(Uuid $uuid, string $aggregateType): bool
     {
         $key = $this->getKey($uuid, $aggregateType);
-        
+
         return isset($this->snapshots[$key]) && !empty($this->snapshots[$key]);
     }
 
@@ -59,11 +59,11 @@ final class InMemorySnapshotStore implements SnapshotStore
     public function getLatestVersion(Uuid $uuid, string $aggregateType): ?int
     {
         $key = $this->getKey($uuid, $aggregateType);
-        
+
         if (!isset($this->snapshots[$key]) || empty($this->snapshots[$key])) {
             return null;
         }
-        
+
         return max(array_keys($this->snapshots[$key]));
     }
 

@@ -67,7 +67,7 @@ final class ProjectSnapshotFactory
                 Uuid::create($workerData['addedBy']),
                 new DateTimeImmutable($workerData['createdAt'])
             );
-            
+
             // Use reflection to add worker directly to avoid domain events
             $project->restoreWorker($worker);
         }

@@ -21,7 +21,7 @@ final class InMemoryEventDispatcher implements EventDispatcher
 
 
     // Testing helper methods
-    
+
     /**
      * @return array<DomainEvent>
      */
@@ -63,7 +63,7 @@ final class InMemoryEventDispatcher implements EventDispatcher
         if ($this->dispatchedEvents === []) {
             return null;
         }
-        
+
         return end($this->dispatchedEvents);
     }
 }

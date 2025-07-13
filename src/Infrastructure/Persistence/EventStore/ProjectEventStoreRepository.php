@@ -69,22 +69,22 @@ final readonly class ProjectEventStoreRepository implements ProjectRepositoryInt
     {
         // Try to load from snapshot first
         $snapshot = $this->snapshotStore->loadLatest($uuid, self::AGGREGATE_TYPE);
-        
+
         if ($snapshot instanceof AggregateSnapshot) {
             // Restore project from snapshot
             $project = $this->projectSnapshotFactory->restoreFromSnapshot($snapshot);
-            
+
             // Load events after the snapshot version
             $eventsAfterSnapshot = $this->eventStore->getEventsFromVersion(
                 $uuid,
                 $snapshot->getVersion() + 1
             );
-            
+
             // Replay events after snapshot
             foreach ($eventsAfterSnapshot as $eventAfterSnapshot) {
                 $project->replayEvent($eventAfterSnapshot);
             }
-            
+
             return $project;
         }
 

@@ -28,20 +28,20 @@ class ProjectSnapshotTest extends TestCase
         Uuid::generate();
         $uuid = Uuid::generate();
         $projectName = new ProjectName('Test Project');
-        
+
         $project = Project::create($projectName, $uuid);
-        
+
         // Add some workers
         $worker1Id = Uuid::generate();
         $worker2Id = Uuid::generate();
         $addedBy = Uuid::generate();
-        
+
         $projectWorker = ProjectWorker::create($worker1Id, ProjectRole::participant(), $addedBy);
         $worker2 = ProjectWorker::create($worker2Id, ProjectRole::owner(), $addedBy);
-        
+
         $project->addWorker($projectWorker);
         $project->addWorker($worker2);
-        
+
         $version = 5;
 
         // Act - Create snapshot
@@ -51,7 +51,7 @@ class ProjectSnapshotTest extends TestCase
         $this->assertInstanceOf(ProjectSnapshot::class, $projectSnapshot);
         $this->assertEquals($project->getId(), $projectSnapshot->getAggregateId());
         $this->assertEquals($version, $projectSnapshot->getVersion());
-        
+
         $data = $projectSnapshot->getData();
         $this->assertEquals($project->getId()->toString(), $data['id']);
         $this->assertEquals('Test Project', $data['name']);
@@ -59,12 +59,12 @@ class ProjectSnapshotTest extends TestCase
         $this->assertArrayHasKey('createdAt', $data);
         $this->assertNull($data['deletedAt']);
         $this->assertCount(2, $data['workers']);
-        
+
         // Check worker data
         $this->assertEquals($worker1Id->toString(), $data['workers'][0]['userId']);
         $this->assertEquals('participant', $data['workers'][0]['role']);
         $this->assertEquals($addedBy->toString(), $data['workers'][0]['addedBy']);
-        
+
         $this->assertEquals($worker2Id->toString(), $data['workers'][1]['userId']);
         $this->assertEquals('owner', $data['workers'][1]['role']);
         $this->assertEquals($addedBy->toString(), $data['workers'][1]['addedBy']);
@@ -76,15 +76,15 @@ class ProjectSnapshotTest extends TestCase
         Uuid::generate();
         $uuid = Uuid::generate();
         $projectName = new ProjectName('Restored Project');
-        
+
         $originalProject = Project::create($projectName, $uuid);
-        
+
         // Add worker to original
         $workerId = Uuid::generate();
         $addedBy = Uuid::generate();
         $projectWorker = ProjectWorker::create($workerId, ProjectRole::participant(), $addedBy);
         $originalProject->addWorker($projectWorker);
-        
+
         // Create snapshot
         $version = 3;
         $projectSnapshot = $this->projectSnapshotFactory->createSnapshot($originalProject, $version);
@@ -96,22 +96,22 @@ class ProjectSnapshotTest extends TestCase
         $this->assertEquals($originalProject->getId(), $restoredProject->getId());
         $this->assertEquals((string) $originalProject->getName(), (string) $restoredProject->getName());
         $this->assertEquals($originalProject->getOwnerId(), $restoredProject->getOwnerId());
-        
+
         // Compare timestamps without microseconds (lost in serialization)
         $this->assertEquals(
             $originalProject->getCreatedAt()->format('Y-m-d H:i:s'),
             $restoredProject->getCreatedAt()->format('Y-m-d H:i:s')
         );
-        
+
         $this->assertEquals($originalProject->getDeletedAt(), $restoredProject->getDeletedAt());
         $this->assertEquals($version, $restoredProject->getVersion());
-        
+
         // Check workers
         $restoredWorkers = $restoredProject->getWorkers();
         $originalWorkers = $originalProject->getWorkers();
-        
+
         $this->assertCount(count($originalWorkers), $restoredWorkers);
-        
+
         foreach ($originalWorkers as $index => $originalWorker) {
             $restoredWorker = $restoredWorkers[$index];
             $this->assertEquals($originalWorker->getUserId(), $restoredWorker->getUserId());
@@ -131,10 +131,10 @@ class ProjectSnapshotTest extends TestCase
         Uuid::generate();
         $uuid = Uuid::generate();
         $projectName = new ProjectName('Deleted Project');
-        
+
         $project = Project::create($projectName, $uuid);
         $project->delete();
-        
+
         $version = 2;
 
         // Act
@@ -143,11 +143,11 @@ class ProjectSnapshotTest extends TestCase
         // Assert
         $data = $projectSnapshot->getData();
         $this->assertNotNull($data['deletedAt']);
-        
+
         // Restore and verify
         $restoredProject = $this->projectSnapshotFactory->restoreFromSnapshot($projectSnapshot);
         $this->assertTrue($restoredProject->isDeleted());
-        
+
         // Compare only the timestamp part (ignore microseconds differences)
         $this->assertEquals(
             $project->getDeletedAt()->format('Y-m-d H:i:s'),
@@ -161,7 +161,7 @@ class ProjectSnapshotTest extends TestCase
         Uuid::generate();
         $uuid = Uuid::generate();
         $projectName = new ProjectName('Empty Project');
-        
+
         $project = Project::create($projectName, $uuid);
         $version = 1;
 
@@ -171,7 +171,7 @@ class ProjectSnapshotTest extends TestCase
         // Assert
         $data = $projectSnapshot->getData();
         $this->assertEmpty($data['workers']);
-        
+
         // Restore and verify
         $restoredProject = $this->projectSnapshotFactory->restoreFromSnapshot($projectSnapshot);
         $this->assertEmpty($restoredProject->getWorkers());
@@ -183,7 +183,7 @@ class ProjectSnapshotTest extends TestCase
         Uuid::generate();
         $uuid = Uuid::generate();
         $projectName = new ProjectName('Serialization Test');
-        
+
         $project = Project::create($projectName, $uuid);
         $version = 1;
 

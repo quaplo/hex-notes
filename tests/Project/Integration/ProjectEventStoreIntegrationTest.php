@@ -128,16 +128,23 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Add workers
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(), (string)$uuid, 'participant', (string)$addedBy
+                (string)$project->getId(),
+                (string)$uuid,
+                'participant',
+                (string)$addedBy
             ));
 
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(), (string)$userId2, 'owner', (string)$addedBy
+                (string)$project->getId(),
+                (string)$userId2,
+                'owner',
+                (string)$addedBy
             ));
 
             // Rename project
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
-                (string)$project->getId(), 'Final Name'
+                (string)$project->getId(),
+                'Final Name'
             ));
 
             // Clear in-memory state and reload from events
@@ -163,7 +170,6 @@ describe('Project Event Store Integration Tests', function (): void {
             expect($userIds)->toContain((string)$uuid);
             expect($userIds)->toContain((string)$userId2);
         });
-
     });
 
     describe('Event Store Error Scenarios', function (): void {
@@ -183,7 +189,6 @@ describe('Project Event Store Integration Tests', function (): void {
 
             expect($exists)->toBeFalse();
         });
-
     });
 
     describe('Event Dispatcher Integration', function (): void {
@@ -194,7 +199,8 @@ describe('Project Event Store Integration Tests', function (): void {
             $project = ($this->registerHandler)($registerProjectCommand);
 
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
-                (string)$project->getId(), 'Dispatcher Test'
+                (string)$project->getId(),
+                'Dispatcher Test'
             ));
 
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
@@ -213,7 +219,5 @@ describe('Project Event Store Integration Tests', function (): void {
             expect($eventTypes)->toContain(ProjectRenamedEvent::class);
             expect($eventTypes)->toContain(ProjectWorkerAddedEvent::class);
         });
-
     });
-
 });

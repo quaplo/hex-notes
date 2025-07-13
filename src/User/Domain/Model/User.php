@@ -84,7 +84,7 @@ final class User extends AggregateRoot
         if ($this->isDeleted()) {
             return; // Already deleted - idempotent operation
         }
-        
+
         // Record domain event for cross-domain communication
         $this->apply(UserDeletedEvent::create($this->uuid, $this->email));
     }

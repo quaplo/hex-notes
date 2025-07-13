@@ -68,7 +68,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
     private function handleProjectRenamed(ProjectRenamedEvent $projectRenamedEvent): void
     {
         $readModel = $this->projectReadModelRepository->findById($projectRenamedEvent->getProjectId());
-        
+
         if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for rename', [
                 'projectId' => $projectRenamedEvent->getProjectId()->toString()
@@ -78,7 +78,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
 
         $readModel->setName($projectRenamedEvent->getNewName()->__toString());
         $readModel->incrementVersion();
-        
+
         $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project read model renamed', [
@@ -91,7 +91,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
     private function handleProjectDeleted(ProjectDeletedEvent $projectDeletedEvent): void
     {
         $readModel = $this->projectReadModelRepository->findById($projectDeletedEvent->getProjectId());
-        
+
         if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for deletion', [
                 'projectId' => $projectDeletedEvent->getProjectId()->toString()
@@ -101,7 +101,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
 
         $readModel->setDeletedAt($projectDeletedEvent->getOccurredAt());
         $readModel->incrementVersion();
-        
+
         $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project read model deleted', [
@@ -112,7 +112,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
     private function handleProjectWorkerAdded(ProjectWorkerAddedEvent $projectWorkerAddedEvent): void
     {
         $readModel = $this->projectReadModelRepository->findById($projectWorkerAddedEvent->getProjectId());
-        
+
         if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for worker addition', [
                 'projectId' => $projectWorkerAddedEvent->getProjectId()->toString()
@@ -129,7 +129,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
 
         $readModel->addWorker($workerData);
         $readModel->incrementVersion();
-        
+
         $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project worker added to read model', [
@@ -142,7 +142,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
     private function handleProjectWorkerRemoved(ProjectWorkerRemovedEvent $projectWorkerRemovedEvent): void
     {
         $readModel = $this->projectReadModelRepository->findById($projectWorkerRemovedEvent->getProjectId());
-        
+
         if (!$readModel instanceof ProjectReadModelEntity) {
             $this->logger->warning('Project read model not found for worker removal', [
                 'projectId' => $projectWorkerRemovedEvent->getProjectId()->toString()
@@ -152,7 +152,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
 
         $readModel->removeWorker($projectWorkerRemovedEvent->getUserId()->toString());
         $readModel->incrementVersion();
-        
+
         $this->projectReadModelRepository->save($readModel);
 
         $this->logger->info('Project worker removed from read model', [

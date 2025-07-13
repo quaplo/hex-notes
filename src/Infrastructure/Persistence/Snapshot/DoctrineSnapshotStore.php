@@ -17,7 +17,8 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
 {
     public function __construct(
         private Connection $connection
-    ) {}
+    ) {
+    }
 
     /**
      * @throws Exception
@@ -193,12 +194,12 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
     private function getAggregateType(AggregateSnapshot $aggregateSnapshot): string
     {
         $className = $aggregateSnapshot::class;
-        
+
         // Extract type from class name (e.g., ProjectSnapshot -> Project)
         if (preg_match('/([A-Z][a-z]+)Snapshot$/', $className, $matches)) {
             return $matches[1];
         }
-        
+
         throw new RuntimeException('Cannot determine aggregate type from snapshot class: ' . $className);
     }
 }

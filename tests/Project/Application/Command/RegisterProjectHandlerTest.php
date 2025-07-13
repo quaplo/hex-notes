@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 use App\Project\Application\Command\RegisterProjectHandler;
 use App\Project\Domain\Model\Project;
 use App\Tests\Project\Doubles\InMemoryProjectRepository;
@@ -8,7 +9,7 @@ use App\Tests\Project\Helpers\ProjectEventAsserter;
 use App\Tests\Project\Helpers\ProjectTestFactory;
 
 describe('RegisterProjectHandler', function (): void {
-    
+
     test('register project handler creates new project', function (): void {
         $repository = new InMemoryProjectRepository();
         $handler = new RegisterProjectHandler($repository);
@@ -33,7 +34,7 @@ describe('RegisterProjectHandler', function (): void {
 
         expect($repository->count())->toBe(1);
         expect($repository->hasProject($project->getId()))->toBeTrue();
-        
+
         $savedProject = $repository->getProject($project->getId());
         expect($savedProject->getId()->equals($project->getId()))->toBeTrue();
         expect((string)$savedProject->getName())->toBe((string)$registerProjectCommand->name);
@@ -51,9 +52,9 @@ describe('RegisterProjectHandler', function (): void {
         $events = $repository->getEventsForProject($project->getId());
         ProjectEventAsserter::assertEventCount($events, 1);
         ProjectEventAsserter::assertProjectCreatedEvent(
-            $events[0], 
-            $project->getId(), 
-            $registerProjectCommand->name, 
+            $events[0],
+            $project->getId(),
+            $registerProjectCommand->name,
             $registerProjectCommand->ownerId
         );
     });
@@ -79,7 +80,7 @@ describe('RegisterProjectHandler', function (): void {
     test('multiple projects can be registered', function (): void {
         $repository = new InMemoryProjectRepository();
         $handler = new RegisterProjectHandler($repository);
-        
+
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
             'name' => 'Project One'
         ]);
@@ -95,5 +96,4 @@ describe('RegisterProjectHandler', function (): void {
         expect((string)$project1->getName())->toBe('Project One');
         expect((string)$project2->getName())->toBe('Project Two');
     });
-
 });

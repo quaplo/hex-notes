@@ -13,7 +13,7 @@ interface UserRepositoryInterface
 
     public function findByEmail(Email $email): ?User;
     public function findById(Uuid $uuid): ?User;
-    
+
     public function findByEmailIncludingDeleted(Email $email): ?User;
     public function findByIdIncludingDeleted(Uuid $uuid): ?User;
 }

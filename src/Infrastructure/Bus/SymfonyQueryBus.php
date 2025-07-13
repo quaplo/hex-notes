@@ -12,15 +12,16 @@ final readonly class SymfonyQueryBus implements QueryBus
 {
     public function __construct(
         private MessageBusInterface $messageBus
-    ) {}
+    ) {
+    }
 
     public function dispatch(object $query): mixed
     {
         $envelope = $this->messageBus->dispatch($query);
-        
+
         /** @var HandledStamp|null $handledStamp */
         $handledStamp = $envelope->last(HandledStamp::class);
-        
+
         return $handledStamp?->getResult();
     }
 }

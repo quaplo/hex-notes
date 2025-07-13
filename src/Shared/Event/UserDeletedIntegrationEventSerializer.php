@@ -24,14 +24,14 @@ final class UserDeletedIntegrationEventSerializer implements EventSerializer
             'userEmail' => $domainEvent->getUserEmail(),
             'occurredAt' => $domainEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
         ];
-        
+
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
 
     public function deserialize(string $eventData, string $eventType): DomainEvent
     {
         $data = json_decode($eventData, true, 512, JSON_THROW_ON_ERROR);
-        
+
         return UserDeletedIntegrationEvent::fromArray($data);
     }
 

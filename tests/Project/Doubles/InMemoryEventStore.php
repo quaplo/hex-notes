@@ -14,24 +14,24 @@ final class InMemoryEventStore implements EventStore
 {
     /** @var array<string, array<DomainEvent>> */
     private array $events = [];
-    
+
     /** @var array<string, int> */
     private array $versions = [];
 
     public function append(Uuid $uuid, array $events, int $expectedVersion): void
     {
         $id = (string)$uuid;
-        
+
         if (!isset($this->events[$id])) {
             $this->events[$id] = [];
             $this->versions[$id] = 0;
         }
-        
+
         // Version check for concurrency control
         if ($this->versions[$id] !== $expectedVersion) {
             throw new RuntimeException("Concurrency conflict: expected version {$expectedVersion}, got {$this->versions[$id]}");
         }
-        
+
         foreach ($events as $event) {
             $this->events[$id][] = $event;
             $this->versions[$id]++;
@@ -48,14 +48,14 @@ final class InMemoryEventStore implements EventStore
     {
         $id = (string)$uuid;
         $allEvents = $this->events[$id] ?? [];
-        
+
         return array_slice($allEvents, $fromVersion);
     }
 
     public function findProjectAggregatesByOwnerId(Uuid $uuid): array
     {
         $aggregateIds = [];
-        
+
         foreach ($this->events as $aggregateId => $events) {
             foreach ($events as $event) {
                 if (!$event instanceof ProjectCreatedEvent) {
@@ -69,7 +69,7 @@ final class InMemoryEventStore implements EventStore
                 // Only need to find one ProjectCreatedEvent per aggregate
             }
         }
-        
+
         return $aggregateIds;
     }
 
@@ -80,7 +80,7 @@ final class InMemoryEventStore implements EventStore
     }
 
     // Testing helper methods
-    
+
     public function clear(): void
     {
         $this->events = [];

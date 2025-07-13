@@ -114,7 +114,6 @@ describe('Project Integration Tests', function (): void {
             expect($remainingWorker->getUserId()->equals($userId2))->toBeTrue();
             expect((string)$remainingWorker->getRole())->toBe('owner');
         });
-
     });
 
     describe('Event Sourcing Integration', function (): void {
@@ -164,7 +163,6 @@ describe('Project Integration Tests', function (): void {
             ProjectEventAsserter::assertEventCount($events, 4);
             ProjectEventAsserter::assertContainsEventType($events, ProjectDeletedEvent::class);
         });
-
     });
 
     describe('Error Scenarios', function (): void {
@@ -289,7 +287,6 @@ describe('Project Integration Tests', function (): void {
                 ($this->removeWorkerHandler)($removeProjectWorkerCommand);
             })->toThrow(DomainException::class, 'Worker not found in project');
         });
-
     });
 
     describe('Concurrency and State Consistency', function (): void {
@@ -309,25 +306,37 @@ describe('Project Integration Tests', function (): void {
 
             // Add multiple workers
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(), (string)$uuid, 'participant', (string)$addedBy
+                (string)$project->getId(),
+                (string)$uuid,
+                'participant',
+                (string)$addedBy
             ));
 
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(), (string)$userId2, 'owner', (string)$addedBy
+                (string)$project->getId(),
+                (string)$userId2,
+                'owner',
+                (string)$addedBy
             ));
 
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(), (string)$userId3, 'participant', (string)$addedBy
+                (string)$project->getId(),
+                (string)$userId3,
+                'participant',
+                (string)$addedBy
             ));
 
             // Rename project
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
-                (string)$project->getId(), 'Renamed Concurrency Test'
+                (string)$project->getId(),
+                'Renamed Concurrency Test'
             ));
 
             // Remove one worker
             ($this->removeWorkerHandler)(RemoveProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(), (string)$userId2, (string)$addedBy
+                (string)$project->getId(),
+                (string)$userId2,
+                (string)$addedBy
             ));
 
             // Verify final state
@@ -340,7 +349,5 @@ describe('Project Integration Tests', function (): void {
             $events = $this->repository->getEventsForProject($project->getId());
             expect(count($events))->toBe(6); // Created + 3 workers added + renamed + 1 worker removed
         });
-
     });
-
 });

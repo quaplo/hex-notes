@@ -24,19 +24,19 @@ final readonly class GetProjectWithUserDetailsHandler
         $project = $this->queryBus->dispatch(
             GetProjectQuery::fromPrimitives($getProjectWithUserDetailsQuery->projectId->toString())
         );
-        
+
         if (!$project) {
             return null;
         }
-        
+
         // Map project to DTO
         $projectDto = $this->projectDtoMapper->toDto($project);
-        
+
         // Get owner from User domain
         $owner = $this->queryBus->dispatch(
             new GetUserByIdQuery($project->getOwnerId()->toString())
         );
-        
+
         // Get all workers from User domain
         $workers = [];
         foreach ($project->getWorkers() as $worker) {
@@ -47,7 +47,7 @@ final readonly class GetProjectWithUserDetailsHandler
                 $workers[] = $workerUser;
             }
         }
-        
+
         return new ProjectWithUserDetailsDto($projectDto, $owner, $workers);
     }
 }

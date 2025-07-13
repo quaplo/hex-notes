@@ -8,7 +8,7 @@ use App\Shared\ValueObject\Uuid;
 
 interface ProjectReadModelRepositoryInterface
 {
-    public function findByOwnerId(Uuid $ownerId): array;
-    
-    public function findByOwnerIdIncludingDeleted(Uuid $ownerId): array;
+    public function findByOwnerId(Uuid $uuid): array;
+
+    public function findByOwnerIdIncludingDeleted(Uuid $uuid): array;
 }

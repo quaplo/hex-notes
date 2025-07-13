@@ -10,12 +10,12 @@ use DateTimeImmutable;
 interface AggregateSnapshot
 {
     public function getAggregateId(): Uuid;
-    
+
     public function getAggregateType(): string;
-    
+
     public function getVersion(): int;
-    
+
     public function getData(): array;
-    
+
     public function getCreatedAt(): DateTimeImmutable;
 }

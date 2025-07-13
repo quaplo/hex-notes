@@ -28,7 +28,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
     {
         self::bootKernel();
         $container = static::getContainer();
-        
+
         $this->createUserHandler = $container->get(CreateUserHandler::class);
         $this->deleteUserHandler = $container->get(DeleteUserHandler::class);
         $this->getUserByIdHandler = $container->get(GetUserByIdHandler::class);
@@ -40,7 +40,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
     {
         // Given: Create a user
         $userEmail = 'test-owner-' . uniqid() . '@example.com';
-        
+
         $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
         $uuid = $user->getId();
 
@@ -56,14 +56,14 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         ));
 
         $project2 = ($this->registerProjectHandler)(RegisterProjectCommand::fromPrimitives(
-            'User Project 2', 
+            'User Project 2',
             $uuid->toString()
         ));
 
         // Verify projects were created and are accessible
         $project1Query = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($project1->getId()->toString()));
         $project2Query = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($project2->getId()->toString()));
-        
+
         expect($project1Query)->not()->toBeNull();
         expect($project2Query)->not()->toBeNull();
         expect($project1Query->getOwnerId())->toEqual($uuid);
@@ -79,10 +79,10 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         // Then: Projects should be cleaned up automatically via event handlers
         // Note: In a real system with asynchronous event handling, you might need to wait
         // or trigger the event handlers manually. For this test, assuming synchronous handling.
-        
+
         $cleanedProject1 = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($project1->getId()->toString()));
         $cleanedProject2 = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($project2->getId()->toString()));
-        
+
         // Projects owned by deleted users should be deleted (business rule)
         expect($cleanedProject1)->toBeNull();
         expect($cleanedProject2)->toBeNull();
@@ -92,7 +92,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
     {
         // Given: Create a user with no projects
         $userEmail = 'no-projects-' . uniqid() . '@example.com';
-        
+
         $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
         $uuid = $user->getId();
 
@@ -113,7 +113,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         // Given: Create two users
         $user1 = ($this->createUserHandler)(new CreateUserCommand('user1-' . uniqid() . '@example.com'));
         $user2 = ($this->createUserHandler)(new CreateUserCommand('user2-' . uniqid() . '@example.com'));
-        
+
         $uuid = $user1->getId();
         $user2Id = $user2->getId();
 
@@ -134,7 +134,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         // Then: Only user1's projects should be cleaned up
         $user1ProjectAfterDeletion = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($user1Project->getId()->toString()));
         $user2ProjectAfterDeletion = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($user2Project->getId()->toString()));
-        
+
         expect($user1ProjectAfterDeletion)->toBeNull(); // User1's project cleaned up
         expect($user2ProjectAfterDeletion)->not()->toBeNull(); // User2's project remains
         expect($user2ProjectAfterDeletion->getOwnerId())->toEqual($user2Id);

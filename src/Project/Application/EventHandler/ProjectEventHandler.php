@@ -36,7 +36,7 @@ final readonly class ProjectEventHandler
             default => $this->logger->info('Unhandled project event', ['event' => $domainEvent::class])
         };
     }
-    
+
     public function handle(DomainEvent $domainEvent): void
     {
         $this->__invoke($domainEvent);

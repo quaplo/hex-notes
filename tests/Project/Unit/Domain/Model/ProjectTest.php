@@ -199,5 +199,4 @@ describe('Project Domain Model', function (): void {
         expect(fn(): Project => $project->removeWorkerByUserId($uuid))
             ->toThrow(DomainException::class, 'Cannot remove worker from deleted project');
     });
-
 });

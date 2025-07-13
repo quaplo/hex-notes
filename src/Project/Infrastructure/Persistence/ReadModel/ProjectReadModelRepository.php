@@ -53,7 +53,7 @@ final readonly class ProjectReadModelRepository implements ProjectReadModelRepos
     public function findProjectsWithWorker(Uuid $uuid): array
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
-        
+
         return $queryBuilder->select('p')
             ->from(ProjectReadModelEntity::class, 'p')
             ->where('JSON_CONTAINS(p.workers, :userId, \'$[*].userId\') = 1')
@@ -66,7 +66,7 @@ final readonly class ProjectReadModelRepository implements ProjectReadModelRepos
     public function getProjectStatistics(Uuid $uuid): array
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
-        
+
         return $queryBuilder->select([
                 'COUNT(p.id) as total_projects',
                 'COUNT(CASE WHEN p.deletedAt IS NULL THEN 1 END) as active_projects',

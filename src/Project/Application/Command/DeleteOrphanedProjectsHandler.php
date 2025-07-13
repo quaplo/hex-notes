@@ -21,7 +21,7 @@ final readonly class DeleteOrphanedProjectsHandler
         // Find all projects owned by the deleted user
         $findProjectsForDeletionQuery = new FindProjectsForDeletionQuery($deleteOrphanedProjectsCommand->getDeletedUserId());
         $projects = $this->queryBus->dispatch($findProjectsForDeletionQuery);
-        
+
         // Delete each project
         foreach ($projects as $project) {
             $deletedProject = $project->delete();

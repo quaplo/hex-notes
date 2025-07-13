@@ -22,7 +22,7 @@ final readonly class UserRepository implements UserRepositoryInterface
     public function save(User $user): void
     {
         $existingEntity = $this->entityManager->getRepository(UserEntity::class)->findOneBy(['id' => $user->getId()->toString()]);
-        
+
         if ($existingEntity instanceof UserEntity) {
             // Update existing entity
             $existingEntity->setEmail($user->getEmail()->__toString());
@@ -39,9 +39,9 @@ final readonly class UserRepository implements UserRepositoryInterface
             );
             $this->entityManager->persist($userEntity);
         }
-        
+
         $this->entityManager->flush();
-        
+
         // Dispatch domain events after successful persistence
         if ($user->hasUncommittedEvents()) {
             $this->eventDispatcher->dispatch($user->getUncommittedEvents());
@@ -52,7 +52,7 @@ final readonly class UserRepository implements UserRepositoryInterface
     public function delete(Uuid $uuid): void
     {
         $entity = $this->entityManager->getRepository(UserEntity::class)->findOneBy(['id' => $uuid->toString()]);
-        
+
         if (!$entity instanceof UserEntity) {
             return; // User not found, nothing to delete
         }

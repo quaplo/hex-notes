@@ -12,7 +12,7 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
 {
     /** @var array<string, Project> */
     private array $projects = [];
-    
+
     /** @var array<string, array> */
     private array $savedEvents = [];
 
@@ -20,7 +20,7 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
     {
         $id = (string)$project->getId();
         $this->projects[$id] = $project;
-        
+
         // Track events for testing purposes
         $events = $project->getDomainEvents();
         if ($events !== []) {
@@ -29,7 +29,7 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
             }
             $this->savedEvents[$id] = array_merge($this->savedEvents[$id], $events);
         }
-        
+
         $project->clearDomainEvents();
     }
 
@@ -51,7 +51,7 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
     }
 
     // Testing helper methods
-    
+
     public function clear(): void
     {
         $this->projects = [];

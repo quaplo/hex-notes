@@ -24,8 +24,7 @@ class UserEntity
         private DateTimeImmutable $createdAt,
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
         private ?DateTimeImmutable $deletedAt = null
-    )
-    {
+    ) {
     }
 
     public function getId(): string

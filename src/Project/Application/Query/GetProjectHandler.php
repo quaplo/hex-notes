@@ -17,11 +17,11 @@ final readonly class GetProjectHandler
     public function __invoke(GetProjectQuery $getProjectQuery): ?Project
     {
         $project = $this->projectRepository->load($getProjectQuery->projectId);
-        
+
         if (!$project || $project->isDeleted()) {
             return null;
         }
-        
+
         return $project;
     }
 }

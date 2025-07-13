@@ -19,8 +19,8 @@ use PHPUnit\Framework\Assert;
 final class ProjectEventAsserter
 {
     public static function assertProjectCreatedEvent(
-        DomainEvent $domainEvent, 
-        Uuid $expectedId, 
+        DomainEvent $domainEvent,
+        Uuid $expectedId,
         ProjectName $projectName,
         Uuid $expectedOwnerId
     ): void {
@@ -32,9 +32,9 @@ final class ProjectEventAsserter
     }
 
     public static function assertProjectRenamedEvent(
-        DomainEvent $domainEvent, 
+        DomainEvent $domainEvent,
         Uuid $uuid,
-        ProjectName $expectedOldName, 
+        ProjectName $expectedOldName,
         ProjectName $expectedNewName
     ): void {
         Assert::assertInstanceOf(ProjectRenamedEvent::class, $domainEvent);
@@ -62,11 +62,11 @@ final class ProjectEventAsserter
         Assert::assertTrue($domainEvent->getProjectId()->equals($expectedProjectId));
         Assert::assertTrue($domainEvent->getUserId()->equals($expectedUserId));
         Assert::assertEquals((string)$projectRole, (string)$domainEvent->getRole());
-        
+
         if ($expectedAddedBy instanceof Uuid) {
             Assert::assertTrue($domainEvent->getAddedBy()->equals($expectedAddedBy));
         }
-        
+
         Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
@@ -79,11 +79,11 @@ final class ProjectEventAsserter
         Assert::assertInstanceOf(ProjectWorkerRemovedEvent::class, $domainEvent);
         Assert::assertTrue($domainEvent->getProjectId()->equals($expectedProjectId));
         Assert::assertTrue($domainEvent->getUserId()->equals($expectedUserId));
-        
+
         if ($expectedRemovedBy instanceof Uuid) {
             Assert::assertTrue($domainEvent->getRemovedBy()->equals($expectedRemovedBy));
         }
-        
+
         Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
@@ -101,7 +101,7 @@ final class ProjectEventAsserter
                 break;
             }
         }
-        
+
         Assert::assertTrue($found, "Expected to find event of type {$eventClass} in events");
     }
 
@@ -115,7 +115,7 @@ final class ProjectEventAsserter
     public static function assertEventsInOrder(array $events, array $expectedEventClasses): void
     {
         Assert::assertCount(count($expectedEventClasses), $events, "Event count mismatch");
-        
+
         foreach ($events as $index => $event) {
             $expectedClass = $expectedEventClasses[$index];
             Assert::assertInstanceOf($expectedClass, $event, "Event at index {$index} should be {$expectedClass}");

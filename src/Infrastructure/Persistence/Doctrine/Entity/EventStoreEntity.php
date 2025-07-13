@@ -30,8 +30,7 @@ class EventStoreEntity
         private int $version,
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
         private DateTimeImmutable $occurredAt
-    )
-    {
+    ) {
     }
 
     public function getId(): int

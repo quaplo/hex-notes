@@ -81,7 +81,7 @@ final class UserController extends BaseController
                     'error' => 'User not found'
                 ], JsonResponse::HTTP_NOT_FOUND);
             }
-            
+
             // Re-throw if it's a different exception
             throw $e;
         } catch (UserNotFoundException) {

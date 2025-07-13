@@ -20,7 +20,6 @@ use DateTimeImmutable;
 
 final class Project extends AggregateRoot
 {
-
     /**
      * @var ProjectWorker[]
      */

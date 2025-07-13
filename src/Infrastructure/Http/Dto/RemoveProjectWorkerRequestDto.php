@@ -12,7 +12,6 @@ final readonly class RemoveProjectWorkerRequestDto
         #[Assert\NotBlank(message: 'User ID cannot be empty')]
         #[Assert\Uuid(message: 'User ID must be a valid UUID')]
         public string $userId,
-        
         #[Assert\Uuid(message: 'Removed by must be a valid UUID')]
         public ?string $removedBy = null
     ) {

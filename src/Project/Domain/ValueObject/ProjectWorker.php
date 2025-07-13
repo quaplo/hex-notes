@@ -59,5 +59,4 @@ final readonly class ProjectWorker
             && $this->createdAt == $other->createdAt
             && $this->addedBy->equals($other->addedBy);
     }
-
 }
