@@ -387,48 +387,18 @@ composer deptrac
 
 ---
 
-## 9. Praktický návod: Nový projekt s Order doménou
+## 9. Praktický návod: Pridanie Order domény do existujúceho projektu
 
-### Krok 1: Základný Symfony setup
+### Prečo rozšíriť existujúci projekt namiesto tvorby nového
 
-```bash
-# Vytvorenie nového Symfony projektu
-composer create-project symfony/skeleton order-management
-cd order-management
+Rozhodnutie zachovať User a Project domény ako **referenčné vzory** je múdre z týchto dôvodov:
 
-# Inštalácia základných závislostí
-composer require symfony/framework-bundle:7.2.*
-composer require symfony/messenger:7.2.*
-composer require doctrine/orm:^3.5
-composer require doctrine/doctrine-migrations-bundle:^3.4
-composer require ramsey/uuid:>=4.9
+✅ **Kompletné príklady implementácie** - User/Project slúžia ako living documentation  
+✅ **Porovnanie prístupov** - môžeš vidieť konzistenciu medzi doménami  
+✅ **Budúce rozšírenia** - projekt slúži ako template pre ďalšie domény  
+✅ **Učenie sa** - konkrétne príklady sú lepšie ako abstraktná dokumentácia  
 
-# Dev závislosti
-composer require --dev pestphp/pest:^3.8
-composer require --dev phpstan/phpstan:^2.1
-composer require --dev rector/rector:dev-main
-composer require --dev qossmic/deptrac:^2.0
-composer require --dev squizlabs/php_codesniffer:^3.13
-```
-
-### Krok 2: Kopírovanie a adaptácia Shared komponentov
-
-Najjednoduchšie je skopírovať celý `src/Shared/` priečinok z aktuálneho projektu:
-
-```bash
-# Skopíruj z aktuálneho projektu
-cp -r /cesta/k/hex-notes/src/Shared src/
-cp -r /cesta/k/hex-notes/src/Infrastructure src/
-```
-
-**Súbory na kopírovanie** (zachovaj štruktúru):
-- `src/Shared/` - celý priečinok
-- `src/Infrastructure/Bus/` - CQRS implementácia  
-- `src/Infrastructure/Event/` - Event infrastructure
-- `src/Infrastructure/Persistence/EventStore/` - Event Store
-- `src/Infrastructure/Http/Controller/BaseController.php` - base controller
-
-### Krok 3: Vytvorenie Order domény
+### Krok 1: Vytvorenie Order domény štruktúry
 
 ```bash
 mkdir -p src/Order/{Domain/{Model,Event,ValueObject,Repository,Exception},Application/{Command,Query,EventHandler},Infrastructure/{Event,Persistence,Mapper}}
@@ -490,16 +460,9 @@ final class Order extends AggregateRoot
 }
 ```
 
-### Krok 4: Konfiguračné súbory
+### Krok 2: Aktualizácia konfiguračných súborov
 
-**Skopíruj a uprav**:
-- `config/services.yaml` - uprav pre Order kontext
-- `config/packages/messenger.yaml` - zachovaj
-- `config/packages/doctrine.yaml` - uprav mappings
-- `deptrac.yaml` - uprav vrstvy pre Order
-- `phpstan.dist.neon`, `rector.php`, `phpcs.xml.dist` - zachovaj
-
-**Upravený `config/services.yaml`** (zjednodušená verzia):
+**Aktualizuj `config/services.yaml`** - pridaj Order handlers:
 ```yaml
 services:
     _defaults:
@@ -648,35 +611,36 @@ doctrine:
         tags: [{ name: messenger.message_handler, bus: command.bus }]
 ```
 
-### Krok 5: Databáza a migrácie
+### Krok 3: Aktualizácia deptrac.yaml pre Order doménu
 
-```bash
-# Vytvorenie databázy
-php bin/console doctrine:database:create
-
-# Vytvorenie migrácie pre event_store
-php bin/console doctrine:migrations:diff
-
-# Aplikovanie migrácií  
-php bin/console doctrine:migrations:migrate
+```yaml
+# Pridaj do existujúceho deptrac.yaml:
+parameters:
+    layers:
+        # Context-specific Domain layers
+        - name: Domain
+          collectors:
+              - type: directory
+                value: 'src/(Project|User|Order)/Domain'
+        
+        # Context-specific Application layers
+        - name: Application
+          collectors:
+              - type: directory
+                value: 'src/(Project|User|Order)/Application'
+        
+        # Context-specific Infrastructure layers
+        - name: Infrastructure
+          collectors:
+              - type: directory
+                value: 'src/(Project|User|Order)/Infrastructure'
+              - type: directory
+                value: 'src/Infrastructure'
 ```
 
-**Event store migrácia** (vytvor manuálne ak treba):
-```sql
-CREATE TABLE event_store (
-    id SERIAL PRIMARY KEY,
-    aggregate_id VARCHAR(36) NOT NULL,
-    event_type VARCHAR(255) NOT NULL,
-    event_data TEXT NOT NULL,
-    version INTEGER NOT NULL,
-    occurred_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
-    UNIQUE(aggregate_id, version)
-);
-```
+### Krok 4: Vytvorenie prvého testu
 
-### Krok 6: Prvý test
-
-**`tests/Order/Unit/Domain/Model/OrderTest.php`**:
+**`tests/Order/Unit/Domain/Model/OrderTest.php`** (podľa vzoru Project testov):
 ```php
 <?php
 declare(strict_types=1);
@@ -697,34 +661,41 @@ describe('Order Domain Model', function (): void {
 });
 ```
 
-### Krok 7: Spustenie testov a kontrol
+### Krok 5: Spustenie testov a overenie
 
 ```bash
-# Composer skripty
+# Spustenie všetkých testov (User, Project a Order)
 composer test
-composer phpstan  
+
+# Kontrola architektúrnych obmedzení
 composer deptrac
+
+# Statická analýza
+composer phpstan
 ```
 
-### Časový harmonogram (1-2 dni)
+### Časový harmonogram (2-4 hodiny)
 
-**Deň 1 (setup)**:
-1. Symfony install + závislosti (30 min)
-2. Kopírovanie Shared komponentov (1 hod)
-3. Základná Order doména (2 hod)
-4. Konfigurácia (1 hod)
+**Prípravná fáza (30 min)**:
+1. Vytvorenie Order directory štruktúry
+2. Aktualizácia deptrac.yaml a services.yaml
 
-**Deň 2 (rozšírenie)**:
-1. Command/Query handlers (2 hod)
-2. Testy a quality tools (2 hod)
-3. Prvé API endpointy (2 hod)
+**Implementácia Order domény (2-3 hod)**:
+1. Order aggregate a základné value objects (1 hod)
+2. Order domain events a command/query handlers (1 hod)  
+3. Testy a integration s existujúcou infraštruktúrou (1 hod)
 
-### Najčastejšie úskalia
+**Overenie a dokumentácia (30 min)**:
+1. Spustenie všetkých quality checks
+2. Validácia konzistencie s User/Project vzormi
 
-1. **Namespace konflikty** - skontroluj `App\` namespace v autoload
-2. **Doctrine mappings** - uprav cesty v `doctrine.yaml`
-3. **Deptrac rules** - aktualizuj `deptrac.yaml` pre Order kontext
-4. **Event serializers** - vytvor `OrderEventSerializer`
+### Výhody tohto prístupu
+
+✅ **Referenčné vzory** - User a Project implementácie slúžia ako live príklady  
+✅ **Konzistentnosť** - jednoduché porovnanie medzi doménami  
+✅ **Budúce rozšírenia** - projekt sa stáva template pre ďalšie domény  
+✅ **Postupný vývoj** - môžeš využiť infraštruktúru okamžite  
+✅ **Minimálne riziká** - žiadne kopírovanie súborov, všetko je na svojom mieste
 
 ### Odporúčané kroky po základnom setup
 
