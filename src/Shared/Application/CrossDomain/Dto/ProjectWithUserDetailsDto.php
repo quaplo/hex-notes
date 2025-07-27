@@ -4,15 +4,28 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\CrossDomain\Dto;
 
-use App\Shared\Application\Dto\ProjectDto;
 use App\User\Application\Dto\UserDto;
 
 final readonly class ProjectWithUserDetailsDto
 {
     public function __construct(
-        public ProjectDto $project,
-        public ?UserDto $owner,
-        public array $workers = []
+        public array $project
     ) {
+    }
+
+    public static function create(
+        string $id,
+        string $name,
+        UserDto $owner,
+        array $workers,
+        bool $isDeleted
+    ): self {
+        return new self([
+            'id' => $id,
+            'name' => $name,
+            'owner' => $owner,
+            'workers' => $workers,
+            'isDeleted' => $isDeleted
+        ]);
     }
 }

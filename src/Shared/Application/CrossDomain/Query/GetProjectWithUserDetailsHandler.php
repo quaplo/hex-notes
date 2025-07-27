@@ -6,15 +6,13 @@ namespace App\Shared\Application\CrossDomain\Query;
 
 use App\Project\Application\Query\GetProjectQuery;
 use App\Shared\Application\CrossDomain\Dto\ProjectWithUserDetailsDto;
-use App\Shared\Application\Mapper\ProjectDtoMapperInterface;
 use App\Shared\Application\QueryBus;
 use App\User\Application\Query\GetUserByIdQuery;
 
 final readonly class GetProjectWithUserDetailsHandler
 {
     public function __construct(
-        private QueryBus $queryBus,
-        private ProjectDtoMapperInterface $projectDtoMapper
+        private QueryBus $queryBus
     ) {
     }
 
@@ -29,25 +27,39 @@ final readonly class GetProjectWithUserDetailsHandler
             return null;
         }
 
-        // Map project to DTO
-        $projectDto = $this->projectDtoMapper->toDto($project);
-
         // Get owner from User domain
         $owner = $this->queryBus->dispatch(
             new GetUserByIdQuery($project->getOwnerId()->toString())
         );
 
-        // Get all workers from User domain
+        if (!$owner) {
+            return null; // Cannot create project without owner
+        }
+
+        // Get all workers from User domain, filtering out deleted users
         $workers = [];
         foreach ($project->getWorkers() as $worker) {
             $workerUser = $this->queryBus->dispatch(
                 new GetUserByIdQuery($worker->getUserId()->toString())
             );
-            if ($workerUser) {
-                $workers[] = $workerUser;
+            if ($workerUser && !$workerUser->isDeleted) {
+                $workers[] = [
+                    'id' => $workerUser->id,
+                    'email' => $workerUser->email,
+                    'isDeleted' => $workerUser->isDeleted,
+                    'addedBy' => $worker->getAddedBy()->toString(),
+                    'addedAt' => $worker->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'role' => $worker->getRole()->__toString()
+                ];
             }
         }
 
-        return new ProjectWithUserDetailsDto($projectDto, $owner, $workers);
+        return ProjectWithUserDetailsDto::create(
+            id: $project->getId()->toString(),
+            name: $project->getName()->__toString(),
+            owner: $owner,
+            workers: $workers,
+            isDeleted: $project->isDeleted()
+        );
     }
 }
