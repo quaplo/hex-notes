@@ -57,11 +57,15 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
             $projectCreatedEvent->getOccurredAt()
         );
 
+        // Set version to 1 to match the version of ProjectCreated event in event store
+        $projectReadModelEntity->setVersion(1);
+
         $this->projectReadModelRepository->save($projectReadModelEntity);
 
         $this->logger->info('Project read model created', [
             'projectId' => $projectCreatedEvent->getProjectId()->toString(),
-            'name' => $projectCreatedEvent->getName()->__toString()
+            'name' => $projectCreatedEvent->getName()->__toString(),
+            'version' => 1
         ]);
     }
 
