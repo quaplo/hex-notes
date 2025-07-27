@@ -18,7 +18,8 @@ final readonly class DoctrineEventStore implements EventStore
 {
     public function __construct(
         private Connection $connection,
-        private EventSerializer $eventSerializer
+        private EventSerializer $eventSerializer,
+        private AggregateTypeResolver $aggregateTypeResolver
     ) {
     }
 
@@ -92,13 +93,83 @@ final readonly class DoctrineEventStore implements EventStore
 
     public function findProjectAggregatesByOwnerId(Uuid $uuid): array
     {
-        // PostgreSQL syntax for JSON extraction
+        // Optimized query using aggregate_type index
         $sql = 'SELECT DISTINCT aggregate_id FROM event_store
-                WHERE event_type = ? AND event_data->>\'ownerId\' = ?';
+                WHERE aggregate_type = ? AND event_type = ? AND event_data->>\'ownerId\' = ?';
 
         $statement = $this->connection->prepare($sql);
-        $statement->bindValue(1, ProjectCreatedEvent::class, Types::STRING);
-        $statement->bindValue(2, $uuid->toString(), Types::STRING);
+        $statement->bindValue(1, 'App\\Project', Types::STRING);
+        $statement->bindValue(2, ProjectCreatedEvent::class, Types::STRING);
+        $statement->bindValue(3, $uuid->toString(), Types::STRING);
+        $result = $statement->executeQuery();
+
+        $aggregateIds = [];
+        while ($row = $result->fetchAssociative()) {
+            $aggregateIds[] = Uuid::create($row['aggregate_id']);
+        }
+
+        return $aggregateIds;
+    }
+
+    public function getEventsByAggregateType(string $aggregateType, ?\DateTimeImmutable $from = null, ?\DateTimeImmutable $to = null): array
+    {
+        $sql = 'SELECT event_data, event_type, version FROM event_store WHERE aggregate_type = ?';
+        $params = [$aggregateType];
+        $types = [Types::STRING];
+
+        if ($from !== null) {
+            $sql .= ' AND occurred_at >= ?';
+            $params[] = $from;
+            $types[] = Types::DATETIME_IMMUTABLE;
+        }
+
+        if ($to !== null) {
+            $sql .= ' AND occurred_at <= ?';
+            $params[] = $to;
+            $types[] = Types::DATETIME_IMMUTABLE;
+        }
+
+        $sql .= ' ORDER BY occurred_at ASC, version ASC';
+
+        $statement = $this->connection->prepare($sql);
+        foreach ($params as $index => $param) {
+            $statement->bindValue($index + 1, $param, $types[$index]);
+        }
+        $result = $statement->executeQuery();
+
+        $events = [];
+        while ($row = $result->fetchAssociative()) {
+            $events[] = $this->deserializeEvent($row['event_data'], $row['event_type']);
+        }
+
+        return $events;
+    }
+
+    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $aggregateId): array
+    {
+        $sql = 'SELECT event_data, event_type, version FROM event_store
+                WHERE aggregate_type = ? AND aggregate_id = ?
+                ORDER BY version ASC';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(1, $aggregateType, Types::STRING);
+        $statement->bindValue(2, $aggregateId->toString(), Types::STRING);
+        $result = $statement->executeQuery();
+
+        $events = [];
+        while ($row = $result->fetchAssociative()) {
+            $events[] = $this->deserializeEvent($row['event_data'], $row['event_type']);
+        }
+
+        return $events;
+    }
+
+    public function getAggregateIdsByType(string $aggregateType): array
+    {
+        $sql = 'SELECT DISTINCT aggregate_id FROM event_store WHERE aggregate_type = ?';
+
+        $statement = $this->connection->prepare($sql);
+        $statement->bindValue(1, $aggregateType, Types::STRING);
         $result = $statement->executeQuery();
 
         $aggregateIds = [];
@@ -122,15 +193,18 @@ final readonly class DoctrineEventStore implements EventStore
 
     private function insertEvent(Uuid $uuid, DomainEvent $domainEvent, int $version): void
     {
-        $sql = 'INSERT INTO event_store (aggregate_id, event_type, event_data, version, occurred_at) 
-                VALUES (?, ?, ?, ?, ?)';
+        $aggregateType = $this->aggregateTypeResolver->resolve($domainEvent);
+        
+        $sql = 'INSERT INTO event_store (aggregate_id, aggregate_type, event_type, event_data, version, occurred_at)
+                VALUES (?, ?, ?, ?, ?, ?)';
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue(1, $uuid->toString(), Types::STRING);
-        $statement->bindValue(2, $domainEvent::class, Types::STRING);
-        $statement->bindValue(3, $this->serializeEvent($domainEvent), Types::TEXT);
-        $statement->bindValue(4, $version, Types::INTEGER);
-        $statement->bindValue(5, $domainEvent->getOccurredAt(), Types::DATETIME_IMMUTABLE);
+        $statement->bindValue(2, $aggregateType, Types::STRING);
+        $statement->bindValue(3, $domainEvent::class, Types::STRING);
+        $statement->bindValue(4, $this->serializeEvent($domainEvent), Types::TEXT);
+        $statement->bindValue(5, $version, Types::INTEGER);
+        $statement->bindValue(6, $domainEvent->getOccurredAt(), Types::DATETIME_IMMUTABLE);
 
         $statement->executeStatement();
     }

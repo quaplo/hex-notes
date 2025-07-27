@@ -29,4 +29,22 @@ interface EventStore
      * @return Uuid[]
      */
     public function findProjectAggregatesByOwnerId(Uuid $uuid): array;
+
+    /**
+     * Get events for specific aggregate type and time range (optimized with aggregate_type index)
+     * @return DomainEvent[]
+     */
+    public function getEventsByAggregateType(string $aggregateType, ?\DateTimeImmutable $from = null, ?\DateTimeImmutable $to = null): array;
+
+    /**
+     * Get events for specific aggregate type and aggregate ID (optimized with aggregate_type index)
+     * @return DomainEvent[]
+     */
+    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $aggregateId): array;
+
+    /**
+     * Get all aggregate IDs for specific aggregate type
+     * @return Uuid[]
+     */
+    public function getAggregateIdsByType(string $aggregateType): array;
 }

@@ -73,6 +73,34 @@ final class InMemoryEventStore implements EventStore
         return $aggregateIds;
     }
 
+    public function getEventsByAggregateType(string $aggregateType, ?\DateTimeImmutable $from = null, ?\DateTimeImmutable $to = null): array
+    {
+        // For testing, we'll return all events since we don't store aggregate_type in memory
+        // This is a simplified implementation for testing purposes
+        $allEvents = [];
+        foreach ($this->events as $events) {
+            $allEvents = array_merge($allEvents, $events);
+        }
+        return $allEvents;
+    }
+
+    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $aggregateId): array
+    {
+        // For testing, just return events for the given aggregate ID
+        // since we don't store aggregate_type in memory
+        return $this->getEvents($aggregateId);
+    }
+
+    public function getAggregateIdsByType(string $aggregateType): array
+    {
+        // For testing, return all aggregate IDs since we don't store aggregate_type
+        $aggregateIds = [];
+        foreach (array_keys($this->events) as $aggregateId) {
+            $aggregateIds[] = Uuid::create($aggregateId);
+        }
+        return $aggregateIds;
+    }
+
     public function getVersion(Uuid $uuid): int
     {
         $id = (string)$uuid;

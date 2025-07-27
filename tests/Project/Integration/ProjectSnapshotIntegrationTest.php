@@ -18,6 +18,7 @@ use App\Project\Application\Command\RemoveProjectWorkerHandler;
 use App\Project\Domain\Model\ProjectSnapshotFactory;
 use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Infrastructure\Persistence\EventStore\DoctrineEventStore;
+use App\Infrastructure\Persistence\EventStore\AggregateTypeResolver;
 use App\Infrastructure\Persistence\Snapshot\DoctrineSnapshotStore;
 use App\Infrastructure\Event\FrequencyBasedSnapshotStrategy;
 use App\Infrastructure\Event\CompositeEventSerializer;
@@ -68,7 +69,8 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         );
 
         // Setup core components
-        $this->doctrineEventStore = new DoctrineEventStore($this->connection, $compositeEventSerializer);
+        $aggregateTypeResolver = new AggregateTypeResolver();
+        $this->doctrineEventStore = new DoctrineEventStore($this->connection, $compositeEventSerializer, $aggregateTypeResolver);
         $symfonyEventDispatcher = $container->get('event_dispatcher');
         $this->domainEventDispatcher = new DomainEventDispatcher($symfonyEventDispatcher);
         $this->doctrineSnapshotStore = new DoctrineSnapshotStore($this->connection);
