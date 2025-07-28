@@ -12,6 +12,22 @@ enum Currency: string
     case EUR = 'EUR';
     case USD = 'USD';
     case GBP = 'GBP';
+
+    public static function fromString(string $currency): self
+    {
+        return self::tryFrom($currency) ?? throw new InvalidArgumentException("Invalid currency: {$currency}");
+    }
+
+    public function toString(): string
+    {
+        return $this->value;
+    }
+
+    public function equals(Currency $other): bool
+    {
+        return $this === $other;
+    }
+
     public function getSymbol(): string
     {
         return match ($this) {

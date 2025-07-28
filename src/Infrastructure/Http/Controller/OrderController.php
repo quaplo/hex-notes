@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 
 final class OrderController extends BaseController
 {
@@ -52,14 +53,20 @@ final class OrderController extends BaseController
     #[Route('/api/orders/{id}', name: 'get_order', methods: ['GET'])]
     public function detail(string $id): JsonResponse
     {
-        $getOrderQuery = GetOrderQuery::fromPrimitives($id);
-        $orderDto = $this->queryBus->dispatch($getOrderQuery);
+        try {
+            $getOrderQuery = GetOrderQuery::fromPrimitives($id);
+            $orderDto = $this->queryBus->dispatch($getOrderQuery);
 
-        if (!$orderDto) {
+            return new JsonResponse($orderDto, JsonResponse::HTTP_OK);
+        } catch (HandlerFailedException $e) {
+            // Check if the wrapped exception is a DomainException
+            if ($e->getPrevious() instanceof \DomainException) {
+                return new JsonResponse(['error' => 'Order not found'], JsonResponse::HTTP_NOT_FOUND);
+            }
+            throw $e;
+        } catch (\DomainException $e) {
             return new JsonResponse(['error' => 'Order not found'], JsonResponse::HTTP_NOT_FOUND);
         }
-
-        return new JsonResponse($orderDto, JsonResponse::HTTP_OK);
     }
 
     #[Route('/api/orders/{id}/items', name: 'add_order_item', methods: ['POST'])]

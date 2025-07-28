@@ -8,13 +8,13 @@ use InvalidArgumentException;
 
 enum OrderStatus: string
 {
-    case CREATED = 'created';
-    case CONFIRMED = 'confirmed';
-    case PAID = 'paid';
-    case SHIPPED = 'shipped';
-    case DELIVERED = 'delivered';
-    case CANCELLED = 'cancelled';
-    case REFUNDED = 'refunded';
+    case CREATED = 'CREATED';
+    case CONFIRMED = 'CONFIRMED';
+    case PAID = 'PAID';
+    case SHIPPED = 'SHIPPED';
+    case DELIVERED = 'DELIVERED';
+    case CANCELLED = 'CANCELLED';
+    case REFUNDED = 'REFUNDED';
 
     public function isCreated(): bool
     {
@@ -71,8 +71,4 @@ enum OrderStatus: string
         return $this->value;
     }
 
-    public function __toString(): string
-    {
-        return $this->value;
-    }
 }

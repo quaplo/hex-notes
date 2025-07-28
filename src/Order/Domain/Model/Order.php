@@ -242,7 +242,7 @@ final class Order extends AggregateRoot
     private function validateStatusTransition(OrderStatus $newStatus): void
     {
         // Business rules for valid status transitions
-        $validTransitions = [
+        $validTransitions = match ($this->status) {
             OrderStatus::CREATED => [OrderStatus::CONFIRMED, OrderStatus::CANCELLED],
             OrderStatus::CONFIRMED => [OrderStatus::PAID, OrderStatus::CANCELLED],
             OrderStatus::PAID => [OrderStatus::SHIPPED, OrderStatus::REFUNDED],
@@ -250,11 +250,9 @@ final class Order extends AggregateRoot
             OrderStatus::DELIVERED => [OrderStatus::REFUNDED],
             OrderStatus::CANCELLED => [], // Terminal state
             OrderStatus::REFUNDED => [], // Terminal state
-        ];
+        };
 
-        $allowedStatuses = $validTransitions[$this->status] ?? [];
-
-        if (!in_array($newStatus, $allowedStatuses, true)) {
+        if (!in_array($newStatus, $validTransitions, true)) {
             throw new DomainException(
                 sprintf(
                     'Invalid status transition from %s to %s',

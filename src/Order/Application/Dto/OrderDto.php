@@ -32,7 +32,7 @@ final readonly class OrderDto
         return new self(
             $order->getId()->toString(),
             $order->getCreatedAt(),
-            $order->getTotalPrice()->getAmount(),
+            (float) $order->getTotalPrice()->getAmount(),
             $order->getCurrency()->toString(),
             $order->getStatus()->toString(),
             $items
