@@ -6,19 +6,19 @@ parameters:
         - name: Domain
           collectors:
               - type: directory
-                value: 'src/(Project|User)/Domain'
+                value: 'src/(Project|User|Order)/Domain'
         
         # Context-specific Application layers
         - name: Application
           collectors:
               - type: directory
-                value: 'src/(Project|User)/Application'
+                value: 'src/(Project|User|Order)/Application'
         
         # Context-specific Infrastructure layers
         - name: Infrastructure
           collectors:
               - type: directory
-                value: 'src/(Project|User)/Infrastructure'
+                value: 'src/(Project|User|Order)/Infrastructure'
               - type: directory
                 value: 'src/Infrastructure'
         
