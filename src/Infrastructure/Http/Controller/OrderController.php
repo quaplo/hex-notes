@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Controller;
 
+use DomainException;
 use App\Order\Application\Command\CreateOrderCommand;
 use App\Order\Application\Command\AddItemCommand;
 use App\Order\Application\Command\RemoveItemCommand;
@@ -60,11 +61,11 @@ final class OrderController extends BaseController
             return new JsonResponse($orderDto, JsonResponse::HTTP_OK);
         } catch (HandlerFailedException $e) {
             // Check if the wrapped exception is a DomainException
-            if ($e->getPrevious() instanceof \DomainException) {
+            if ($e->getPrevious() instanceof DomainException) {
                 return new JsonResponse(['error' => 'Order not found'], JsonResponse::HTTP_NOT_FOUND);
             }
             throw $e;
-        } catch (\DomainException $e) {
+        } catch (DomainException) {
             return new JsonResponse(['error' => 'Order not found'], JsonResponse::HTTP_NOT_FOUND);
         }
     }

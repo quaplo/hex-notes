@@ -23,9 +23,9 @@ enum Currency: string
         return $this->value;
     }
 
-    public function equals(Currency $other): bool
+    public function equals(Currency $currency): bool
     {
-        return $this === $other;
+        return $this === $currency;
     }
 
     public function getSymbol(): string

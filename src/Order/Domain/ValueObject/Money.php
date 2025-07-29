@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Order\Domain\ValueObject;
 
+use Stringable;
 use InvalidArgumentException;
 
-final readonly class Money
+final readonly class Money implements Stringable
 {
     public function __construct(
         private float $amount,
@@ -37,22 +38,22 @@ final readonly class Money
         return $this->currency;
     }
 
-    public function add(Money $other): self
+    public function add(Money $money): self
     {
-        $this->ensureSameCurrency($other);
-        
-        return new self($this->amount + $other->amount, $this->currency);
+        $this->ensureSameCurrency($money);
+
+        return new self($this->amount + $money->amount, $this->currency);
     }
 
-    public function subtract(Money $other): self
+    public function subtract(Money $money): self
     {
-        $this->ensureSameCurrency($other);
-        
-        $newAmount = $this->amount - $other->amount;
+        $this->ensureSameCurrency($money);
+
+        $newAmount = $this->amount - $money->amount;
         if ($newAmount < 0) {
             throw new InvalidArgumentException('Cannot subtract to negative amount');
         }
-        
+
         return new self($newAmount, $this->currency);
     }
 
@@ -61,20 +62,20 @@ final readonly class Money
         if ($multiplier < 0) {
             throw new InvalidArgumentException('Multiplier cannot be negative');
         }
-        
+
         return new self($this->amount * $multiplier, $this->currency);
     }
 
-    public function equals(Money $other): bool
+    public function equals(Money $money): bool
     {
-        return $this->amount === $other->amount && $this->currency->equals($other->currency);
+        return $this->amount === $money->amount && $this->currency->equals($money->currency);
     }
 
-    public function isGreaterThan(Money $other): bool
+    public function isGreaterThan(Money $money): bool
     {
-        $this->ensureSameCurrency($other);
-        
-        return $this->amount > $other->amount;
+        $this->ensureSameCurrency($money);
+
+        return $this->amount > $money->amount;
     }
 
     public function isZero(): bool
@@ -92,14 +93,14 @@ final readonly class Money
         return $this->toString();
     }
 
-    private function ensureSameCurrency(Money $other): void
+    private function ensureSameCurrency(Money $money): void
     {
-        if (!$this->currency->equals($other->currency)) {
+        if (!$this->currency->equals($money->currency)) {
             throw new InvalidArgumentException(
                 sprintf(
                     'Cannot operate on different currencies: %s and %s',
                     $this->currency->toString(),
-                    $other->currency->toString()
+                    $money->currency->toString()
                 )
             );
         }

@@ -43,7 +43,9 @@ final class ProjectEventSerializer implements EventSerializer
                 ProjectDeletedEvent::class => $this->serializeProjectDeletedEvent($domainEvent),
                 ProjectWorkerAddedEvent::class => $this->serializeProjectWorkerAddedEvent($domainEvent),
                 ProjectWorkerRemovedEvent::class => $this->serializeProjectWorkerRemovedEvent($domainEvent),
-                default => throw new RuntimeException("Unsupported event type for serialization: " . $domainEvent::class)
+                default => throw new RuntimeException(
+                    "Unsupported event type for serialization: " . $domainEvent::class
+                )
             };
         } catch (JsonException $e) {
             throw new RuntimeException('Failed to serialize event', 0, $e);

@@ -23,8 +23,8 @@ final readonly class ChangeStatusCommand
         );
     }
 
-    public static function create(Uuid $orderId, OrderStatus $newStatus): self
+    public static function create(Uuid $uuid, OrderStatus $orderStatus): self
     {
-        return new self($orderId, $newStatus);
+        return new self($uuid, $orderStatus);
     }
 }

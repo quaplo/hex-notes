@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Order\Infrastructure\Event;
 
+use InvalidArgumentException;
 use App\Order\Domain\Event\ItemAddedEvent;
 use App\Order\Domain\Event\ItemRemovedEvent;
 use App\Order\Domain\Event\OrderCreatedEvent;
@@ -13,7 +14,7 @@ use App\Shared\Event\EventSerializer;
 
 final readonly class OrderEventSerializer implements EventSerializer
 {
-    private const SUPPORTED_EVENTS = [
+    private const array SUPPORTED_EVENTS = [
         OrderCreatedEvent::class,
         ItemAddedEvent::class,
         ItemRemovedEvent::class,
@@ -25,9 +26,9 @@ final readonly class OrderEventSerializer implements EventSerializer
         return in_array($eventType, self::SUPPORTED_EVENTS, true);
     }
 
-    public function serialize(DomainEvent $event): string
+    public function serialize(DomainEvent $domainEvent): string
     {
-        return json_encode($event->getEventData(), JSON_THROW_ON_ERROR);
+        return json_encode($domainEvent->getEventData(), JSON_THROW_ON_ERROR);
     }
 
     public function deserialize(string $eventData, string $eventType): DomainEvent
@@ -39,7 +40,7 @@ final readonly class OrderEventSerializer implements EventSerializer
             ItemAddedEvent::class => ItemAddedEvent::fromEventData($data),
             ItemRemovedEvent::class => ItemRemovedEvent::fromEventData($data),
             OrderStatusChangedEvent::class => OrderStatusChangedEvent::fromEventData($data),
-            default => throw new \InvalidArgumentException("Unknown event type: {$eventType}")
+            default => throw new InvalidArgumentException("Unknown event type: {$eventType}")
         };
     }
 }

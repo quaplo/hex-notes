@@ -13,7 +13,12 @@ final readonly class AddItemRequestDto
         #[Assert\Uuid(message: 'Product ID must be a valid UUID')]
         public string $productId,
         #[Assert\NotBlank(message: 'Product name cannot be empty')]
-        #[Assert\Length(min: 1, max: 255, minMessage: 'Product name must be at least 1 character', maxMessage: 'Product name cannot exceed 255 characters')]
+        #[Assert\Length(
+            min: 1,
+            max: 255,
+            minMessage: 'Product name must be at least 1 character',
+            maxMessage: 'Product name cannot exceed 255 characters'
+        )]
         public string $productName,
         #[Assert\NotBlank(message: 'Quantity cannot be empty')]
         #[Assert\Type(type: 'integer', message: 'Quantity must be an integer')]

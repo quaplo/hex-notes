@@ -70,5 +70,4 @@ enum OrderStatus: string
     {
         return $this->value;
     }
-
 }

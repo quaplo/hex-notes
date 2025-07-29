@@ -33,7 +33,9 @@ final class UserEventSerializer implements EventSerializer
             return match ($domainEvent::class) {
                 UserCreatedEvent::class => $this->serializeUserCreatedEvent($domainEvent),
                 UserDeletedEvent::class => $this->serializeUserDeletedEvent($domainEvent),
-                default => throw new RuntimeException("Unsupported event type for serialization: " . $domainEvent::class)
+                default => throw new RuntimeException(
+                    "Unsupported event type for serialization: " . $domainEvent::class
+                )
             };
         } catch (JsonException $e) {
             throw new RuntimeException('Failed to serialize event', 0, $e);

@@ -12,7 +12,7 @@ use DateTimeImmutable;
 final readonly class OrderStatusChangedEvent implements DomainEvent
 {
     public function __construct(
-        private Uuid $orderId,
+        private Uuid $uuid,
         private OrderStatus $oldStatus,
         private OrderStatus $newStatus,
         private DateTimeImmutable $occurredAt = new DateTimeImmutable()
@@ -21,7 +21,7 @@ final readonly class OrderStatusChangedEvent implements DomainEvent
 
     public function getOrderId(): Uuid
     {
-        return $this->orderId;
+        return $this->uuid;
     }
 
     public function getOldStatus(): OrderStatus
@@ -41,7 +41,7 @@ final readonly class OrderStatusChangedEvent implements DomainEvent
 
     public function getAggregateId(): string
     {
-        return $this->orderId->toString();
+        return $this->uuid->toString();
     }
 
     public function getEventName(): string
@@ -52,7 +52,7 @@ final readonly class OrderStatusChangedEvent implements DomainEvent
     public function getEventData(): array
     {
         return [
-            'orderId' => $this->orderId->toString(),
+            'orderId' => $this->uuid->toString(),
             'oldStatus' => $this->oldStatus->toString(),
             'newStatus' => $this->newStatus->toString(),
             'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')

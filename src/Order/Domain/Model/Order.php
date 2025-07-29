@@ -27,10 +27,10 @@ final class Order extends AggregateRoot
     private array $items = [];
 
     public function __construct(
-        private Uuid $orderId,
+        private Uuid $uuid,
         private DateTimeImmutable $createdAt,
         private Currency $currency,
-        private OrderStatus $status
+        private OrderStatus $orderStatus
     ) {
     }
 
@@ -42,9 +42,9 @@ final class Order extends AggregateRoot
             $currency,
             OrderStatus::CREATED
         );
-        
-        $order->apply(new OrderCreatedEvent($order->orderId, $currency));
-        
+
+        $order->apply(new OrderCreatedEvent($order->uuid, $currency));
+
         return $order;
     }
 
@@ -64,7 +64,7 @@ final class Order extends AggregateRoot
 
     public function getId(): Uuid
     {
-        return $this->orderId;
+        return $this->uuid;
     }
 
     public function getCreatedAt(): DateTimeImmutable
@@ -79,7 +79,7 @@ final class Order extends AggregateRoot
 
     public function getStatus(): OrderStatus
     {
-        return $this->status;
+        return $this->orderStatus;
     }
 
     /**
@@ -93,54 +93,54 @@ final class Order extends AggregateRoot
     public function getTotalPrice(): Money
     {
         $total = Money::zero($this->currency);
-        
+
         foreach ($this->items as $item) {
             $total = $total->add($item->getTotalPrice());
         }
-        
+
         return $total;
     }
 
-    public function addItem(Uuid $productId, string $productName, int $quantity, Money $unitPrice): self
+    public function addItem(Uuid $uuid, string $productName, int $quantity, Money $money): self
     {
-        if (!$this->status->canBeModified()) {
-            throw new DomainException('Cannot add items to order with status: ' . $this->status->toString());
+        if (!$this->orderStatus->canBeModified()) {
+            throw new DomainException('Cannot add items to order with status: ' . $this->orderStatus->toString());
         }
 
-        if (!$unitPrice->getCurrency()->equals($this->currency)) {
+        if (!$money->getCurrency()->equals($this->currency)) {
             throw new DomainException('Item currency must match order currency');
         }
 
         // Check if product already exists in order
-        foreach ($this->items as $existingItem) {
-            if ($existingItem->isSameProduct($productId)) {
+        foreach ($this->items as $item) {
+            if ($item->isSameProduct($uuid)) {
                 throw new DomainException('Product already exists in order. Use quantity change instead.');
             }
         }
 
-        $orderItem = OrderItem::create($productId, $productName, $quantity, $unitPrice);
+        $orderItem = OrderItem::create($uuid, $productName, $quantity, $money);
 
         $this->apply(new ItemAddedEvent(
-            $this->orderId,
+            $this->uuid,
             $orderItem->getOrderItemId(),
-            $productId,
+            $uuid,
             $productName,
             $quantity,
-            $unitPrice
+            $money
         ));
 
         return $this;
     }
 
-    public function removeItem(Uuid $orderItemId): self
+    public function removeItem(Uuid $uuid): self
     {
-        if (!$this->status->canBeModified()) {
-            throw new DomainException('Cannot remove items from order with status: ' . $this->status->toString());
+        if (!$this->orderStatus->canBeModified()) {
+            throw new DomainException('Cannot remove items from order with status: ' . $this->orderStatus->toString());
         }
 
         $found = false;
         foreach ($this->items as $item) {
-            if ($item->getOrderItemId()->equals($orderItemId)) {
+            if ($item->getOrderItemId()->equals($uuid)) {
                 $found = true;
                 break;
             }
@@ -150,30 +150,30 @@ final class Order extends AggregateRoot
             throw new DomainException('Order item not found');
         }
 
-        $this->apply(new ItemRemovedEvent($this->orderId, $orderItemId));
+        $this->apply(new ItemRemovedEvent($this->uuid, $uuid));
 
         return $this;
     }
 
-    public function changeStatus(OrderStatus $newStatus): self
+    public function changeStatus(OrderStatus $orderStatus): self
     {
-        if ($this->status === $newStatus) {
+        if ($this->orderStatus === $orderStatus) {
             return $this; // No change needed
         }
 
         // Business rules for status transitions
-        $this->validateStatusTransition($newStatus);
+        $this->validateStatusTransition($orderStatus);
 
-        $oldStatus = $this->status;
-        $this->apply(new OrderStatusChangedEvent($this->orderId, $oldStatus, $newStatus));
+        $oldStatus = $this->orderStatus;
+        $this->apply(new OrderStatusChangedEvent($this->uuid, $oldStatus, $orderStatus));
 
         return $this;
     }
 
     public function cancel(): self
     {
-        if (!$this->status->canBeCancelled()) {
-            throw new DomainException('Order cannot be cancelled in current status: ' . $this->status->toString());
+        if (!$this->orderStatus->canBeCancelled()) {
+            throw new DomainException('Order cannot be cancelled in current status: ' . $this->orderStatus->toString());
         }
 
         return $this->changeStatus(OrderStatus::CANCELLED);
@@ -201,48 +201,48 @@ final class Order extends AggregateRoot
         };
     }
 
-    private function handleOrderCreated(OrderCreatedEvent $event): void
+    private function handleOrderCreated(OrderCreatedEvent $orderCreatedEvent): void
     {
-        $this->orderId = $event->getOrderId();
-        $this->currency = $event->getCurrency();
-        $this->status = OrderStatus::CREATED;
-        $this->createdAt = $event->getOccurredAt();
+        $this->uuid = $orderCreatedEvent->getOrderId();
+        $this->currency = $orderCreatedEvent->getCurrency();
+        $this->orderStatus = OrderStatus::CREATED;
+        $this->createdAt = $orderCreatedEvent->getOccurredAt();
     }
 
-    private function handleItemAdded(ItemAddedEvent $event): void
+    private function handleItemAdded(ItemAddedEvent $itemAddedEvent): void
     {
         $orderItem = OrderItem::fromPrimitives(
-            $event->getOrderItemId()->toString(),
-            $event->getProductId()->toString(),
-            $event->getProductName(),
-            $event->getQuantity(),
-            $event->getUnitPrice()->getAmount(),
-            $event->getUnitPrice()->getCurrency()->toString()
+            $itemAddedEvent->getOrderItemId()->toString(),
+            $itemAddedEvent->getProductId()->toString(),
+            $itemAddedEvent->getProductName(),
+            $itemAddedEvent->getQuantity(),
+            $itemAddedEvent->getUnitPrice()->getAmount(),
+            $itemAddedEvent->getUnitPrice()->getCurrency()->toString()
         );
 
         $this->items[] = $orderItem;
     }
 
-    private function handleItemRemoved(ItemRemovedEvent $event): void
+    private function handleItemRemoved(ItemRemovedEvent $itemRemovedEvent): void
     {
         $this->items = array_filter(
             $this->items,
-            fn(OrderItem $item): bool => !$item->getOrderItemId()->equals($event->getOrderItemId())
+            fn(OrderItem $orderItem): bool => !$orderItem->getOrderItemId()->equals($itemRemovedEvent->getOrderItemId())
         );
-        
+
         // Re-index array
         $this->items = array_values($this->items);
     }
 
-    private function handleOrderStatusChanged(OrderStatusChangedEvent $event): void
+    private function handleOrderStatusChanged(OrderStatusChangedEvent $orderStatusChangedEvent): void
     {
-        $this->status = $event->getNewStatus();
+        $this->orderStatus = $orderStatusChangedEvent->getNewStatus();
     }
 
-    private function validateStatusTransition(OrderStatus $newStatus): void
+    private function validateStatusTransition(OrderStatus $orderStatus): void
     {
         // Business rules for valid status transitions
-        $validTransitions = match ($this->status) {
+        $validTransitions = match ($this->orderStatus) {
             OrderStatus::CREATED => [OrderStatus::CONFIRMED, OrderStatus::CANCELLED],
             OrderStatus::CONFIRMED => [OrderStatus::PAID, OrderStatus::CANCELLED],
             OrderStatus::PAID => [OrderStatus::SHIPPED, OrderStatus::REFUNDED],
@@ -252,12 +252,12 @@ final class Order extends AggregateRoot
             OrderStatus::REFUNDED => [], // Terminal state
         };
 
-        if (!in_array($newStatus, $validTransitions, true)) {
+        if (!in_array($orderStatus, $validTransitions, true)) {
             throw new DomainException(
                 sprintf(
                     'Invalid status transition from %s to %s',
-                    $this->status->toString(),
-                    $newStatus->toString()
+                    $this->orderStatus->toString(),
+                    $orderStatus->toString()
                 )
             );
         }

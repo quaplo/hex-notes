@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Persistence\EventStore;
 
+use App\Order\Domain\Event\OrderCreatedEvent;
 use App\Infrastructure\Persistence\Doctrine\Entity\EventStoreEntity;
 use App\Project\Domain\Event\ProjectCreatedEvent;
-use App\Project\Domain\ValueObject\ProjectName;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -15,15 +15,15 @@ final class CompoundPrimaryKeyTest extends TestCase
 {
     public function testCompoundPrimaryKeyStructure(): void
     {
-        $aggregateId = Uuid::generate();
+        $uuid = Uuid::generate();
         $version = 1;
         $aggregateType = 'App\\Project';
         $eventType = ProjectCreatedEvent::class;
         $eventData = '{"test": "data"}';
         $occurredAt = new DateTimeImmutable();
 
-        $entity = new EventStoreEntity(
-            $aggregateId->toString(),
+        $eventStoreEntity = new EventStoreEntity(
+            $uuid->toString(),
             $version,
             $aggregateType,
             $eventType,
@@ -32,24 +32,24 @@ final class CompoundPrimaryKeyTest extends TestCase
         );
 
         // Compound primary key components
-        $this->assertEquals($aggregateId->toString(), $entity->getAggregateId());
-        $this->assertEquals($version, $entity->getVersion());
-        
+        $this->assertEquals($uuid->toString(), $eventStoreEntity->getAggregateId());
+        $this->assertEquals($version, $eventStoreEntity->getVersion());
+
         // Other properties
-        $this->assertEquals($aggregateType, $entity->getAggregateType());
-        $this->assertEquals($eventType, $entity->getEventType());
-        $this->assertEquals($eventData, $entity->getEventData());
-        $this->assertEquals($occurredAt, $entity->getOccurredAt());
+        $this->assertEquals($aggregateType, $eventStoreEntity->getAggregateType());
+        $this->assertEquals($eventType, $eventStoreEntity->getEventType());
+        $this->assertEquals($eventData, $eventStoreEntity->getEventData());
+        $this->assertEquals($occurredAt, $eventStoreEntity->getOccurredAt());
     }
 
     public function testUniqueCompoundPrimaryKey(): void
     {
-        $aggregateId = Uuid::generate();
+        $uuid = Uuid::generate();
         $occurredAt = new DateTimeImmutable();
 
         // Same aggregate, different versions should be unique
         $entity1 = new EventStoreEntity(
-            $aggregateId->toString(),
+            $uuid->toString(),
             1,
             'App\\Project',
             ProjectCreatedEvent::class,
@@ -58,7 +58,7 @@ final class CompoundPrimaryKeyTest extends TestCase
         );
 
         $entity2 = new EventStoreEntity(
-            $aggregateId->toString(),
+            $uuid->toString(),
             2,
             'App\\Project',
             ProjectCreatedEvent::class,
@@ -73,14 +73,14 @@ final class CompoundPrimaryKeyTest extends TestCase
 
     public function testDifferentAggregatesSameVersion(): void
     {
-        $aggregateId1 = Uuid::generate();
+        $uuid = Uuid::generate();
         $aggregateId2 = Uuid::generate();
         $version = 1;
         $occurredAt = new DateTimeImmutable();
 
         // Different aggregates, same version should be unique
         $entity1 = new EventStoreEntity(
-            $aggregateId1->toString(),
+            $uuid->toString(),
             $version,
             'App\\Project',
             ProjectCreatedEvent::class,
@@ -92,7 +92,7 @@ final class CompoundPrimaryKeyTest extends TestCase
             $aggregateId2->toString(),
             $version,
             'App\\Order',
-            'App\\Order\\Domain\\Event\\OrderCreatedEvent',
+            OrderCreatedEvent::class,
             '{"test": "data2"}',
             $occurredAt
         );
@@ -105,7 +105,7 @@ final class CompoundPrimaryKeyTest extends TestCase
 
     public function testNoArtificialIdNeeded(): void
     {
-        $entity = new EventStoreEntity(
+        $eventStoreEntity = new EventStoreEntity(
             Uuid::generate()->toString(),
             1,
             'App\\Project',
@@ -115,10 +115,10 @@ final class CompoundPrimaryKeyTest extends TestCase
         );
 
         // Verify no getId() method exists (removed artificial ID)
-        $this->assertFalse(method_exists($entity, 'getId'));
-        
+        $this->assertFalse(method_exists($eventStoreEntity, 'getId'));
+
         // Natural compound key provides identification
-        $this->assertTrue(method_exists($entity, 'getAggregateId'));
-        $this->assertTrue(method_exists($entity, 'getVersion'));
+        $this->assertTrue(method_exists($eventStoreEntity, 'getAggregateId'));
+        $this->assertTrue(method_exists($eventStoreEntity, 'getVersion'));
     }
 }

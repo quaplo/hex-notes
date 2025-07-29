@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\EventStore;
 
+use DateTimeImmutable;
 use RuntimeException;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Shared\Domain\Event\DomainEvent;
@@ -111,19 +112,22 @@ final readonly class DoctrineEventStore implements EventStore
         return $aggregateIds;
     }
 
-    public function getEventsByAggregateType(string $aggregateType, ?\DateTimeImmutable $from = null, ?\DateTimeImmutable $to = null): array
-    {
+    public function getEventsByAggregateType(
+        string $aggregateType,
+        ?DateTimeImmutable $from = null,
+        ?DateTimeImmutable $to = null
+    ): array {
         $sql = 'SELECT event_data, event_type, version FROM event_store WHERE aggregate_type = ?';
         $params = [$aggregateType];
         $types = [Types::STRING];
 
-        if ($from !== null) {
+        if ($from instanceof DateTimeImmutable) {
             $sql .= ' AND occurred_at >= ?';
             $params[] = $from;
             $types[] = Types::DATETIME_IMMUTABLE;
         }
 
-        if ($to !== null) {
+        if ($to instanceof DateTimeImmutable) {
             $sql .= ' AND occurred_at <= ?';
             $params[] = $to;
             $types[] = Types::DATETIME_IMMUTABLE;
@@ -145,7 +149,7 @@ final readonly class DoctrineEventStore implements EventStore
         return $events;
     }
 
-    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $aggregateId): array
+    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $uuid): array
     {
         $sql = 'SELECT event_data, event_type, version FROM event_store
                 WHERE aggregate_type = ? AND aggregate_id = ?
@@ -153,7 +157,7 @@ final readonly class DoctrineEventStore implements EventStore
 
         $statement = $this->connection->prepare($sql);
         $statement->bindValue(1, $aggregateType, Types::STRING);
-        $statement->bindValue(2, $aggregateId->toString(), Types::STRING);
+        $statement->bindValue(2, $uuid->toString(), Types::STRING);
         $result = $statement->executeQuery();
 
         $events = [];
@@ -194,7 +198,7 @@ final readonly class DoctrineEventStore implements EventStore
     private function insertEvent(Uuid $uuid, DomainEvent $domainEvent, int $version): void
     {
         $aggregateType = $this->aggregateTypeResolver->resolve($domainEvent);
-        
+
         $sql = 'INSERT INTO event_store (aggregate_id, aggregate_type, event_type, event_data, version, occurred_at)
                 VALUES (?, ?, ?, ?, ?, ?)';
 

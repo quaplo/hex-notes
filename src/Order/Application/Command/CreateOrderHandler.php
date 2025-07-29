@@ -15,12 +15,12 @@ final readonly class CreateOrderHandler
     ) {
     }
 
-    public function __invoke(CreateOrderCommand $command): Uuid
+    public function __invoke(CreateOrderCommand $createOrderCommand): Uuid
     {
-        $order = Order::create($command->currency);
-        
+        $order = Order::create($createOrderCommand->currency);
+
         $this->orderRepository->save($order);
-        
+
         return $order->getId();
     }
 }

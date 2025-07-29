@@ -21,7 +21,8 @@ final readonly class UserRepository implements UserRepositoryInterface
 
     public function save(User $user): void
     {
-        $existingEntity = $this->entityManager->getRepository(UserEntity::class)->findOneBy(['id' => $user->getId()->toString()]);
+        $existingEntity = $this->entityManager->getRepository(UserEntity::class)
+            ->findOneBy(['id' => $user->getId()->toString()]);
 
         if ($existingEntity instanceof UserEntity) {
             // Update existing entity

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Project\Doubles;
 
+use DateTimeImmutable;
 use RuntimeException;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Shared\Domain\Event\DomainEvent;
@@ -73,22 +74,22 @@ final class InMemoryEventStore implements EventStore
         return $aggregateIds;
     }
 
-    public function getEventsByAggregateType(string $aggregateType, ?\DateTimeImmutable $from = null, ?\DateTimeImmutable $to = null): array
+    public function getEventsByAggregateType(string $aggregateType, ?DateTimeImmutable $from = null, ?DateTimeImmutable $to = null): array
     {
         // For testing, we'll return all events since we don't store aggregate_type in memory
         // This is a simplified implementation for testing purposes
         $allEvents = [];
-        foreach ($this->events as $events) {
-            $allEvents = array_merge($allEvents, $events);
+        foreach ($this->events as $event) {
+            $allEvents = array_merge($allEvents, $event);
         }
         return $allEvents;
     }
 
-    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $aggregateId): array
+    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $uuid): array
     {
         // For testing, just return events for the given aggregate ID
         // since we don't store aggregate_type in memory
-        return $this->getEvents($aggregateId);
+        return $this->getEvents($uuid);
     }
 
     public function getAggregateIdsByType(string $aggregateType): array

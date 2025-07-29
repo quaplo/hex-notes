@@ -25,8 +25,13 @@ final class Project extends AggregateRoot
      */
     private array $workers = [];
 
-    public function __construct(private Uuid $id, private ProjectName $projectName, private DateTimeImmutable $createdAt, private Uuid $ownerId, private ?DateTimeImmutable $deletedAt = null)
-    {
+    public function __construct(
+        private Uuid $id,
+        private ProjectName $projectName,
+        private DateTimeImmutable $createdAt,
+        private Uuid $ownerId,
+        private ?DateTimeImmutable $deletedAt = null
+    ) {
     }
 
     public static function create(ProjectName $projectName, Uuid $uuid): self

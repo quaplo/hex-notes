@@ -17,7 +17,7 @@ final readonly class ItemAddedEvent implements DomainEvent
         private Uuid $productId,
         private string $productName,
         private int $quantity,
-        private Money $unitPrice,
+        private Money $money,
         private DateTimeImmutable $occurredAt = new DateTimeImmutable()
     ) {
     }
@@ -49,7 +49,7 @@ final readonly class ItemAddedEvent implements DomainEvent
 
     public function getUnitPrice(): Money
     {
-        return $this->unitPrice;
+        return $this->money;
     }
 
     public function getOccurredAt(): DateTimeImmutable
@@ -75,8 +75,8 @@ final readonly class ItemAddedEvent implements DomainEvent
             'productId' => $this->productId->toString(),
             'productName' => $this->productName,
             'quantity' => $this->quantity,
-            'unitPrice' => $this->unitPrice->getAmount(),
-            'currency' => $this->unitPrice->getCurrency()->toString(),
+            'unitPrice' => $this->money->getAmount(),
+            'currency' => $this->money->getCurrency()->toString(),
             'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')
         ];
     }

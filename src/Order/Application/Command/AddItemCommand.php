@@ -40,8 +40,8 @@ final readonly class AddItemCommand
         Uuid $productId,
         string $productName,
         int $quantity,
-        Money $unitPrice
+        Money $money
     ): self {
-        return new self($orderId, $productId, $productName, $quantity, $unitPrice);
+        return new self($orderId, $productId, $productName, $quantity, $money);
     }
 }

@@ -14,7 +14,7 @@ final readonly class OrderItem
         private Uuid $productId,
         private string $productName,
         private int $quantity,
-        private Money $unitPrice
+        private Money $money
     ) {
         if ($quantity <= 0) {
             throw new InvalidArgumentException('Order item quantity must be positive');
@@ -26,17 +26,17 @@ final readonly class OrderItem
     }
 
     public static function create(
-        Uuid $productId,
+        Uuid $uuid,
         string $productName,
         int $quantity,
-        Money $unitPrice
+        Money $money
     ): self {
         return new self(
             Uuid::generate(),
-            $productId,
+            $uuid,
             $productName,
             $quantity,
-            $unitPrice
+            $money
         );
     }
 
@@ -79,12 +79,12 @@ final readonly class OrderItem
 
     public function getUnitPrice(): Money
     {
-        return $this->unitPrice;
+        return $this->money;
     }
 
     public function getTotalPrice(): Money
     {
-        return $this->unitPrice->multiply($this->quantity);
+        return $this->money->multiply($this->quantity);
     }
 
     public function changeQuantity(int $newQuantity): self
@@ -98,17 +98,17 @@ final readonly class OrderItem
             $this->productId,
             $this->productName,
             $newQuantity,
-            $this->unitPrice
+            $this->money
         );
     }
 
-    public function equals(OrderItem $other): bool
+    public function equals(OrderItem $orderItem): bool
     {
-        return $this->orderItemId->equals($other->orderItemId);
+        return $this->orderItemId->equals($orderItem->orderItemId);
     }
 
-    public function isSameProduct(Uuid $productId): bool
+    public function isSameProduct(Uuid $uuid): bool
     {
-        return $this->productId->equals($productId);
+        return $this->productId->equals($uuid);
     }
 }

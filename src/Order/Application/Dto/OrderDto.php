@@ -25,14 +25,14 @@ final readonly class OrderDto
     public static function fromOrder(Order $order): self
     {
         $items = array_map(
-            fn($item) => OrderItemDto::fromOrderItem($item),
+            fn($item): OrderItemDto => OrderItemDto::fromOrderItem($item),
             $order->getItems()
         );
 
         return new self(
             $order->getId()->toString(),
             $order->getCreatedAt(),
-            (float) $order->getTotalPrice()->getAmount(),
+            $order->getTotalPrice()->getAmount(),
             $order->getCurrency()->toString(),
             $order->getStatus()->toString(),
             $items
