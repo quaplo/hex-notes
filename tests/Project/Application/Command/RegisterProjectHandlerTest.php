@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Project\Application\Command\RegisterProjectHandler;
+use App\Project\Application\Command\Register\RegisterProjectHandler;
 use App\Project\Domain\Model\Project;
 use App\Tests\Project\Doubles\InMemoryProjectRepository;
 use App\Tests\Project\Helpers\ProjectEventAsserter;

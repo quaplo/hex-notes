@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Integration;
 
-use App\Project\Application\Command\RegisterProjectCommand;
-use App\Project\Application\Command\RegisterProjectHandler;
-use App\Project\Application\Query\GetProjectQuery;
-use App\Project\Application\Query\GetProjectHandler;
+use App\Project\Application\Command\Register\RegisterProjectCommand;
+use App\Project\Application\Command\Register\RegisterProjectHandler;
+use App\Project\Application\Query\Get\GetProjectHandler;
+use App\Project\Application\Query\Get\GetProjectQuery;
 use App\User\Application\Command\CreateUserCommand;
 use App\User\Application\Command\CreateUserHandler;
 use App\User\Application\Command\DeleteUserCommand;
 use App\User\Application\Command\DeleteUserHandler;
-use App\User\Application\Query\GetUserByIdQuery;
 use App\User\Application\Query\GetUserByIdHandler;
+use App\User\Application\Query\GetUserByIdQuery;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class UserProjectCleanupIntegrationTest extends KernelTestCase

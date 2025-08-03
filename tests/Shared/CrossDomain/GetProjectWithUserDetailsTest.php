@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Tests\Shared\CrossDomain;
 
-use DateTimeImmutable;
-use ReflectionClass;
-use RuntimeException;
-use App\Shared\Application\Dto\ProjectDto;
-use App\User\Application\Dto\UserDto;
-use App\Shared\Application\Mapper\ProjectDtoMapperInterface;
-use App\Project\Application\Query\GetProjectQuery;
+use App\Project\Application\Query\Get\GetProjectQuery;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\ValueObject\ProjectName;
-use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Project\Domain\ValueObject\ProjectRole;
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Shared\Application\CrossDomain\Dto\ProjectWithUserDetailsDto;
 use App\Shared\Application\CrossDomain\Query\GetProjectWithUserDetailsHandler;
 use App\Shared\Application\CrossDomain\Query\GetProjectWithUserDetailsQuery;
+use App\Shared\Application\Dto\ProjectDto;
+use App\Shared\Application\Mapper\ProjectDtoMapperInterface;
 use App\Shared\Application\QueryBus;
 use App\Shared\ValueObject\Uuid;
+use App\User\Application\Dto\UserDto;
 use App\User\Application\Query\GetUserByIdQuery;
+use DateTimeImmutable;
+use ReflectionClass;
+use RuntimeException;
 
 it('can get project with user details via cross-domain query', function (): void {
     // Mock project data

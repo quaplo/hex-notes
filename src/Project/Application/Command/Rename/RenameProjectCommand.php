@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Command;
+namespace App\Project\Application\Command\Rename;
 
 use App\Project\Domain\ValueObject\ProjectName;
 use App\Shared\ValueObject\Uuid;

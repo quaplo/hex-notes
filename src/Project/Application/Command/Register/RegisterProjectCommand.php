@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Command;
+namespace App\Project\Application\Command\Register;
 
-use App\Shared\ValueObject\Uuid;
 use App\Project\Domain\ValueObject\ProjectName;
+use App\Shared\ValueObject\Uuid;
 
 final readonly class RegisterProjectCommand
 {

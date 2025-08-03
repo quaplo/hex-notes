@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Project\Application\Command\RegisterProjectCommand;
-use App\Project\Application\Command\RegisterProjectHandler;
+use App\Project\Application\Command\Register\RegisterProjectCommand;
+use App\Project\Application\Command\Register\RegisterProjectHandler;
 use App\User\Application\Command\CreateUserCommand;
 use App\User\Application\Command\CreateUserHandler;
 use Symfony\Component\HttpFoundation\Response;

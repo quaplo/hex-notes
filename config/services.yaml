@@ -44,7 +44,7 @@ services:
     
     # Command Handlers
     App\Project\Application\Command\:
-        resource: '../src/Project/Application/Command/*Handler.php'
+        resource: '../src/Project/Application/Command/*/*Handler.php'
         tags:
             - { name: messenger.message_handler, bus: command.bus }
     
@@ -55,7 +55,7 @@ services:
     
     # Query Handlers
     App\Project\Application\Query\:
-        resource: '../src/Project/Application/Query/*Handler.php'
+        resource: '../src/Project/Application/Query/*/*Handler.php'
         tags:
             - { name: messenger.message_handler, bus: query.bus }
             
@@ -129,7 +129,7 @@ services:
     App\Project\Infrastructure\Projection\ProjectReadModelProjection: ~
     
     # Optimized Query Handlers
-    App\Project\Application\Query\FindProjectsByOwnerOptimizedHandler:
+    App\Project\Application\Query\Find\FindProjectsByOwnerOptimizedHandler:
         tags:
             - { name: messenger.message_handler, bus: query.bus }
     

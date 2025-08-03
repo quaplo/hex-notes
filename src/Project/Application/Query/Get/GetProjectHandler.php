@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Query;
+namespace App\Project\Application\Query\Get;
 
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;

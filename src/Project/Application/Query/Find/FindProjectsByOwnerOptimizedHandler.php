@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Query;
+namespace App\Project\Application\Query\Find;
 
 use App\Project\Application\ReadModel\ProjectReadModelRepositoryInterface;
 

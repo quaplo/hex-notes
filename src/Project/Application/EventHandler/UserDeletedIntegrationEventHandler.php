@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Project\Application\EventHandler;
 
+use App\Project\Application\Command\Delete\DeleteOrphanedProjectsCommand;
 use App\Shared\Domain\Event\UserDeletedIntegrationEvent;
 use Symfony\Component\Messenger\MessageBusInterface;
-use App\Project\Application\Command\DeleteOrphanedProjectsCommand;
 
 final readonly class UserDeletedIntegrationEventHandler
 {

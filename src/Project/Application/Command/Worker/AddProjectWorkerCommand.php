@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Command;
+namespace App\Project\Application\Command\Worker;
 
 use App\Project\Domain\ValueObject\ProjectRole;
 use App\Shared\ValueObject\Uuid;

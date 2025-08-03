@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Command;
+namespace App\Project\Application\Command\Register;
 
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;

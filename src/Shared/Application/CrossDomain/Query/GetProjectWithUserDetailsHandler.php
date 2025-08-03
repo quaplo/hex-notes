@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Application\CrossDomain\Query;
 
-use App\Project\Application\Query\GetProjectQuery;
+use App\Project\Application\Query\Get\GetProjectQuery;
 use App\Shared\Application\CrossDomain\Dto\ProjectWithUserDetailsDto;
 use App\Shared\Application\QueryBus;
 use App\User\Application\Query\GetUserByIdQuery;

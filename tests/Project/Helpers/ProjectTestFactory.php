@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Project\Helpers;
 
+use App\Project\Application\Command\Register\RegisterProjectCommand;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\ValueObject\ProjectName;
 use App\Project\Domain\ValueObject\ProjectRole;
 use App\Project\Domain\ValueObject\ProjectWorker;
-use App\Project\Application\Command\RegisterProjectCommand;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 

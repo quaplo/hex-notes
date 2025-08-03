@@ -4,31 +4,31 @@ declare(strict_types=1);
 
 namespace Tests\Project\Integration;
 
-use App\Shared\Event\SnapshotStore;
-use App\Shared\Domain\Model\AggregateSnapshot;
-use RuntimeException;
-use App\Shared\ValueObject\Uuid;
-use App\Project\Application\Command\RenameProjectCommand;
-use App\Project\Application\Command\AddProjectWorkerCommand;
-use App\Project\Application\Command\RemoveProjectWorkerCommand;
-use App\Project\Application\Command\RegisterProjectHandler;
-use App\Project\Application\Command\RenameProjectHandler;
-use App\Project\Application\Command\AddProjectWorkerHandler;
-use App\Project\Application\Command\RemoveProjectWorkerHandler;
-use App\Project\Domain\Model\ProjectSnapshotFactory;
-use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
-use App\Infrastructure\Persistence\EventStore\DoctrineEventStore;
-use App\Infrastructure\Persistence\EventStore\AggregateTypeResolver;
-use App\Infrastructure\Persistence\Snapshot\DoctrineSnapshotStore;
-use App\Infrastructure\Event\FrequencyBasedSnapshotStrategy;
 use App\Infrastructure\Event\CompositeEventSerializer;
+use App\Infrastructure\Event\FrequencyBasedSnapshotStrategy;
+use App\Infrastructure\Persistence\EventStore\AggregateTypeResolver;
+use App\Infrastructure\Persistence\EventStore\DoctrineEventStore;
+use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
+use App\Infrastructure\Persistence\Snapshot\DoctrineSnapshotStore;
+use App\Project\Application\Command\Register\RegisterProjectHandler;
+use App\Project\Application\Command\Rename\RenameProjectCommand;
+use App\Project\Application\Command\Rename\RenameProjectHandler;
+use App\Project\Application\Command\Worker\AddProjectWorkerCommand;
+use App\Project\Application\Command\Worker\AddProjectWorkerHandler;
+use App\Project\Application\Command\Worker\RemoveProjectWorkerCommand;
+use App\Project\Application\Command\Worker\RemoveProjectWorkerHandler;
+use App\Project\Domain\Model\ProjectSnapshotFactory;
 use App\Project\Infrastructure\Event\ProjectEventSerializer;
-use App\User\Infrastructure\Event\UserEventSerializer;
+use App\Shared\Domain\Model\AggregateSnapshot;
+use App\Shared\Event\SnapshotStore;
 use App\Shared\Event\UserDeletedIntegrationEventSerializer;
 use App\Shared\Infrastructure\Event\DomainEventDispatcher;
+use App\Shared\ValueObject\Uuid;
 use App\Tests\Project\Helpers\ProjectTestFactory;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\User\Infrastructure\Event\UserEventSerializer;
 use Doctrine\DBAL\Connection;
+use RuntimeException;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class ProjectSnapshotIntegrationTest extends KernelTestCase
 {

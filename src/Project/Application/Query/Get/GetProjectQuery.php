@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Project\Application\Query;
+namespace App\Project\Application\Query\Get;
 
 use App\Shared\ValueObject\Uuid;
 

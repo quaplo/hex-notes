@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-use App\Project\Application\Command\RenameProjectCommand;
-use App\Project\Application\Command\DeleteProjectCommand;
-use App\Project\Application\Command\AddProjectWorkerCommand;
-use App\Project\Application\Command\RemoveProjectWorkerCommand;
-use App\Project\Application\Command\RegisterProjectHandler;
-use App\Project\Application\Command\RenameProjectHandler;
-use App\Project\Application\Command\DeleteProjectHandler;
-use App\Project\Application\Command\AddProjectWorkerHandler;
-use App\Project\Application\Command\RemoveProjectWorkerHandler;
+use App\Project\Application\Command\Delete\DeleteProjectCommand;
+use App\Project\Application\Command\Delete\DeleteProjectHandler;
+use App\Project\Application\Command\Register\RegisterProjectHandler;
+use App\Project\Application\Command\Rename\RenameProjectCommand;
+use App\Project\Application\Command\Rename\RenameProjectHandler;
+use App\Project\Application\Command\Worker\AddProjectWorkerCommand;
+use App\Project\Application\Command\Worker\AddProjectWorkerHandler;
+use App\Project\Application\Command\Worker\RemoveProjectWorkerCommand;
+use App\Project\Application\Command\Worker\RemoveProjectWorkerHandler;
 use App\Project\Domain\Event\ProjectCreatedEvent;
-use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
+use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Exception\ProjectNotFoundException;
 use App\Tests\Project\Doubles\InMemoryProjectRepository;
-use App\Tests\Project\Helpers\ProjectTestFactory;
 use App\Tests\Project\Helpers\ProjectEventAsserter;
+use App\Tests\Project\Helpers\ProjectTestFactory;
 
 describe('Project Integration Tests', function (): void {
 
