@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http\Controller;
 
-use Symfony\Component\Messenger\Exception\HandlerFailedException;
-use App\User\Application\Exception\UserNotFoundException;
 use App\Infrastructure\Http\Dto\CreateUserRequestDto;
 use App\Infrastructure\Http\Exception\ValidationException;
-use App\User\Application\Command\CreateUserCommand;
-use App\User\Application\Command\DeleteUserCommand;
-use App\User\Application\Query\GetUserByIdQuery;
 use App\Shared\Application\CommandBus;
 use App\Shared\Application\QueryBus;
+use App\User\Application\Command\Create\CreateUserCommand;
+use App\User\Application\Command\Delete\DeleteUserCommand;
+use App\User\Application\Exception\UserNotFoundException;
+use App\User\Application\Query\Get\GetUserByIdQuery;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;

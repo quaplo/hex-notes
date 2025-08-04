@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\User\Application\Command\Create\CreateUserCommand;
+use App\User\Application\Command\Create\CreateUserHandler;
+use App\User\Application\Command\Delete\DeleteUserCommand;
+use App\User\Application\Command\Delete\DeleteUserHandler;
+use App\User\Application\Query\Get\GetUserByIdHandler;
+use App\User\Application\Query\Get\GetUserByIdQuery;
 use App\User\Domain\Exception\UserAlreadyExistsException;
-use App\User\Application\Command\CreateUserCommand;
-use App\User\Application\Command\CreateUserHandler;
-use App\User\Application\Command\DeleteUserCommand;
-use App\User\Application\Command\DeleteUserHandler;
-use App\User\Application\Query\GetUserByIdHandler;
-use App\User\Application\Query\GetUserByIdQuery;
 use App\User\Domain\Repository\UserRepositoryInterface;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 uses(KernelTestCase::class);
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\User\Application\Query;
+namespace App\User\Application\Command\Delete;
 
 use App\Shared\ValueObject\Uuid;
 
-final readonly class GetUserByIdQuery
+final readonly class DeleteUserCommand
 {
     public function __construct(
         public string $userId

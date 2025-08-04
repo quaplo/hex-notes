@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\User\Application\Command;
+namespace App\User\Application\Command\Create;
 
 use App\User\Domain\Exception\UserAlreadyExistsException;
 use App\User\Domain\Model\User;

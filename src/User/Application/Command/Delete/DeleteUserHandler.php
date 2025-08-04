@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\User\Application\Command;
+namespace App\User\Application\Command\Delete;
 
-use App\User\Domain\Model\User;
 use App\User\Application\Exception\UserNotFoundException;
+use App\User\Domain\Model\User;
 use App\User\Domain\Repository\UserRepositoryInterface;
 
 final readonly class DeleteUserHandler

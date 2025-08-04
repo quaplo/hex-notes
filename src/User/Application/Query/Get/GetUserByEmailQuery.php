@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\User\Application\Command;
+namespace App\User\Application\Query\Get;
 
 use App\Shared\ValueObject\Email;
 
-final readonly class CreateUserCommand
+final readonly class GetUserByEmailQuery
 {
     public function __construct(
         public string $email

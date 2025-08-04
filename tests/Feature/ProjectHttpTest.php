@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Project\Application\Command\Register\RegisterProjectCommand;
 use App\Project\Application\Command\Register\RegisterProjectHandler;
-use App\User\Application\Command\CreateUserCommand;
-use App\User\Application\Command\CreateUserHandler;
+use App\User\Application\Command\Create\CreateUserCommand;
+use App\User\Application\Command\Create\CreateUserHandler;
 use Symfony\Component\HttpFoundation\Response;
 
 it('can create project via HTTP API', function (): void {

@@ -17,7 +17,7 @@ use App\Shared\Application\Mapper\ProjectDtoMapperInterface;
 use App\Shared\Application\QueryBus;
 use App\Shared\ValueObject\Uuid;
 use App\User\Application\Dto\UserDto;
-use App\User\Application\Query\GetUserByIdQuery;
+use App\User\Application\Query\Get\GetUserByIdQuery;
 use DateTimeImmutable;
 use ReflectionClass;
 use RuntimeException;

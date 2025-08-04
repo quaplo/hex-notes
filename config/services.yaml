@@ -49,7 +49,7 @@ services:
             - { name: messenger.message_handler, bus: command.bus }
     
     App\User\Application\Command\:
-        resource: '../src/User/Application/Command/*Handler.php'
+        resource: '../src/User/Application/Command/*/*Handler.php'
         tags:
             - { name: messenger.message_handler, bus: command.bus }
     
@@ -60,7 +60,7 @@ services:
             - { name: messenger.message_handler, bus: query.bus }
             
     App\User\Application\Query\:
-        resource: '../src/User/Application/Query/*Handler.php'
+        resource: '../src/User/Application/Query/*/*Handler.php'
         tags:
             - { name: messenger.message_handler, bus: query.bus }
             
