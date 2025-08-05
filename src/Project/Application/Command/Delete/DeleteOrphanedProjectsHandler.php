@@ -27,8 +27,7 @@ final readonly class DeleteOrphanedProjectsHandler
         // Delete each project
         foreach ($readModels as $readModel) {
             // Load the full aggregate from event store
-            $projectId = Uuid::create($readModel->getId());
-            $project = $this->projectRepository->load($projectId);
+            $project = $this->projectRepository->load(Uuid::create($readModel->getId()));
 
             if ($project instanceof Project) {
                 $project->delete();
