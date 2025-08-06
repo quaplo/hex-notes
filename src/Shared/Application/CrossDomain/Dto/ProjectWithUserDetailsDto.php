@@ -16,14 +16,14 @@ final readonly class ProjectWithUserDetailsDto
     public static function create(
         string $id,
         string $name,
-        UserDto $owner,
+        UserDto $userDto,
         array $workers,
         bool $isDeleted
     ): self {
         return new self([
             'id' => $id,
             'name' => $name,
-            'owner' => $owner,
+            'owner' => $userDto,
             'workers' => $workers,
             'isDeleted' => $isDeleted
         ]);

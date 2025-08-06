@@ -13,16 +13,16 @@ final readonly class DeleteOrphanedProjectsHandler
 {
     public function __construct(
         private ProjectRepositoryInterface $projectRepository,
-        private ProjectReadModelRepositoryInterface $readModelRepository
+        private ProjectReadModelRepositoryInterface $projectReadModelRepository
     ) {
     }
 
-    public function __invoke(DeleteOrphanedProjectsCommand $command): void
+    public function __invoke(DeleteOrphanedProjectsCommand $deleteOrphanedProjectsCommand): void
     {
-        $ownerId = $command->getDeletedUserId();
+        $uuid = $deleteOrphanedProjectsCommand->getDeletedUserId();
 
         // Find only active projects owned by the deleted user
-        $readModels = $this->readModelRepository->findByOwnerId($ownerId);
+        $readModels = $this->projectReadModelRepository->findByOwnerId($uuid);
 
         // Delete each project
         foreach ($readModels as $readModel) {

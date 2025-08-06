@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Shared\Event;
 
+use DateTimeImmutable;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 
@@ -34,13 +35,13 @@ interface EventStore
      * Get events for specific aggregate type and time range (optimized with aggregate_type index)
      * @return DomainEvent[]
      */
-    public function getEventsByAggregateType(string $aggregateType, ?\DateTimeImmutable $from = null, ?\DateTimeImmutable $to = null): array;
+    public function getEventsByAggregateType(string $aggregateType, ?DateTimeImmutable $from = null, ?DateTimeImmutable $to = null): array;
 
     /**
      * Get events for specific aggregate type and aggregate ID (optimized with aggregate_type index)
      * @return DomainEvent[]
      */
-    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $aggregateId): array;
+    public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $uuid): array;
 
     /**
      * Get all aggregate IDs for specific aggregate type

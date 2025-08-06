@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Projection;
 
+use RuntimeException;
 use App\Project\Application\Projection\ProjectReadModelProjectionInterface;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
 use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelEntity;
@@ -16,17 +17,17 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
 {
     public function __construct(
         private ProjectRepositoryInterface $projectRepository,
-        private ProjectReadModelRepository $readModelRepository,
+        private ProjectReadModelRepository $projectReadModelRepository,
         private LoggerInterface $logger
     ) {
     }
 
-    public function handle(DomainEvent $event): void
+    public function handle(DomainEvent $domainEvent): void
     {
-        $project = $this->loadProject($event);
-        $readModel = $this->syncReadModel($project);
+        $project = $this->loadProject($domainEvent);
+        $projectReadModelEntity = $this->syncReadModel($project);
 
-        $this->readModelRepository->save($readModel);
+        $this->projectReadModelRepository->save($projectReadModelEntity);
 
         $this->logger->info('Read model synced', [
             'id' => $project->getId()->toString(),
@@ -34,18 +35,18 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
         ]);
     }
 
-    private function loadProject(DomainEvent $event)
+    private function loadProject(DomainEvent $domainEvent)
     {
         // All project events have getProjectId() method - no need for method_exists()
-        $id = $event->getProjectId();
+        $id = $domainEvent->getProjectId();
 
         return $this->projectRepository->load($id)
-            ?? throw new \RuntimeException("Project not found: {$id->toString()}");
+            ?? throw new RuntimeException("Project not found: {$id->toString()}");
     }
 
     private function syncReadModel($project): ProjectReadModelEntity
     {
-        $readModel = $this->readModelRepository->findById($project->getId())
+        $readModel = $this->projectReadModelRepository->findById($project->getId())
             ?? new ProjectReadModelEntity(
                 $project->getId()->toString(),
                 $project->getName()->__toString(),
@@ -59,7 +60,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
         $readModel->setVersion($project->getVersion());
         $readModel->setWorkers(
             array_map(
-                fn($w) => [
+                fn($w): array => [
                     'userId' => $w->getUserId()->toString(),
                     'role' => $w->getRole()->__toString(),
                     'addedBy' => $w->getAddedBy()->toString(),
