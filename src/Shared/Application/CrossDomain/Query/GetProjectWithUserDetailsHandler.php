@@ -57,7 +57,7 @@ final readonly class GetProjectWithUserDetailsHandler
         return ProjectWithUserDetailsDto::create(
             id: $project->getId()->toString(),
             name: $project->getName()->__toString(),
-            owner: $owner,
+            userDto: $owner,
             workers: $workers,
             isDeleted: $project->isDeleted()
         );
