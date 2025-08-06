@@ -30,3 +30,4 @@ phpstan.neon
 ###< friendsofphp/php-cs-fixer ###
 /.deptrac.cache
 /metrics-report
+/.DS_store
