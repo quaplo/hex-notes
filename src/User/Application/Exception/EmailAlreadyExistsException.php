@@ -8,7 +8,7 @@ use Throwable;
 
 class EmailAlreadyExistsException extends ApplicationException
 {
-    public function __construct(string $email, Throwable $throwable = null)
+    public function __construct(string $email, ?Throwable $throwable = null)
     {
         parent::__construct("Email '$email' exist.", 0, $throwable);
     }
