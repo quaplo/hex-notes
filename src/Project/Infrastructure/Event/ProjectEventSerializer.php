@@ -104,7 +104,7 @@ final class ProjectEventSerializer implements EventSerializer
         $data = [
             'projectId' => $projectWorkerAddedEvent->getProjectId()->toString(),
             'userId' => $projectWorkerAddedEvent->getUserId()->toString(),
-            'role' => (string)$projectWorkerAddedEvent->getRole(),
+            'role' => $projectWorkerAddedEvent->getRole()->toString(),
             'addedBy' => $projectWorkerAddedEvent->getAddedBy()?->toString(),
             'occurredAt' => $projectWorkerAddedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
         ];

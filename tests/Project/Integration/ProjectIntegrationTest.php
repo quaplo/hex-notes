@@ -112,7 +112,7 @@ describe('Project Integration Tests', function (): void {
             expect($workers)->toHaveCount(1);
             $remainingWorker = reset($workers); // Get first element regardless of key
             expect($remainingWorker->getUserId()->equals($userId2))->toBeTrue();
-            expect((string)$remainingWorker->getRole())->toBe('owner');
+            expect($remainingWorker->getRole()->toString())->toBe('owner');
         });
     });
 

@@ -61,7 +61,7 @@ final class ProjectEventAsserter
         Assert::assertInstanceOf(ProjectWorkerAddedEvent::class, $domainEvent);
         Assert::assertTrue($domainEvent->getProjectId()->equals($expectedProjectId));
         Assert::assertTrue($domainEvent->getUserId()->equals($expectedUserId));
-        Assert::assertEquals((string)$projectRole, (string)$domainEvent->getRole());
+        Assert::assertEquals($projectRole->toString(), $domainEvent->getRole()->toString());
 
         if ($expectedAddedBy instanceof Uuid) {
             Assert::assertTrue($domainEvent->getAddedBy()->equals($expectedAddedBy));

@@ -88,7 +88,7 @@ final readonly class ProjectEventHandler
         $this->logger->info('Project worker added - side effects processing', [
             'projectId' => $projectWorkerAddedEvent->getProjectId()->toString(),
             'userId' => $projectWorkerAddedEvent->getUserId()->toString(),
-            'role' => (string)$projectWorkerAddedEvent->getRole()
+            'role' => $projectWorkerAddedEvent->getRole()->toString(),
         ]);
 
         // Additional side effects:

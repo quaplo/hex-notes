@@ -62,7 +62,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
             array_map(
                 fn($w): array => [
                     'userId' => $w->getUserId()->toString(),
-                    'role' => $w->getRole()->__toString(),
+                    'role' => $w->getRole()->toString(),
                     'addedBy' => $w->getAddedBy()->toString(),
                     'addedAt' => $w->getCreatedAt()->format(DateTimeInterface::ATOM)
                 ],

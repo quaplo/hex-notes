@@ -172,7 +172,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $workers = $restoredProject->getWorkers();
         $remainingWorker = reset($workers);
         $this->assertTrue($remainingWorker->getUserId()->equals($userId2));
-        $this->assertEquals('owner', (string)$remainingWorker->getRole());
+        $this->assertEquals('owner', $remainingWorker->getRole()->toString());
     }
 
     public function test_project_can_be_loaded_from_snapshot_when_no_events_exist_after_snapshot(): void
@@ -368,7 +368,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
 
         $this->assertTrue($worker1->getUserId()->equals($uuid));
         $this->assertTrue($worker2->getUserId()->equals($userId2));
-        $this->assertEquals('participant', (string)$worker1->getRole());
-        $this->assertEquals('owner', (string)$worker2->getRole());
+        $this->assertEquals('participant', $worker1->getRole()->toString());
+        $this->assertEquals('owner', $worker2->getRole()->toString());
     }
 }

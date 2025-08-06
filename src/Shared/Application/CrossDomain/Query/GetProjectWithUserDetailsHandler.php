@@ -49,7 +49,7 @@ final readonly class GetProjectWithUserDetailsHandler
                     'isDeleted' => $workerUser->isDeleted,
                     'addedBy' => $worker->getAddedBy()->toString(),
                     'addedAt' => $worker->getCreatedAt()->format('Y-m-d H:i:s'),
-                    'role' => $worker->getRole()->__toString()
+                    'role' => $worker->getRole()->toString()
                 ];
             }
         }
