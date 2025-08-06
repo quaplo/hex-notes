@@ -110,11 +110,18 @@ it('can rename project via HTTP API', function (): void {
 it('can delete project via HTTP API', function (): void {
     $client = static::createClient();
 
+    // First create a user (owner)
+    /** @var CreateUserHandler $createUserHandler */
+    $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
+    $ownerEmail = 'project_owner_' . uniqid() . '@example.com';
+    $ownerCommand = new CreateUserCommand($ownerEmail);
+    $user = $createUserHandler($ownerCommand);
+
     // First create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
     $projectName = 'Project to Delete ' . uniqid();
-    $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, '550e8400-e29b-41d4-a716-446655440001');
+    $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, $user->getId()->toString());
 
     $project = $projectHandler($registerProjectCommand);
 
