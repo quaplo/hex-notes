@@ -105,6 +105,7 @@
         "friendsofphp/php-cs-fixer": "^3.85",
         "pestphp/pest": "^3.8.2",
         "pestphp/pest-plugin": "^3.0",
+        "phpmetrics/phpmetrics": "^2.9",
         "phpstan/phpstan": "^2.1.17",
         "qossmic/deptrac": "^2.0",
         "rector/rector": "dev-main",
