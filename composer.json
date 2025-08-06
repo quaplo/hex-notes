@@ -101,6 +101,7 @@
         }
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.85",
         "pestphp/pest": "^3.8.2",
         "pestphp/pest-plugin": "^3.0",
         "phpstan/phpstan": "^2.1.17",
