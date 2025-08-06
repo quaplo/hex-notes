@@ -34,7 +34,7 @@ final class CompoundPrimaryKeyTest extends TestCase
         // Compound primary key components
         $this->assertEquals($aggregateId->toString(), $entity->getAggregateId());
         $this->assertEquals($version, $entity->getVersion());
-        
+
         // Other properties
         $this->assertEquals($aggregateType, $entity->getAggregateType());
         $this->assertEquals($eventType, $entity->getEventType());
@@ -116,7 +116,7 @@ final class CompoundPrimaryKeyTest extends TestCase
 
         // Verify no getId() method exists (removed artificial ID)
         $this->assertFalse(method_exists($entity, 'getId'));
-        
+
         // Natural compound key provides identification
         $this->assertTrue(method_exists($entity, 'getAggregateId'));
         $this->assertTrue(method_exists($entity, 'getVersion'));

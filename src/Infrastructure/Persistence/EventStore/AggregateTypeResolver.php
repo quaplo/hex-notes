@@ -10,7 +10,7 @@ final readonly class AggregateTypeResolver
 {
     /**
      * Derives aggregate_type from domain event class namespace
-     * 
+     *
      * Examples:
      * - App\Project\Domain\Event\ProjectCreatedEvent → App\Project
      * - App\User\Domain\Event\UserDeletedEvent → App\User
@@ -26,7 +26,7 @@ final readonly class AggregateTypeResolver
     {
         // Split namespace by backslashes
         $namespaceParts = explode('\\', $eventClassName);
-        
+
         // For structure like App\Domain\Event\EventName → extract App\Domain
         // For structure like App\Project\Domain\Event\EventName → extract App\Project
         if (count($namespaceParts) < 3) {

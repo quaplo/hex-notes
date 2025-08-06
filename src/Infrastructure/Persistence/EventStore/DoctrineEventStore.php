@@ -194,7 +194,7 @@ final readonly class DoctrineEventStore implements EventStore
     private function insertEvent(Uuid $uuid, DomainEvent $domainEvent, int $version): void
     {
         $aggregateType = $this->aggregateTypeResolver->resolve($domainEvent);
-        
+
         $sql = 'INSERT INTO event_store (aggregate_id, aggregate_type, event_type, event_data, version, occurred_at)
                 VALUES (?, ?, ?, ?, ?, ?)';
 

@@ -25,9 +25,9 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
     {
         $project = $this->loadProject($event);
         $readModel = $this->syncReadModel($project);
-        
+
         $this->readModelRepository->save($readModel);
-        
+
         $this->logger->info('Read model synced', [
             'id' => $project->getId()->toString(),
             'version' => $project->getVersion()

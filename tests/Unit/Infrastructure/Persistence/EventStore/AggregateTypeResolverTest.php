@@ -22,21 +22,21 @@ final class AggregateTypeResolverTest extends TestCase
     public function testResolveFromProjectEvent(): void
     {
         $aggregateType = $this->resolver->resolveFromClassName(ProjectCreatedEvent::class);
-        
+
         $this->assertEquals('App\\Project', $aggregateType);
     }
 
     public function testResolveFromUserEvent(): void
     {
         $aggregateType = $this->resolver->resolveFromClassName(UserDeletedEvent::class);
-        
+
         $this->assertEquals('App\\User', $aggregateType);
     }
 
     public function testResolveFromSharedEvent(): void
     {
         $aggregateType = $this->resolver->resolveFromClassName(UserDeletedIntegrationEvent::class);
-        
+
         $this->assertEquals('App\\Shared', $aggregateType);
     }
 
@@ -44,7 +44,7 @@ final class AggregateTypeResolverTest extends TestCase
     {
         // Simulácia budúcej Order domény
         $aggregateType = $this->resolver->resolveFromClassName('App\\Order\\Domain\\Event\\OrderCreatedEvent');
-        
+
         $this->assertEquals('App\\Order', $aggregateType);
     }
 
@@ -52,7 +52,7 @@ final class AggregateTypeResolverTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid event class namespace structure: InvalidEvent');
-        
+
         $this->resolver->resolveFromClassName('InvalidEvent');
     }
 
@@ -60,7 +60,7 @@ final class AggregateTypeResolverTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid event class namespace structure: App\\Event');
-        
+
         $this->resolver->resolveFromClassName('App\\Event');
     }
 }
