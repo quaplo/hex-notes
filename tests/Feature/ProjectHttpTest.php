@@ -72,13 +72,13 @@ it('can get project with user details via HTTP API (cross-domain)', function ():
     expect($responseData['project']['id'])->toBe($project->getId()->toString());
 
     // Validate cross-domain owner data
-    expect($responseData['owner']['email'])->toBe($ownerEmail);
-    expect($responseData['owner']['id'])->toBe($user->getId()->toString());
+    expect($responseData['project']['owner']['email'])->toBe($ownerEmail);
+    expect($responseData['project']['owner']['id'])->toBe($user->getId()->toString());
 
     // Validate cross-domain workers data
-    expect($responseData['workers'])->toHaveCount(1);
-    expect($responseData['workers'][0]['email'])->toBe($workerEmail);
-    expect($responseData['workers'][0]['id'])->toBe($worker->getId()->toString());
+    expect($responseData['project']['workers'])->toHaveCount(1);
+    expect($responseData['project']['workers'][0]['email'])->toBe($workerEmail);
+    expect($responseData['project']['workers'][0]['id'])->toBe($worker->getId()->toString());
 });
 
 it('can rename project via HTTP API', function (): void {
@@ -115,12 +115,14 @@ it('can delete project via HTTP API', function (): void {
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
     $projectName = 'Project to Delete ' . uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, '550e8400-e29b-41d4-a716-446655440001');
+
     $project = $projectHandler($registerProjectCommand);
 
     $projectId = $project->getId()->toString();
 
     // Verify project exists before deletion
     $client->request('GET', '/api/projects/' . $projectId);
+
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     // Delete the project
@@ -170,8 +172,8 @@ it('can add worker to project via HTTP API', function (): void {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
-    expect($responseData['workers'])->toHaveCount(1);
-    expect($responseData['workers'][0]['id'])->toBe($worker->getId()->toString());
+    expect($responseData['project']['workers'])->toHaveCount(1);
+    expect($responseData['project']['workers'][0]['id'])->toBe($worker->getId()->toString());
 });
 
 it('can remove worker from project via HTTP API', function (): void {
@@ -219,7 +221,7 @@ it('can remove worker from project via HTTP API', function (): void {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
-    expect($responseData['workers'])->toHaveCount(0);
+    expect($responseData['project']['workers'])->toHaveCount(0);
 });
 
 it('returns 404 when getting non-existent project', function (): void {
