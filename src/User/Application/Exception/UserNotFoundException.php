@@ -8,7 +8,7 @@ use Throwable;
 
 class UserNotFoundException extends ApplicationException
 {
-    public function __construct(string $userId, Throwable $throwable = null)
+    public function __construct(string $userId, ?Throwable $throwable = null)
     {
         parent::__construct("User ID '$userId' not found.", 0, $throwable);
     }

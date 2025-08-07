@@ -36,8 +36,8 @@ class ProjectSnapshotTest extends TestCase
         $worker2Id = Uuid::generate();
         $addedBy = Uuid::generate();
 
-        $projectWorker = ProjectWorker::create($worker1Id, ProjectRole::participant(), $addedBy);
-        $worker2 = ProjectWorker::create($worker2Id, ProjectRole::owner(), $addedBy);
+        $projectWorker = ProjectWorker::create($worker1Id, ProjectRole::PARTICIPANT, $addedBy);
+        $worker2 = ProjectWorker::create($worker2Id, ProjectRole::OWNER, $addedBy);
 
         $project->addWorker($projectWorker);
         $project->addWorker($worker2);
@@ -82,7 +82,7 @@ class ProjectSnapshotTest extends TestCase
         // Add worker to original
         $workerId = Uuid::generate();
         $addedBy = Uuid::generate();
-        $projectWorker = ProjectWorker::create($workerId, ProjectRole::participant(), $addedBy);
+        $projectWorker = ProjectWorker::create($workerId, ProjectRole::PARTICIPANT, $addedBy);
         $originalProject->addWorker($projectWorker);
 
         // Create snapshot

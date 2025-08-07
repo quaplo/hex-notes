@@ -15,8 +15,6 @@
     <exclude-pattern>*/tests/*Fixtures/*</exclude-pattern>
     <exclude-pattern>tests/Pest.php</exclude-pattern>
 
-
     <file>src/</file>
-    <file>tests/</file>
 
 </ruleset>

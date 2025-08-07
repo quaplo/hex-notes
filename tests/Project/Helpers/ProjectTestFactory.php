@@ -44,7 +44,7 @@ final class ProjectTestFactory
     {
         $defaults = [
             'userId' => Uuid::generate(),
-            'role' => ProjectRole::participant(),
+            'role' => ProjectRole::PARTICIPANT,
             'addedBy' => Uuid::generate(),
             'addedAt' => new DateTimeImmutable(),
         ];

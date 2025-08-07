@@ -19,7 +19,7 @@ final readonly class ProjectDtoMapper implements ProjectDtoMapperInterface
             'deletedAt' => $project->getDeletedAt()?->format('Y-m-d H:i:s'),
             'workers' => array_map(fn($worker): array => [
                 'userId' => $worker->getUserId()->toString(),
-                'role' => (string)$worker->getRole(),
+                'role' => $worker->getRole()->toString(),
                 'addedBy' => $worker->getAddedBy()->toString(),
                 'addedAt' => $worker->getCreatedAt()->format('Y-m-d H:i:s')
             ], $project->getWorkers())

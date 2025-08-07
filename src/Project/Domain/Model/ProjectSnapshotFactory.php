@@ -21,7 +21,7 @@ final class ProjectSnapshotFactory
         foreach ($project->getWorkers() as $projectWorker) {
             $workersData[] = [
                 'userId' => $projectWorker->getUserId()->toString(),
-                'role' => (string) $projectWorker->getRole(),
+                'role' => $projectWorker->getRole()->toString(),
                 'createdAt' => $projectWorker->getCreatedAt()->format(DateTimeImmutable::ATOM),
                 'addedBy' => $projectWorker->getAddedBy()->toString(),
             ];

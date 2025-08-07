@@ -114,7 +114,7 @@ describe('Project Domain Model', function (): void {
         $project = ProjectTestFactory::createProject();
         $projectWorker = ProjectTestFactory::createProjectWorker([
             'userId' => ProjectTestFactory::createValidUuid(),
-            'role' => ProjectRole::participant()
+            'role' => ProjectRole::PARTICIPANT
         ]);
 
         $updatedProject = $project->addWorker($projectWorker);

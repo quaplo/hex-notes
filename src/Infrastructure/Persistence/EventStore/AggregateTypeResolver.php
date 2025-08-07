@@ -36,12 +36,6 @@ final readonly class AggregateTypeResolver
             );
         }
 
-        // Take first 2 parts (App\Project) or 3 parts if middle is not "Domain"
-        if (isset($namespaceParts[2]) && $namespaceParts[2] === 'Domain') {
-            // Structure: App\Project\Domain\Event\*
-            return $namespaceParts[0] . '\\' . $namespaceParts[1];
-        }
-
         // Default fallback - take first 2 namespace parts
         return $namespaceParts[0] . '\\' . $namespaceParts[1];
     }

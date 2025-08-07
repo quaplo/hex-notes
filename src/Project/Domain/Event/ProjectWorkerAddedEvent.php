@@ -60,7 +60,7 @@ final readonly class ProjectWorkerAddedEvent implements DomainEvent
         return [
             'projectId' => $this->projectId->toString(),
             'userId' => $this->userId->toString(),
-            'role' => (string)$this->projectRole,
+            'role' => $this->projectRole->toString(),
             'addedBy' => $this->addedBy?->toString(),
             'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
         ];
