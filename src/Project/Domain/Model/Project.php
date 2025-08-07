@@ -137,7 +137,7 @@ final class Project extends AggregateRoot
         if ($this->isDeleted()) {
             throw new DomainException('Cannot remove worker from deleted project');
         }
-        $found = array_any($this->workers, fn ($worker) => $worker->getUserId()->equals($userId));
+        $found = array_any($this->workers, fn ($worker): bool => $worker->getUserId()->equals($userId));
 
         if (!$found) {
             throw new DomainException('Worker not found in project');
