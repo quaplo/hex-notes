@@ -11,7 +11,7 @@ use App\User\Domain\Repository\UserRepositoryInterface;
 final readonly class CreateUserHandler
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository
+        private UserRepositoryInterface $userRepository,
     ) {
     }
 
@@ -20,6 +20,7 @@ final readonly class CreateUserHandler
         $email = $createUserCommand->getEmail();
 
         $existingUser = $this->userRepository->findByEmailIncludingDeleted($email);
+
         if ($existingUser instanceof User) {
             throw new UserAlreadyExistsException($email);
         }

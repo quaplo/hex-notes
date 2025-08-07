@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Shared\Domain\Event;
 
+use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 use DateTimeInterface;
-use App\Shared\ValueObject\Uuid;
 
 final readonly class UserDeletedIntegrationEvent implements DomainEvent
 {
     public function __construct(
         private Uuid $uuid,
         private string $userEmail,
-        private DateTimeImmutable $occurredAt
+        private DateTimeImmutable $occurredAt,
     ) {
     }
 

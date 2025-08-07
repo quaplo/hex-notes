@@ -13,7 +13,7 @@ use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Shared\ValueObject\Uuid;
 use PHPUnit\Framework\TestCase;
 
-class ProjectSnapshotTest extends TestCase
+final class ProjectSnapshotTest extends TestCase
 {
     private ProjectSnapshotFactory $projectSnapshotFactory;
 
@@ -110,7 +110,7 @@ class ProjectSnapshotTest extends TestCase
         $restoredWorkers = $restoredProject->getWorkers();
         $originalWorkers = $originalProject->getWorkers();
 
-        $this->assertCount(count($originalWorkers), $restoredWorkers);
+        $this->assertCount(\count($originalWorkers), $restoredWorkers);
 
         foreach ($originalWorkers as $index => $originalWorker) {
             $restoredWorker = $restoredWorkers[$index];

@@ -43,7 +43,7 @@ final class UserController extends BaseController
             return new JsonResponse([
                 'message' => 'User created successfully',
                 'id' => $user->getId()->toString(),
-                'email' => $user->getEmail()->__toString()
+                'email' => $user->getEmail()->__toString(),
             ], JsonResponse::HTTP_CREATED);
         } catch (ValidationException $e) {
             return $this->createValidationErrorResponse($e->getViolations());
@@ -71,14 +71,15 @@ final class UserController extends BaseController
             $this->commandBus->dispatch($deleteUserCommand);
 
             return new JsonResponse([
-                'message' => 'User deleted successfully'
+                'message' => 'User deleted successfully',
             ], JsonResponse::HTTP_OK);
         } catch (HandlerFailedException $e) {
             // Check if the original exception is UserNotFoundException
             $previous = $e->getPrevious();
+
             if ($previous instanceof UserNotFoundException) {
                 return new JsonResponse([
-                    'error' => 'User not found'
+                    'error' => 'User not found',
                 ], JsonResponse::HTTP_NOT_FOUND);
             }
 
@@ -86,7 +87,7 @@ final class UserController extends BaseController
             throw $e;
         } catch (UserNotFoundException) {
             return new JsonResponse([
-                'error' => 'User not found'
+                'error' => 'User not found',
             ], JsonResponse::HTTP_NOT_FOUND);
         }
     }

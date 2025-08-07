@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Projection;
 
-use RuntimeException;
 use App\Project\Application\Projection\ProjectReadModelProjectionInterface;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
 use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelEntity;
@@ -12,13 +11,14 @@ use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository;
 use App\Shared\Domain\Event\DomainEvent;
 use DateTimeInterface;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 final readonly class ProjectReadModelProjection implements ProjectReadModelProjectionInterface
 {
     public function __construct(
         private ProjectRepositoryInterface $projectRepository,
         private ProjectReadModelRepository $projectReadModelRepository,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -31,7 +31,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
 
         $this->logger->info('Read model synced', [
             'id' => $project->getId()->toString(),
-            'version' => $project->getVersion()
+            'version' => $project->getVersion(),
         ]);
     }
 
@@ -60,11 +60,11 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
         $readModel->setVersion($project->getVersion());
         $readModel->setWorkers(
             array_map(
-                fn($w): array => [
+                fn ($w): array => [
                     'userId' => $w->getUserId()->toString(),
                     'role' => $w->getRole()->toString(),
                     'addedBy' => $w->getAddedBy()->toString(),
-                    'addedAt' => $w->getCreatedAt()->format(DateTimeInterface::ATOM)
+                    'addedAt' => $w->getCreatedAt()->format(DateTimeInterface::ATOM),
                 ],
                 $project->getWorkers()
             )

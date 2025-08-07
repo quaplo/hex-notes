@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Shared\ValueObject;
 
-use Stringable;
 use InvalidArgumentException;
+use Stringable;
 use Symfony\Component\Uid\Uuid as SymfonyUuid;
 
 final readonly class Uuid implements Stringable
@@ -15,6 +15,11 @@ final readonly class Uuid implements Stringable
         if (!SymfonyUuid::isValid($this->value)) {
             throw new InvalidArgumentException("Invalid UUID: {$this->value}");
         }
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
     }
 
     public static function create(string $value): self
@@ -27,17 +32,12 @@ final readonly class Uuid implements Stringable
         return new self(SymfonyUuid::v4()->toRfc4122());
     }
 
-    public function __toString(): string
-    {
-        return $this->value;
-    }
-
     public function toString(): string
     {
         return $this->value;
     }
 
-    public function equals(Uuid $uuid): bool
+    public function equals(self $uuid): bool
     {
         return $this->value === (string) $uuid;
     }

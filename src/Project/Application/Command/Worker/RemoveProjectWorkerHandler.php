@@ -11,13 +11,14 @@ use App\Project\Domain\Repository\ProjectRepositoryInterface;
 final readonly class RemoveProjectWorkerHandler
 {
     public function __construct(
-        private ProjectRepositoryInterface $projectRepository
+        private ProjectRepositoryInterface $projectRepository,
     ) {
     }
 
     public function __invoke(RemoveProjectWorkerCommand $removeProjectWorkerCommand): Project
     {
         $project = $this->projectRepository->load($removeProjectWorkerCommand->projectId);
+
         if (!$project instanceof Project) {
             throw new ProjectNotFoundException($removeProjectWorkerCommand->projectId);
         }
@@ -27,6 +28,7 @@ final readonly class RemoveProjectWorkerHandler
             $removeProjectWorkerCommand->removedBy
         );
         $this->projectRepository->save($project);
+
         return $project;
     }
 }

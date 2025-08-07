@@ -18,11 +18,12 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
 
     public function save(Project $project): void
     {
-        $id = (string)$project->getId();
+        $id = (string) $project->getId();
         $this->projects[$id] = $project;
 
         // Track events for testing purposes
         $events = $project->getDomainEvents();
+
         if ($events !== []) {
             if (!isset($this->savedEvents[$id])) {
                 $this->savedEvents[$id] = [];
@@ -35,7 +36,8 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
 
     public function load(Uuid $uuid): ?Project
     {
-        $id = (string)$uuid;
+        $id = (string) $uuid;
+
         return $this->projects[$id] ?? null;
     }
 
@@ -46,7 +48,8 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
 
     public function exists(Uuid $uuid): bool
     {
-        $id = (string)$uuid;
+        $id = (string) $uuid;
+
         return isset($this->projects[$id]);
     }
 
@@ -60,7 +63,7 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
 
     public function count(): int
     {
-        return count($this->projects);
+        return \count($this->projects);
     }
 
     /**
@@ -73,7 +76,8 @@ final class InMemoryProjectRepository implements ProjectRepositoryInterface
 
     public function getEventsForProject(Uuid $uuid): array
     {
-        $id = (string)$uuid;
+        $id = (string) $uuid;
+
         return $this->savedEvents[$id] ?? [];
     }
 

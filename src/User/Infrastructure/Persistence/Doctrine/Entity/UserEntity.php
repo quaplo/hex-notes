@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 // src/Infrastructure/Persistence/Doctrine/Entity/UserEntity.php
+
 namespace App\User\Infrastructure\Persistence\Doctrine\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use DateTimeImmutable;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -23,7 +26,7 @@ class UserEntity
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
         private DateTimeImmutable $createdAt,
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-        private ?DateTimeImmutable $deletedAt = null
+        private ?DateTimeImmutable $deletedAt = null,
     ) {
     }
 

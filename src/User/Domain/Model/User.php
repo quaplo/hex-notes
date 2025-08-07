@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\User\Domain\Model;
 
-use RuntimeException;
-use App\Shared\Domain\Model\AggregateRoot;
 use App\Shared\Domain\Event\DomainEvent;
+use App\Shared\Domain\Model\AggregateRoot;
 use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
 use App\User\Domain\Event\UserDeletedEvent;
-use App\User\Domain\ValueObject\UserStatus;
 use App\User\Domain\Exception\UserInactiveException;
+use App\User\Domain\ValueObject\UserStatus;
 use DateTimeImmutable;
+use RuntimeException;
 
 final class User extends AggregateRoot
 {
@@ -21,7 +21,7 @@ final class User extends AggregateRoot
         private Email $email,
         private UserStatus $userStatus,
         private readonly DateTimeImmutable $createdAt,
-        private ?DateTimeImmutable $deletedAt = null
+        private ?DateTimeImmutable $deletedAt = null,
     ) {
     }
 
@@ -30,7 +30,7 @@ final class User extends AggregateRoot
         string $email,
         string $status,
         DateTimeImmutable $createdAt,
-        ?DateTimeImmutable $deletedAt = null
+        ?DateTimeImmutable $deletedAt = null,
     ): self {
         return new self(
             Uuid::create($id),
@@ -146,13 +146,13 @@ final class User extends AggregateRoot
     }
 
     /**
-     * Implementation of abstract handleEvent method from AggregateRoot
+     * Implementation of abstract handleEvent method from AggregateRoot.
      */
     protected function handleEvent(DomainEvent $domainEvent): void
     {
         match ($domainEvent::class) {
             UserDeletedEvent::class => $this->handleUserDeleted($domainEvent),
-            default => throw new RuntimeException('Unknown event type: ' . $domainEvent::class)
+            default => throw new RuntimeException('Unknown event type: '.$domainEvent::class),
         };
     }
 

@@ -14,7 +14,7 @@ final readonly class ProjectWorkerRemovedEvent implements DomainEvent
         private Uuid $projectId,
         private Uuid $userId,
         private ?Uuid $removedBy = null,
-        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable(),
     ) {
     }
 

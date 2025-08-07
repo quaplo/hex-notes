@@ -17,12 +17,12 @@ final readonly class ProjectDtoMapper implements ProjectDtoMapperInterface
             'ownerId' => $project->getOwnerId()->toString(),
             'createdAt' => $project->getCreatedAt()->format('Y-m-d H:i:s'),
             'deletedAt' => $project->getDeletedAt()?->format('Y-m-d H:i:s'),
-            'workers' => array_map(fn($worker): array => [
+            'workers' => array_map(fn ($worker): array => [
                 'userId' => $worker->getUserId()->toString(),
                 'role' => $worker->getRole()->toString(),
                 'addedBy' => $worker->getAddedBy()->toString(),
-                'addedAt' => $worker->getCreatedAt()->format('Y-m-d H:i:s')
-            ], $project->getWorkers())
+                'addedAt' => $worker->getCreatedAt()->format('Y-m-d H:i:s'),
+            ], $project->getWorkers()),
         ];
     }
 }

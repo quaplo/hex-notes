@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Doctrine\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use DateTimeImmutable;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -29,7 +29,7 @@ class EventStoreEntity
         #[ORM\Column(type: Types::JSON)]
         private string $eventData,
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-        private DateTimeImmutable $occurredAt
+        private DateTimeImmutable $occurredAt,
     ) {
     }
 

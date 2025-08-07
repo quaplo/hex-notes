@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\User\Infrastructure\Persistence\Doctrine;
 
-use DateTimeImmutable;
-use App\Shared\ValueObject\Uuid;
-use App\User\Domain\Repository\UserRepositoryInterface;
-use App\User\Domain\Model\User;
-use App\User\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
-use App\Shared\ValueObject\Email;
 use App\Shared\Event\EventDispatcher;
+use App\Shared\ValueObject\Email;
+use App\Shared\ValueObject\Uuid;
+use App\User\Domain\Model\User;
+use App\User\Domain\Repository\UserRepositoryInterface;
+use App\User\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class UserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private EventDispatcher $eventDispatcher
+        private EventDispatcher $eventDispatcher,
     ) {
     }
 
@@ -70,11 +72,13 @@ final readonly class UserRepository implements UserRepositoryInterface
     {
         $entity = $this->entityManager->getRepository(UserEntity::class)->findOneBy([
             'id' => $uuid->__toString(),
-            'deletedAt' => null
+            'deletedAt' => null,
         ]);
+
         if (!$entity instanceof UserEntity) {
             return null;
         }
+
         return $this->mapToDomain($entity);
     }
 
@@ -82,29 +86,35 @@ final readonly class UserRepository implements UserRepositoryInterface
     {
         $entity = $this->entityManager->getRepository(UserEntity::class)->findOneBy([
             'email' => $email->__toString(),
-            'deletedAt' => null
+            'deletedAt' => null,
         ]);
+
         if (!$entity instanceof UserEntity) {
             return null;
         }
+
         return $this->mapToDomain($entity);
     }
 
     public function findByIdIncludingDeleted(Uuid $uuid): ?User
     {
         $entity = $this->entityManager->getRepository(UserEntity::class)->findOneBy(['id' => $uuid->__toString()]);
+
         if (!$entity instanceof UserEntity) {
             return null;
         }
+
         return $this->mapToDomain($entity);
     }
 
     public function findByEmailIncludingDeleted(Email $email): ?User
     {
         $entity = $this->entityManager->getRepository(UserEntity::class)->findOneBy(['email' => $email->__toString()]);
+
         if (!$entity instanceof UserEntity) {
             return null;
         }
+
         return $this->mapToDomain($entity);
     }
 

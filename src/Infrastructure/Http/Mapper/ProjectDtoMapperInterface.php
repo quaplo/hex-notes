@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\Http\Mapper;
 
 use App\Infrastructure\Http\Dto\ProjectDto;

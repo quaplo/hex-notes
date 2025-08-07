@@ -10,6 +10,6 @@ final class UserNotFoundException extends DomainException
 {
     public function __construct(Uuid $uuid)
     {
-        parent::__construct(sprintf('User with id "%s" not found', $uuid->toString()));
+        parent::__construct(\sprintf('User with id "%s" not found', $uuid->toString()));
     }
 }

@@ -9,7 +9,7 @@ use App\Shared\ValueObject\Uuid;
 final readonly class GetProjectWithUserDetailsQuery
 {
     public function __construct(
-        public Uuid $projectId
+        public Uuid $projectId,
     ) {
     }
 

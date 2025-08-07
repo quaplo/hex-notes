@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\Model;
 
-use DomainException;
-use RuntimeException;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
@@ -13,10 +11,12 @@ use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
 use App\Project\Domain\ValueObject\ProjectName;
 use App\Project\Domain\ValueObject\ProjectWorker;
-use App\Shared\Domain\Model\AggregateRoot;
 use App\Shared\Domain\Event\DomainEvent;
+use App\Shared\Domain\Model\AggregateRoot;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
+use DomainException;
+use RuntimeException;
 
 final class Project extends AggregateRoot
 {
@@ -33,6 +33,7 @@ final class Project extends AggregateRoot
     {
         $project = new self(Uuid::generate(), $projectName, new DateTimeImmutable(), $uuid);
         $project->apply(new ProjectCreatedEvent($project->getId(), $projectName, $uuid));
+
         return $project;
     }
 
@@ -122,6 +123,7 @@ final class Project extends AggregateRoot
             $projectWorker->getRole(),
             $projectWorker->getAddedBy()
         ));
+
         return $this;
     }
 
@@ -135,7 +137,8 @@ final class Project extends AggregateRoot
         if ($this->isDeleted()) {
             throw new DomainException('Cannot remove worker from deleted project');
         }
-        $found = array_any($this->workers, fn($worker) => $worker->getUserId()->equals($userId));
+        $found = array_any($this->workers, fn ($worker) => $worker->getUserId()->equals($userId));
+
         if (!$found) {
             throw new DomainException('Worker not found in project');
         }
@@ -145,11 +148,12 @@ final class Project extends AggregateRoot
             $userId,
             $removedBy
         ));
+
         return $this;
     }
 
     /**
-     * Add worker directly without domain events (for snapshot restoration)
+     * Add worker directly without domain events (for snapshot restoration).
      */
     public function restoreWorker(ProjectWorker $projectWorker): void
     {
@@ -157,7 +161,7 @@ final class Project extends AggregateRoot
     }
 
     /**
-     * Implementation of abstract handleEvent method from AggregateRoot
+     * Implementation of abstract handleEvent method from AggregateRoot.
      */
     protected function handleEvent(DomainEvent $domainEvent): void
     {
@@ -167,7 +171,7 @@ final class Project extends AggregateRoot
             ProjectDeletedEvent::class => $this->handleProjectDeleted($domainEvent),
             ProjectWorkerAddedEvent::class => $this->handleProjectWorkerAdded($domainEvent),
             ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($domainEvent),
-            default => throw new RuntimeException('Unknown event type: ' . $domainEvent::class)
+            default => throw new RuntimeException('Unknown event type: '.$domainEvent::class),
         };
     }
 
@@ -203,7 +207,7 @@ final class Project extends AggregateRoot
     {
         $this->workers = array_filter(
             $this->workers,
-            fn($worker): bool => !$worker->getUserId()->equals($projectWorkerRemovedEvent->getUserId())
+            fn ($worker): bool => !$worker->getUserId()->equals($projectWorkerRemovedEvent->getUserId())
         );
     }
 }

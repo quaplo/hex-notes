@@ -9,7 +9,7 @@ use App\Shared\ValueObject\Uuid;
 final readonly class DeleteUserCommand
 {
     public function __construct(
-        public string $userId
+        public string $userId,
     ) {
     }
 

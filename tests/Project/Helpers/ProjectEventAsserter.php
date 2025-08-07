@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Project\Helpers;
 
-use DateTimeImmutable;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
@@ -14,6 +13,7 @@ use App\Project\Domain\ValueObject\ProjectName;
 use App\Project\Domain\ValueObject\ProjectRole;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
+use DateTimeImmutable;
 use PHPUnit\Framework\Assert;
 
 final class ProjectEventAsserter
@@ -22,11 +22,11 @@ final class ProjectEventAsserter
         DomainEvent $domainEvent,
         Uuid $expectedId,
         ProjectName $projectName,
-        Uuid $expectedOwnerId
+        Uuid $expectedOwnerId,
     ): void {
         Assert::assertInstanceOf(ProjectCreatedEvent::class, $domainEvent);
         Assert::assertTrue($domainEvent->getProjectId()->equals($expectedId));
-        Assert::assertEquals((string)$projectName, (string)$domainEvent->getName());
+        Assert::assertEquals((string) $projectName, (string) $domainEvent->getName());
         Assert::assertTrue($domainEvent->getOwnerId()->equals($expectedOwnerId));
         Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
@@ -35,12 +35,12 @@ final class ProjectEventAsserter
         DomainEvent $domainEvent,
         Uuid $uuid,
         ProjectName $expectedOldName,
-        ProjectName $expectedNewName
+        ProjectName $expectedNewName,
     ): void {
         Assert::assertInstanceOf(ProjectRenamedEvent::class, $domainEvent);
         Assert::assertTrue($domainEvent->getProjectId()->equals($uuid));
-        Assert::assertEquals((string)$expectedOldName, (string)$domainEvent->getOldName());
-        Assert::assertEquals((string)$expectedNewName, (string)$domainEvent->getNewName());
+        Assert::assertEquals((string) $expectedOldName, (string) $domainEvent->getOldName());
+        Assert::assertEquals((string) $expectedNewName, (string) $domainEvent->getNewName());
         Assert::assertInstanceOf(DateTimeImmutable::class, $domainEvent->getOccurredAt());
     }
 
@@ -56,7 +56,7 @@ final class ProjectEventAsserter
         Uuid $expectedProjectId,
         Uuid $expectedUserId,
         ProjectRole $projectRole,
-        ?Uuid $expectedAddedBy = null
+        ?Uuid $expectedAddedBy = null,
     ): void {
         Assert::assertInstanceOf(ProjectWorkerAddedEvent::class, $domainEvent);
         Assert::assertTrue($domainEvent->getProjectId()->equals($expectedProjectId));
@@ -74,7 +74,7 @@ final class ProjectEventAsserter
         DomainEvent $domainEvent,
         Uuid $expectedProjectId,
         Uuid $expectedUserId,
-        ?Uuid $expectedRemovedBy = null
+        ?Uuid $expectedRemovedBy = null,
     ): void {
         Assert::assertInstanceOf(ProjectWorkerRemovedEvent::class, $domainEvent);
         Assert::assertTrue($domainEvent->getProjectId()->equals($expectedProjectId));
@@ -89,12 +89,12 @@ final class ProjectEventAsserter
 
     public static function assertEventCount(array $events, int $expectedCount): void
     {
-        Assert::assertCount($expectedCount, $events, "Expected {$expectedCount} events, got " . count($events));
+        Assert::assertCount($expectedCount, $events, "Expected {$expectedCount} events, got ".\count($events));
     }
 
     public static function assertContainsEventType(array $events, string $eventClass): void
     {
-        $found = array_any($events, fn($event): bool => $event instanceof $eventClass);
+        $found = array_any($events, fn ($event): bool => $event instanceof $eventClass);
         Assert::assertTrue($found, "Expected to find event of type {$eventClass} in events");
     }
 
@@ -107,7 +107,7 @@ final class ProjectEventAsserter
 
     public static function assertEventsInOrder(array $events, array $expectedEventClasses): void
     {
-        Assert::assertCount(count($expectedEventClasses), $events, "Event count mismatch");
+        Assert::assertCount(\count($expectedEventClasses), $events, 'Event count mismatch');
 
         foreach ($events as $index => $event) {
             $expectedClass = $expectedEventClasses[$index];

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Event;
 
-use InvalidArgumentException;
 use App\Shared\Event\SnapshotStrategy;
 use App\Shared\ValueObject\Uuid;
+use InvalidArgumentException;
 
 final readonly class FrequencyBasedSnapshotStrategy implements SnapshotStrategy
 {
     public function __construct(
-        private int $snapshotFrequency = 10
+        private int $snapshotFrequency = 10,
     ) {
         if ($snapshotFrequency <= 0) {
             throw new InvalidArgumentException('Snapshot frequency must be positive');
@@ -19,7 +19,7 @@ final readonly class FrequencyBasedSnapshotStrategy implements SnapshotStrategy
     }
 
     /**
-     * Create snapshot every N events
+     * Create snapshot every N events.
      */
     public function shouldCreateSnapshot(Uuid $uuid, int $currentVersion): bool
     {

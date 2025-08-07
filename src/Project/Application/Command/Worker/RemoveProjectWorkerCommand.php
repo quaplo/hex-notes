@@ -11,7 +11,7 @@ final readonly class RemoveProjectWorkerCommand
     private function __construct(
         public Uuid $projectId,
         public Uuid $userId,
-        public ?Uuid $removedBy = null
+        public ?Uuid $removedBy = null,
     ) {
     }
 

@@ -20,7 +20,7 @@ it('can create and load user via handlers', function (): void {
     /** @var GetUserByIdHandler $getHandler */
     $getHandler = self::getContainer()->get(GetUserByIdHandler::class);
 
-    $email = 'test' . uniqid() . '@example.com';
+    $email = 'test'.uniqid().'@example.com';
     $command = new CreateUserCommand($email);
     $user = $createHandler($command);
 
@@ -46,7 +46,7 @@ it('can soft delete user and user becomes unavailable via regular queries', func
     $userRepository = self::getContainer()->get(UserRepositoryInterface::class);
 
     // Create user
-    $email = 'delete_test' . uniqid() . '@example.com';
+    $email = 'delete_test'.uniqid().'@example.com';
     $command = new CreateUserCommand($email);
     $user = $createHandler($command);
 
@@ -81,7 +81,7 @@ it('soft delete is idempotent - deleting already deleted user does nothing', fun
     $userRepository = self::getContainer()->get(UserRepositoryInterface::class);
 
     // Create user
-    $email = 'idempotent_delete' . uniqid() . '@example.com';
+    $email = 'idempotent_delete'.uniqid().'@example.com';
     $command = new CreateUserCommand($email);
     $user = $createHandler($command);
 
@@ -111,7 +111,7 @@ it('cannot create user with same email as soft deleted user', function (): void 
     $deleteHandler = self::getContainer()->get(DeleteUserHandler::class);
 
     // Create user
-    $email = 'unique_email_test' . uniqid() . '@example.com';
+    $email = 'unique_email_test'.uniqid().'@example.com';
     $command = new CreateUserCommand($email);
     $user = $createHandler($command);
 
@@ -120,6 +120,6 @@ it('cannot create user with same email as soft deleted user', function (): void 
     $deleteHandler($deleteCommand);
 
     // Try to create user with same email - should fail
-    expect(fn() => $createHandler($command))
+    expect(fn () => $createHandler($command))
         ->toThrow(UserAlreadyExistsException::class);
 });

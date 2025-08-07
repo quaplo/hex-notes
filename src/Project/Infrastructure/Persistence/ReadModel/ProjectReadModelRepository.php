@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 final readonly class ProjectReadModelRepository implements ProjectReadModelRepositoryInterface
 {
     public function __construct(
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -58,7 +58,7 @@ final readonly class ProjectReadModelRepository implements ProjectReadModelRepos
             ->from(ProjectReadModelEntity::class, 'p')
             ->where('JSON_CONTAINS(p.workers, :userId, \'$[*].userId\') = 1')
             ->andWhere('p.deletedAt IS NULL')
-            ->setParameter('userId', '"' . $uuid->toString() . '"')
+            ->setParameter('userId', '"'.$uuid->toString().'"')
             ->getQuery()
             ->getResult();
     }
@@ -68,10 +68,10 @@ final readonly class ProjectReadModelRepository implements ProjectReadModelRepos
         $queryBuilder = $this->entityManager->createQueryBuilder();
 
         return $queryBuilder->select([
-                'COUNT(p.id) as total_projects',
-                'COUNT(CASE WHEN p.deletedAt IS NULL THEN 1 END) as active_projects',
-                'COUNT(CASE WHEN p.deletedAt IS NOT NULL THEN 1 END) as deleted_projects'
-            ])
+            'COUNT(p.id) as total_projects',
+            'COUNT(CASE WHEN p.deletedAt IS NULL THEN 1 END) as active_projects',
+            'COUNT(CASE WHEN p.deletedAt IS NOT NULL THEN 1 END) as deleted_projects',
+        ])
             ->from(ProjectReadModelEntity::class, 'p')
             ->where('p.ownerId = :ownerId')
             ->setParameter('ownerId', $uuid->toString())

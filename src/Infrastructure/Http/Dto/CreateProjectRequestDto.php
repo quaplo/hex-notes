@@ -15,7 +15,7 @@ final readonly class CreateProjectRequestDto
         #[Assert\Length(max: 500, maxMessage: 'Description cannot exceed 500 characters')]
         public ?string $description = null,
         #[Assert\Uuid(message: 'Owner ID must be a valid UUID')]
-        public ?string $ownerId = null
+        public ?string $ownerId = null,
     ) {
     }
 }

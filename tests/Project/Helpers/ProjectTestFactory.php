@@ -63,7 +63,7 @@ final class ProjectTestFactory
     {
         $defaults = [
             'name' => 'Test Project',
-            'ownerId' => (string)Uuid::generate(),
+            'ownerId' => (string) Uuid::generate(),
         ];
 
         $data = array_merge($defaults, $overrides);

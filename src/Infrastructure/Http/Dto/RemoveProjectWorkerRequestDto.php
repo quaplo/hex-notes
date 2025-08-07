@@ -13,7 +13,7 @@ final readonly class RemoveProjectWorkerRequestDto
         #[Assert\Uuid(message: 'User ID must be a valid UUID')]
         public string $userId,
         #[Assert\Uuid(message: 'Removed by must be a valid UUID')]
-        public ?string $removedBy = null
+        public ?string $removedBy = null,
     ) {
     }
 }

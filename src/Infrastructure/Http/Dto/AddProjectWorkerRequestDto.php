@@ -16,7 +16,7 @@ final readonly class AddProjectWorkerRequestDto
         #[Assert\Choice(choices: ['owner', 'participant'], message: 'Role must be one of: owner, participant')]
         public string $role,
         #[Assert\Uuid(message: 'Added by must be a valid UUID')]
-        public ?string $addedBy = null
+        public ?string $addedBy = null,
     ) {
     }
 }

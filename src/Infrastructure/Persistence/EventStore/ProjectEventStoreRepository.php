@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\EventStore;
 
-use Exception;
-use App\Shared\Domain\Model\AggregateSnapshot;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Model\ProjectSnapshotFactory;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
+use App\Shared\Domain\Model\AggregateSnapshot;
 use App\Shared\Event\EventDispatcher;
 use App\Shared\Event\EventStore;
 use App\Shared\Event\SnapshotStore;
 use App\Shared\Event\SnapshotStrategy;
 use App\Shared\ValueObject\Uuid;
+use Exception;
 
 final readonly class ProjectEventStoreRepository implements ProjectRepositoryInterface
 {
@@ -24,7 +24,7 @@ final readonly class ProjectEventStoreRepository implements ProjectRepositoryInt
         private EventDispatcher $eventDispatcher,
         private SnapshotStore $snapshotStore,
         private ProjectSnapshotFactory $projectSnapshotFactory,
-        private SnapshotStrategy $snapshotStrategy
+        private SnapshotStrategy $snapshotStrategy,
     ) {
     }
 
@@ -46,7 +46,7 @@ final readonly class ProjectEventStoreRepository implements ProjectRepositoryInt
         );
 
         // Calculate new version after events
-        $newVersion = $expectedVersion + count($events);
+        $newVersion = $expectedVersion + \count($events);
 
         // Check if we should create a snapshot
         if ($this->snapshotStrategy->shouldCreateSnapshot($project->getId(), $newVersion)) {
@@ -56,7 +56,7 @@ final readonly class ProjectEventStoreRepository implements ProjectRepositoryInt
             } catch (Exception $e) {
                 // Log error but don't fail the save operation
                 // Snapshots are for performance optimization, not critical for correctness
-                error_log("Failed to create snapshot for project {$project->getId()}: " . $e->getMessage());
+                error_log("Failed to create snapshot for project {$project->getId()}: ".$e->getMessage());
             }
         }
 
@@ -107,6 +107,7 @@ final readonly class ProjectEventStoreRepository implements ProjectRepositoryInt
     public function exists(Uuid $uuid): bool
     {
         $events = $this->eventStore->getEvents($uuid);
+
         return $events !== [];
     }
 }

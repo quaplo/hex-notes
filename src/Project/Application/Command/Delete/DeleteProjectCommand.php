@@ -9,7 +9,7 @@ use App\Shared\ValueObject\Uuid;
 final readonly class DeleteProjectCommand
 {
     private function __construct(
-        public Uuid $projectId
+        public Uuid $projectId,
     ) {
     }
 

@@ -9,7 +9,7 @@ use App\Shared\ValueObject\Uuid;
 final readonly class GetProjectHistoryQuery
 {
     private function __construct(
-        public Uuid $projectId
+        public Uuid $projectId,
     ) {
     }
 

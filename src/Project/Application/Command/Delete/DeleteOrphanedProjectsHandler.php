@@ -13,7 +13,7 @@ final readonly class DeleteOrphanedProjectsHandler
 {
     public function __construct(
         private ProjectRepositoryInterface $projectRepository,
-        private ProjectReadModelRepositoryInterface $projectReadModelRepository
+        private ProjectReadModelRepositoryInterface $projectReadModelRepository,
     ) {
     }
 

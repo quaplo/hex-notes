@@ -14,7 +14,7 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
 {
     public function __construct(
         protected readonly EventStore $eventStore,
-        protected readonly EventDispatcher $eventDispatcher
+        protected readonly EventDispatcher $eventDispatcher,
     ) {
     }
 
@@ -61,6 +61,7 @@ abstract class AbstractEventStoreRepository implements EventStoreRepository
     public function exists(Uuid $uuid): bool
     {
         $events = $this->eventStore->getEvents($uuid);
+
         return $events !== [];
     }
 

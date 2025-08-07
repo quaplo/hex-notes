@@ -13,7 +13,7 @@ final readonly class GetUserByEmailHandler
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
-        private UserDtoMapper $userDtoMapper
+        private UserDtoMapper $userDtoMapper,
     ) {
     }
 

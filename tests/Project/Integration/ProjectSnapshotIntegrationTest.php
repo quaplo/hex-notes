@@ -95,11 +95,11 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $this->removeProjectWorkerHandler = new RemoveProjectWorkerHandler($this->projectEventStoreRepository);
     }
 
-    public function test_snapshots_are_created_every_2_events_and_project_can_be_restored_from_them(): void
+    public function testSnapshotsAreCreatedEvery2EventsAndProjectCanBeRestoredFromThem(): void
     {
         // Create project (1st event - version 1, no snapshot yet)
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Snapshot Test Project'
+            'name' => 'Snapshot Test Project',
         ]);
         $project = ($this->registerProjectHandler)($registerProjectCommand);
 
@@ -108,7 +108,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
 
         // Rename project (2nd event - should create snapshot at version 2)
         $renameProjectCommand = RenameProjectCommand::fromPrimitives(
-            (string)$project->getId(),
+            (string) $project->getId(),
             'Renamed Once'
         );
         ($this->renameProjectHandler)($renameProjectCommand);
@@ -121,20 +121,20 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $uuid = ProjectTestFactory::createValidUuid();
         $addedBy = ProjectTestFactory::createValidUuid();
         $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
-            (string)$project->getId(),
-            (string)$uuid,
+            (string) $project->getId(),
+            (string) $uuid,
             'participant',
-            (string)$addedBy
+            (string) $addedBy
         );
         ($this->addProjectWorkerHandler)($addProjectWorkerCommand);
 
         // Add another worker (4th event - should create snapshot at version 4)
         $userId2 = ProjectTestFactory::createValidUuid();
         $addWorkerCommand2 = AddProjectWorkerCommand::fromPrimitives(
-            (string)$project->getId(),
-            (string)$userId2,
+            (string) $project->getId(),
+            (string) $userId2,
             'owner',
-            (string)$addedBy
+            (string) $addedBy
         );
         ($this->addProjectWorkerHandler)($addWorkerCommand2);
 
@@ -143,16 +143,16 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
 
         // Rename again (5th event)
         $renameCommand2 = RenameProjectCommand::fromPrimitives(
-            (string)$project->getId(),
+            (string) $project->getId(),
             'Final Name After 5 Events'
         );
         ($this->renameProjectHandler)($renameCommand2);
 
         // Remove one worker (6th event - should create snapshot at version 6)
         $removeProjectWorkerCommand = RemoveProjectWorkerCommand::fromPrimitives(
-            (string)$project->getId(),
-            (string)$uuid,
-            (string)$addedBy
+            (string) $project->getId(),
+            (string) $uuid,
+            (string) $addedBy
         );
         ($this->removeProjectWorkerHandler)($removeProjectWorkerCommand);
 
@@ -163,7 +163,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $restoredProject = $this->projectEventStoreRepository->load($project->getId());
 
         // Verify project state is correctly restored
-        $this->assertEquals('Final Name After 5 Events', (string)$restoredProject->getName());
+        $this->assertEquals('Final Name After 5 Events', (string) $restoredProject->getName());
         $this->assertCount(1, $restoredProject->getWorkers());
         $this->assertTrue($restoredProject->getId()->equals($project->getId()));
         $this->assertFalse($restoredProject->isDeleted());
@@ -175,21 +175,21 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $this->assertEquals('owner', $remainingWorker->getRole()->toString());
     }
 
-    public function test_project_can_be_loaded_from_snapshot_when_no_events_exist_after_snapshot(): void
+    public function testProjectCanBeLoadedFromSnapshotWhenNoEventsExistAfterSnapshot(): void
     {
         // Create project and add worker to reach version 2 (trigger snapshot)
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Snapshot Only Test'
+            'name' => 'Snapshot Only Test',
         ]);
         $project = ($this->registerProjectHandler)($registerProjectCommand);
 
         $uuid = ProjectTestFactory::createValidUuid();
         $addedBy = ProjectTestFactory::createValidUuid();
         $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
-            (string)$project->getId(),
-            (string)$uuid,
+            (string) $project->getId(),
+            (string) $uuid,
             'participant',
-            (string)$addedBy
+            (string) $addedBy
         );
         ($this->addProjectWorkerHandler)($addProjectWorkerCommand);
 
@@ -200,26 +200,26 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $restoredProject = $this->projectEventStoreRepository->load($project->getId());
 
         // Verify state
-        $this->assertEquals('Snapshot Only Test', (string)$restoredProject->getName());
+        $this->assertEquals('Snapshot Only Test', (string) $restoredProject->getName());
         $this->assertCount(1, $restoredProject->getWorkers());
         $this->assertTrue($restoredProject->getId()->equals($project->getId()));
     }
 
-    public function test_project_loads_correctly_when_events_exist_after_latest_snapshot(): void
+    public function testProjectLoadsCorrectlyWhenEventsExistAfterLatestSnapshot(): void
     {
         // Create project, add worker (triggers snapshot at version 2)
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Events After Snapshot'
+            'name' => 'Events After Snapshot',
         ]);
         $project = ($this->registerProjectHandler)($registerProjectCommand);
 
         $uuid = ProjectTestFactory::createValidUuid();
         $addedBy = ProjectTestFactory::createValidUuid();
         $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
-            (string)$project->getId(),
-            (string)$uuid,
+            (string) $project->getId(),
+            (string) $uuid,
             'participant',
-            (string)$addedBy
+            (string) $addedBy
         );
         ($this->addProjectWorkerHandler)($addProjectWorkerCommand);
 
@@ -228,7 +228,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
 
         // Rename project (3rd event - after snapshot)
         $renameProjectCommand = RenameProjectCommand::fromPrimitives(
-            (string)$project->getId(),
+            (string) $project->getId(),
             'Renamed After Snapshot'
         );
         ($this->renameProjectHandler)($renameProjectCommand);
@@ -237,7 +237,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $restoredProject = $this->projectEventStoreRepository->load($project->getId());
 
         // Verify state includes both snapshot data and events after snapshot
-        $this->assertEquals('Renamed After Snapshot', (string)$restoredProject->getName());
+        $this->assertEquals('Renamed After Snapshot', (string) $restoredProject->getName());
         $this->assertCount(1, $restoredProject->getWorkers());
         $this->assertTrue($restoredProject->getId()->equals($project->getId()));
 
@@ -246,7 +246,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $this->assertTrue($worker->getUserId()->equals($uuid));
     }
 
-    public function test_snapshot_creation_failure_does_not_affect_normal_operation(): void
+    public function testSnapshotCreationFailureDoesNotAffectNormalOperation(): void
     {
         // Create a custom snapshot store that always fails
         $failingSnapshotStore = new class implements SnapshotStore {
@@ -294,36 +294,36 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
 
         // Operations should still work despite snapshot failures
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Failing Snapshot Test'
+            'name' => 'Failing Snapshot Test',
         ]);
         $project = ($registerProjectHandler)($registerProjectCommand);
 
         // This should trigger snapshot creation but should not fail the operation
         $renameProjectCommand = RenameProjectCommand::fromPrimitives(
-            (string)$project->getId(),
+            (string) $project->getId(),
             'Renamed Despite Snapshot Failure'
         );
         $renamedProject = ($renameProjectHandler)($renameProjectCommand);
 
         // Verify operations completed successfully
-        $this->assertEquals('Renamed Despite Snapshot Failure', (string)$renamedProject->getName());
+        $this->assertEquals('Renamed Despite Snapshot Failure', (string) $renamedProject->getName());
 
         // Verify project can be loaded from events only
         $loadedProject = $projectEventStoreRepository->load($project->getId());
-        $this->assertEquals('Renamed Despite Snapshot Failure', (string)$loadedProject->getName());
+        $this->assertEquals('Renamed Despite Snapshot Failure', (string) $loadedProject->getName());
     }
 
-    public function test_multiple_projects_have_independent_snapshots(): void
+    public function testMultipleProjectsHaveIndependentSnapshots(): void
     {
         // Create first project
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Project One'
+            'name' => 'Project One',
         ]);
         $project1 = ($this->registerProjectHandler)($registerProjectCommand);
 
         // Create second project
         $registerCommand2 = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Project Two'
+            'name' => 'Project Two',
         ]);
         $project2 = ($this->registerProjectHandler)($registerCommand2);
 
@@ -333,17 +333,17 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $addedBy = ProjectTestFactory::createValidUuid();
 
         ($this->addProjectWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-            (string)$project1->getId(),
-            (string)$uuid,
+            (string) $project1->getId(),
+            (string) $uuid,
             'participant',
-            (string)$addedBy
+            (string) $addedBy
         ));
 
         ($this->addProjectWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-            (string)$project2->getId(),
-            (string)$userId2,
+            (string) $project2->getId(),
+            (string) $userId2,
             'owner',
-            (string)$addedBy
+            (string) $addedBy
         ));
 
         // Verify both projects have snapshots
@@ -354,8 +354,8 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $loadedProject1 = $this->projectEventStoreRepository->load($project1->getId());
         $loadedProject2 = $this->projectEventStoreRepository->load($project2->getId());
 
-        $this->assertEquals('Project One', (string)$loadedProject1->getName());
-        $this->assertEquals('Project Two', (string)$loadedProject2->getName());
+        $this->assertEquals('Project One', (string) $loadedProject1->getName());
+        $this->assertEquals('Project Two', (string) $loadedProject2->getName());
 
         $this->assertCount(1, $loadedProject1->getWorkers());
         $this->assertCount(1, $loadedProject2->getWorkers());

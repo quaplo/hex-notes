@@ -6,7 +6,7 @@ namespace App\User\Application\Exception;
 
 use Throwable;
 
-class UserNotFoundException extends ApplicationException
+final class UserNotFoundException extends ApplicationException
 {
     public function __construct(string $userId, ?Throwable $throwable = null)
     {

@@ -10,6 +10,6 @@ final class UserInactiveException extends DomainException
 {
     public function __construct(Uuid $uuid)
     {
-        parent::__construct(sprintf('User with id "%s" is inactive and cannot perform this action', $uuid->toString()));
+        parent::__construct(\sprintf('User with id "%s" is inactive and cannot perform this action', $uuid->toString()));
     }
 }

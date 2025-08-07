@@ -85,6 +85,7 @@ final class ProjectController extends BaseController
                 $addedBy
             );
             $this->commandBus->dispatch($command);
+
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ValidationException $e) {
             return $this->createValidationErrorResponse($e->getViolations());
@@ -104,6 +105,7 @@ final class ProjectController extends BaseController
                 $dto->removedBy
             );
             $this->commandBus->dispatch($command);
+
             return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
         } catch (ValidationException $e) {
             return $this->createValidationErrorResponse($e->getViolations());

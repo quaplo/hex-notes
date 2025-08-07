@@ -11,7 +11,7 @@ final readonly class ProjectDto
         public string $name,
         public string $ownerId,
         public string $createdAt,
-        public ?string $deletedAt = null
+        public ?string $deletedAt = null,
     ) {
     }
 }
