@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\User\Domain\Event;
 
 use App\Shared\Domain\Event\DomainEvent;
-use App\Shared\ValueObject\Uuid;
 use App\Shared\ValueObject\Email;
+use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
 final readonly class UserDeletedEvent implements DomainEvent
@@ -14,7 +14,7 @@ final readonly class UserDeletedEvent implements DomainEvent
     public function __construct(
         private Uuid $uuid,
         private Email $email,
-        private DateTimeImmutable $occurredAt
+        private DateTimeImmutable $occurredAt,
     ) {
     }
 

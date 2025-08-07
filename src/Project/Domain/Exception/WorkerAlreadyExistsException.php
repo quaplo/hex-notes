@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\Exception;
 
-use DomainException;
 use App\Shared\ValueObject\Uuid;
+use DomainException;
 
 final class WorkerAlreadyExistsException extends DomainException
 {

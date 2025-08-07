@@ -12,7 +12,7 @@ final readonly class FindProjectsByOwnerHandler
 {
     public function __construct(
         private EventStore $eventStore,
-        private ProjectRepositoryInterface $projectRepository
+        private ProjectRepositoryInterface $projectRepository,
     ) {
     }
 
@@ -24,8 +24,10 @@ final readonly class FindProjectsByOwnerHandler
         $aggregateIds = $this->eventStore->findProjectAggregatesByOwnerId($findProjectsByOwnerQuery->getOwnerId());
 
         $projects = [];
+
         foreach ($aggregateIds as $aggregateId) {
             $project = $this->projectRepository->load($aggregateId);
+
             if ($project && !$project->isDeleted()) {
                 $projects[] = $project;
             }

@@ -6,7 +6,6 @@ namespace App\User\Application\Mapper;
 
 use App\User\Application\Dto\UserDto;
 use App\User\Domain\Model\User;
-use App\User\Application\Mapper\UserDtoMapperInterface;
 
 final readonly class UserDtoMapper implements UserDtoMapperInterface
 {

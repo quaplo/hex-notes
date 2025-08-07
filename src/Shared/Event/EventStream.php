@@ -15,7 +15,7 @@ final readonly class EventStream
     public function __construct(
         private Uuid $uuid,
         private array $events,
-        private int $version
+        private int $version,
     ) {
     }
 
@@ -44,6 +44,6 @@ final readonly class EventStream
 
     public function count(): int
     {
-        return count($this->events);
+        return \count($this->events);
     }
 }

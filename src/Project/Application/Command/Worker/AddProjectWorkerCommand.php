@@ -13,7 +13,7 @@ final readonly class AddProjectWorkerCommand
         public Uuid $projectId,
         public Uuid $userId,
         public ProjectRole $role,
-        public Uuid $addedBy
+        public Uuid $addedBy,
     ) {
     }
 

@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace App\Shared\ValueObject;
 
-use Stringable;
 use InvalidArgumentException;
+use Stringable;
 
 final readonly class Email implements Stringable
 {
     public function __construct(private string $value)
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($value, \FILTER_VALIDATE_EMAIL)) {
             throw new InvalidArgumentException("Invalid email address: $value");
         }
+    }
+
+    public function __toString(): string
+    {
+        return $this->value;
     }
 
     public static function fromString(string $value): self
@@ -28,16 +33,11 @@ final readonly class Email implements Stringable
 
     public function getDomain(): string
     {
-        return substr(strrchr($this->value, "@"), 1);
+        return substr(strrchr($this->value, '@'), 1);
     }
 
     public function equals(self $other): bool
     {
         return strtolower($this->value) === strtolower($other->value);
-    }
-
-    public function __toString(): string
-    {
-        return $this->value;
     }
 }

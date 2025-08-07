@@ -14,7 +14,7 @@ final readonly class GetProjectHistoryHandler
     public function __construct(
         private ProjectRepositoryInterface $projectRepository,
         private EventStore $eventStore,
-        private ProjectDtoMapperInterface $projectDtoMapper
+        private ProjectDtoMapperInterface $projectDtoMapper,
     ) {
     }
 
@@ -31,17 +31,17 @@ final readonly class GetProjectHistoryHandler
 
         // Convert events to serializable data
         $eventData = array_map(
-            fn($event): array => [
+            fn ($event): array => [
                 'eventName' => $event->getEventName(),
                 'data' => $event->getEventData(),
-                'occurredAt' => $event->getOccurredAt()->format('Y-m-d H:i:s')
+                'occurredAt' => $event->getOccurredAt()->format('Y-m-d H:i:s'),
             ],
             $events
         );
 
         return [
             'project' => $this->projectDtoMapper->toDto($project),
-            'events' => $eventData
+            'events' => $eventData,
         ];
     }
 }

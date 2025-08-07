@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Infrastructure\Persistence\Snapshot;
 
 use App\Project\Domain\Model\ProjectSnapshot;
-use RuntimeException;
-use JsonException;
-use App\Shared\Event\SnapshotStore;
 use App\Shared\Domain\Model\AggregateSnapshot;
+use App\Shared\Event\SnapshotStore;
 use App\Shared\ValueObject\Uuid;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
+use JsonException;
+use RuntimeException;
 
 final readonly class DoctrineSnapshotStore implements SnapshotStore
 {
     public function __construct(
-        private Connection $connection
+        private Connection $connection,
     ) {
     }
 
@@ -44,8 +44,8 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
             $aggregateSnapshot->getAggregateId()->toString(),
             $this->getAggregateType($aggregateSnapshot),
             $aggregateSnapshot->getVersion(),
-            json_encode($aggregateSnapshot->getData(), JSON_THROW_ON_ERROR),
-            date('Y-m-d H:i:s')
+            json_encode($aggregateSnapshot->getData(), \JSON_THROW_ON_ERROR),
+            date('Y-m-d H:i:s'),
         ]);
     }
 
@@ -56,15 +56,15 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
     {
         $sql = '
             SELECT aggregate_id, aggregate_type, version, data, created_at
-            FROM aggregate_snapshots 
+            FROM aggregate_snapshots
             WHERE aggregate_id = ? AND aggregate_type = ?
-            ORDER BY version DESC 
+            ORDER BY version DESC
             LIMIT 1
         ';
 
         $row = $this->connection->fetchAssociative($sql, [
             $uuid->toString(),
-            $aggregateType
+            $aggregateType,
         ]);
 
         if (!$row) {
@@ -81,14 +81,14 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
     {
         $sql = '
             SELECT aggregate_id, aggregate_type, version, data, created_at
-            FROM aggregate_snapshots 
+            FROM aggregate_snapshots
             WHERE aggregate_id = ? AND aggregate_type = ? AND version = ?
         ';
 
         $row = $this->connection->fetchAssociative($sql, [
             $uuid->toString(),
             $aggregateType,
-            $version
+            $version,
         ]);
 
         if (!$row) {
@@ -104,14 +104,14 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
     public function deleteOlderThan(Uuid $uuid, string $aggregateType, int $version): void
     {
         $sql = '
-            DELETE FROM aggregate_snapshots 
+            DELETE FROM aggregate_snapshots
             WHERE aggregate_id = ? AND aggregate_type = ? AND version < ?
         ';
 
         $this->connection->executeStatement($sql, [
             $uuid->toString(),
             $aggregateType,
-            $version
+            $version,
         ]);
     }
 
@@ -128,7 +128,7 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
 
         $result = $this->connection->fetchAssociative($sql, [
             $uuid->toString(),
-            $aggregateType
+            $aggregateType,
         ]);
 
         return (int) $result['count'] > 0;
@@ -146,7 +146,7 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
 
         $this->connection->executeStatement($sql, [
             $uuid->toString(),
-            $aggregateType
+            $aggregateType,
         ]);
     }
 
@@ -163,33 +163,34 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
 
         $result = $this->connection->fetchAssociative($sql, [
             $uuid->toString(),
-            $aggregateType
+            $aggregateType,
         ]);
 
         return $result['latest_version'] !== null ? (int) $result['latest_version'] : null;
     }
 
     /**
-     * Create specific snapshot instance from database row
+     * Create specific snapshot instance from database row.
      *
      * @param array<string, mixed> $row
+     *
      * @throws JsonException
      */
     private function createSnapshotFromRow(array $row): AggregateSnapshot
     {
         $uuid = Uuid::create($row['aggregate_id']);
         $version = (int) $row['version'];
-        $data = json_decode((string) $row['data'], true, 512, JSON_THROW_ON_ERROR);
+        $data = json_decode((string) $row['data'], true, 512, \JSON_THROW_ON_ERROR);
 
         // Factory pattern based on aggregate type
         return match ($row['aggregate_type']) {
             'Project' => ProjectSnapshot::create($uuid, $version, $data),
-            default => throw new RuntimeException('Unknown aggregate type: ' . $row['aggregate_type'])
+            default => throw new RuntimeException('Unknown aggregate type: '.$row['aggregate_type']),
         };
     }
 
     /**
-     * Get aggregate type from snapshot class name
+     * Get aggregate type from snapshot class name.
      */
     private function getAggregateType(AggregateSnapshot $aggregateSnapshot): string
     {
@@ -200,6 +201,6 @@ final readonly class DoctrineSnapshotStore implements SnapshotStore
             return $matches[1];
         }
 
-        throw new RuntimeException('Cannot determine aggregate type from snapshot class: ' . $className);
+        throw new RuntimeException('Cannot determine aggregate type from snapshot class: '.$className);
     }
 }

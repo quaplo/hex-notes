@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\ValueObject;
 
-use App\Project\Domain\ValueObject\ProjectRole;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
@@ -22,7 +21,7 @@ final readonly class ProjectWorker
         Uuid $userId,
         ProjectRole $projectRole,
         Uuid $addedBy,
-        ?DateTimeImmutable $createdAt = null
+        ?DateTimeImmutable $createdAt = null,
     ): self {
         return new self(
             $userId,

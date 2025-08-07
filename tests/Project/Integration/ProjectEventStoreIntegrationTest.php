@@ -19,7 +19,6 @@ use App\Tests\Project\Doubles\InMemorySnapshotStrategy;
 use App\Tests\Project\Helpers\ProjectTestFactory;
 
 describe('Project Event Store Integration Tests', function (): void {
-
     beforeEach(function (): void {
         $this->eventStore = new InMemoryEventStore();
         $this->eventDispatcher = new InMemoryEventDispatcher();
@@ -41,10 +40,9 @@ describe('Project Event Store Integration Tests', function (): void {
     });
 
     describe('Event Store Operations', function (): void {
-
         test('project creation stores events in event store', function (): void {
             $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-                'name' => 'Event Store Test'
+                'name' => 'Event Store Test',
             ]);
 
             $project = ($this->registerHandler)($registerProjectCommand);
@@ -66,7 +64,7 @@ describe('Project Event Store Integration Tests', function (): void {
         test('project can be loaded from event store', function (): void {
             // Create and save project
             $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-                'name' => 'Loadable Project'
+                'name' => 'Loadable Project',
             ]);
             $originalProject = ($this->registerHandler)($registerProjectCommand);
 
@@ -75,30 +73,30 @@ describe('Project Event Store Integration Tests', function (): void {
 
             expect($loadedProject)->not->toBeNull();
             expect($loadedProject->getId()->equals($originalProject->getId()))->toBeTrue();
-            expect((string)$loadedProject->getName())->toBe('Loadable Project');
+            expect((string) $loadedProject->getName())->toBe('Loadable Project');
             expect($loadedProject->getOwnerId()->equals($originalProject->getOwnerId()))->toBeTrue();
         });
 
         test('multiple operations create event stream', function (): void {
             // Create project
             $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-                'name' => 'Event Stream Test'
+                'name' => 'Event Stream Test',
             ]);
             $project = ($this->registerHandler)($registerProjectCommand);
 
             // Rename project
             $renameProjectCommand = RenameProjectCommand::fromPrimitives(
-                (string)$project->getId(),
+                (string) $project->getId(),
                 'Renamed Event Stream Test'
             );
             ($this->renameHandler)($renameProjectCommand);
 
             // Add worker
             $addProjectWorkerCommand = AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(),
-                (string)ProjectTestFactory::createValidUuid(),
+                (string) $project->getId(),
+                (string) ProjectTestFactory::createValidUuid(),
                 'participant',
-                (string)ProjectTestFactory::createValidUuid()
+                (string) ProjectTestFactory::createValidUuid()
             );
             ($this->addWorkerHandler)($addProjectWorkerCommand);
 
@@ -111,14 +109,14 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Verify project can be reconstructed from events
             $reconstructedProject = $this->repository->load($project->getId());
-            expect((string)$reconstructedProject->getName())->toBe('Renamed Event Stream Test');
+            expect((string) $reconstructedProject->getName())->toBe('Renamed Event Stream Test');
             expect($reconstructedProject->getWorkers())->toHaveCount(1);
         });
 
         test('project state is correctly reconstructed from events', function (): void {
             // Create project
             $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-                'name' => 'Reconstruction Test'
+                'name' => 'Reconstruction Test',
             ]);
             $project = ($this->registerHandler)($registerProjectCommand);
 
@@ -128,22 +126,22 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Add workers
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(),
-                (string)$uuid,
+                (string) $project->getId(),
+                (string) $uuid,
                 'participant',
-                (string)$addedBy
+                (string) $addedBy
             ));
 
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(),
-                (string)$userId2,
+                (string) $project->getId(),
+                (string) $userId2,
                 'owner',
-                (string)$addedBy
+                (string) $addedBy
             ));
 
             // Rename project
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
-                (string)$project->getId(),
+                (string) $project->getId(),
                 'Final Name'
             ));
 
@@ -159,21 +157,20 @@ describe('Project Event Store Integration Tests', function (): void {
             $reconstructedProject = $this->repository->load($project->getId());
 
             // Verify state is correctly reconstructed
-            expect((string)$reconstructedProject->getName())->toBe('Final Name');
+            expect((string) $reconstructedProject->getName())->toBe('Final Name');
             expect($reconstructedProject->getWorkers())->toHaveCount(2);
             expect($reconstructedProject->getId()->equals($project->getId()))->toBeTrue();
             expect($reconstructedProject->isDeleted())->toBeFalse();
 
             // Verify workers are correctly reconstructed
             $workers = $reconstructedProject->getWorkers();
-            $userIds = array_map(fn($worker): string => (string)$worker->getUserId(), $workers);
-            expect($userIds)->toContain((string)$uuid);
-            expect($userIds)->toContain((string)$userId2);
+            $userIds = array_map(fn ($worker): string => (string) $worker->getUserId(), $workers);
+            expect($userIds)->toContain((string) $uuid);
+            expect($userIds)->toContain((string) $userId2);
         });
     });
 
     describe('Event Store Error Scenarios', function (): void {
-
         test('loading non-existent aggregate returns null', function (): void {
             $uuid = ProjectTestFactory::createValidUuid();
 
@@ -192,29 +189,28 @@ describe('Project Event Store Integration Tests', function (): void {
     });
 
     describe('Event Dispatcher Integration', function (): void {
-
         test('all domain events are dispatched after save', function (): void {
             // Create project with multiple operations
             $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand();
             $project = ($this->registerHandler)($registerProjectCommand);
 
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
-                (string)$project->getId(),
+                (string) $project->getId(),
                 'Dispatcher Test'
             ));
 
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(
-                (string)$project->getId(),
-                (string)ProjectTestFactory::createValidUuid(),
+                (string) $project->getId(),
+                (string) ProjectTestFactory::createValidUuid(),
                 'participant',
-                (string)ProjectTestFactory::createValidUuid()
+                (string) ProjectTestFactory::createValidUuid()
             ));
 
             // Verify all events were dispatched
             $dispatchedEvents = $this->eventDispatcher->getDispatchedEvents();
             expect($dispatchedEvents)->toHaveCount(3);
 
-            $eventTypes = array_map(fn($event): string|false => $event::class, $dispatchedEvents);
+            $eventTypes = array_map(fn ($event): string|false => $event::class, $dispatchedEvents);
             expect($eventTypes)->toContain(ProjectCreatedEvent::class);
             expect($eventTypes)->toContain(ProjectRenamedEvent::class);
             expect($eventTypes)->toContain(ProjectWorkerAddedEvent::class);

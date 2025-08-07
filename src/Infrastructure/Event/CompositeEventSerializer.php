@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Event;
 
-use RuntimeException;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventSerializer;
+use RuntimeException;
 
 final readonly class CompositeEventSerializer implements EventSerializer
 {

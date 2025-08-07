@@ -2,21 +2,20 @@
 
 declare(strict_types=1);
 
-use App\Shared\ValueObject\Uuid;
-use App\Project\Domain\ValueObject\ProjectRole;
 use App\Project\Domain\Model\Project;
+use App\Project\Domain\ValueObject\ProjectRole;
+use App\Shared\ValueObject\Uuid;
 use App\Tests\Project\Helpers\ProjectEventAsserter;
 use App\Tests\Project\Helpers\ProjectTestFactory;
 
 describe('Project Domain Model', function (): void {
-
     test('project can be created with valid data', function (): void {
         $projectName = ProjectTestFactory::createProjectName('My Project');
         $uuid = ProjectTestFactory::createValidUuid();
 
         $project = Project::create($projectName, $uuid);
 
-        expect((string)$project->getName())->toBe('My Project');
+        expect((string) $project->getName())->toBe('My Project');
         expect($project->getOwnerId()->equals($uuid))->toBeTrue();
         expect($project->getCreatedAt())->toBeInstanceOf(DateTimeImmutable::class);
         expect($project->getId())->toBeInstanceOf(Uuid::class);
@@ -38,13 +37,13 @@ describe('Project Domain Model', function (): void {
 
     test('project can be renamed', function (): void {
         $project = ProjectTestFactory::createProject([
-            'name' => ProjectTestFactory::createProjectName('Old Name')
+            'name' => ProjectTestFactory::createProjectName('Old Name'),
         ]);
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
         $renamedProject = $project->rename($projectName);
 
-        expect((string)$renamedProject->getName())->toBe('New Name');
+        expect((string) $renamedProject->getName())->toBe('New Name');
         expect($renamedProject->getId()->equals($project->getId()))->toBeTrue();
         expect($renamedProject->getOwnerId()->equals($project->getOwnerId()))->toBeTrue();
     });
@@ -63,11 +62,11 @@ describe('Project Domain Model', function (): void {
 
     test('deleted project cannot be renamed', function (): void {
         $project = ProjectTestFactory::createProject([
-            'deletedAt' => new DateTimeImmutable()
+            'deletedAt' => new DateTimeImmutable(),
         ]);
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
-        expect(fn(): Project => $project->rename($projectName))
+        expect(fn (): Project => $project->rename($projectName))
             ->toThrow(DomainException::class, 'Cannot rename deleted project');
     });
 
@@ -93,10 +92,10 @@ describe('Project Domain Model', function (): void {
 
     test('already deleted project cannot be deleted again', function (): void {
         $project = ProjectTestFactory::createProject([
-            'deletedAt' => new DateTimeImmutable()
+            'deletedAt' => new DateTimeImmutable(),
         ]);
 
-        expect(fn(): Project => $project->delete())
+        expect(fn (): Project => $project->delete())
             ->toThrow(DomainException::class, 'Project is already deleted');
     });
 
@@ -114,7 +113,7 @@ describe('Project Domain Model', function (): void {
         $project = ProjectTestFactory::createProject();
         $projectWorker = ProjectTestFactory::createProjectWorker([
             'userId' => ProjectTestFactory::createValidUuid(),
-            'role' => ProjectRole::PARTICIPANT
+            'role' => ProjectRole::PARTICIPANT,
         ]);
 
         $updatedProject = $project->addWorker($projectWorker);
@@ -144,11 +143,11 @@ describe('Project Domain Model', function (): void {
 
     test('worker cannot be added to deleted project', function (): void {
         $project = ProjectTestFactory::createProject([
-            'deletedAt' => new DateTimeImmutable()
+            'deletedAt' => new DateTimeImmutable(),
         ]);
         $projectWorker = ProjectTestFactory::createProjectWorker();
 
-        expect(fn(): Project => $project->addWorker($projectWorker))
+        expect(fn (): Project => $project->addWorker($projectWorker))
             ->toThrow(DomainException::class, 'Cannot add worker to deleted project');
     });
 
@@ -186,17 +185,17 @@ describe('Project Domain Model', function (): void {
         $project = ProjectTestFactory::createProject();
         $uuid = ProjectTestFactory::createValidUuid();
 
-        expect(fn(): Project => $project->removeWorkerByUserId($uuid))
+        expect(fn (): Project => $project->removeWorkerByUserId($uuid))
             ->toThrow(DomainException::class, 'Worker not found in project');
     });
 
     test('worker cannot be removed from deleted project', function (): void {
         $uuid = ProjectTestFactory::createValidUuid();
         $project = ProjectTestFactory::createProject([
-            'deletedAt' => new DateTimeImmutable()
+            'deletedAt' => new DateTimeImmutable(),
         ]);
 
-        expect(fn(): Project => $project->removeWorkerByUserId($uuid))
+        expect(fn (): Project => $project->removeWorkerByUserId($uuid))
             ->toThrow(DomainException::class, 'Cannot remove worker from deleted project');
     });
 });

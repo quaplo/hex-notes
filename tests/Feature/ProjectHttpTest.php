@@ -11,13 +11,13 @@ use Symfony\Component\HttpFoundation\Response;
 it('can create project via HTTP API', function (): void {
     $client = static::createClient();
 
-    $projectName = 'HTTP Test Project ' . uniqid();
+    $projectName = 'HTTP Test Project '.uniqid();
 
     $client->request('POST', '/api/projects', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'name' => $projectName,
-        'description' => 'Test project description'
+        'description' => 'Test project description',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_CREATED);
@@ -34,34 +34,34 @@ it('can get project with user details via HTTP API (cross-domain)', function ():
     // First create a user (owner)
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
-    $ownerEmail = 'project_owner_' . uniqid() . '@example.com';
+    $ownerEmail = 'project_owner_'.uniqid().'@example.com';
     $ownerCommand = new CreateUserCommand($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
     // Create a worker user
-    $workerEmail = 'project_worker_' . uniqid() . '@example.com';
+    $workerEmail = 'project_worker_'.uniqid().'@example.com';
     $workerCommand = new CreateUserCommand($workerEmail);
     $worker = $createUserHandler($workerCommand);
 
     // Create a project with the owner
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Cross Domain Test Project ' . uniqid();
+    $projectName = 'Cross Domain Test Project '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, $user->getId()->toString());
     $project = $projectHandler($registerProjectCommand);
 
     // Add worker to project
-    $client->request('POST', '/api/projects/' . $project->getId()->toString() . '/workers', [], [], [
+    $client->request('POST', '/api/projects/'.$project->getId()->toString().'/workers', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'userId' => $worker->getId()->toString(),
-        'role' => 'participant'
+        'role' => 'participant',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Now get the project via cross-domain query
-    $client->request('GET', '/api/projects/' . $project->getId()->toString());
+    $client->request('GET', '/api/projects/'.$project->getId()->toString());
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
@@ -87,17 +87,17 @@ it('can rename project via HTTP API', function (): void {
     // First create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $originalName = 'Original Project Name ' . uniqid();
+    $originalName = 'Original Project Name '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($originalName, '550e8400-e29b-41d4-a716-446655440001');
     $project = $projectHandler($registerProjectCommand);
 
-    $newName = 'Renamed Project ' . uniqid();
+    $newName = 'Renamed Project '.uniqid();
 
     // Rename the project
-    $client->request('PUT', '/api/projects/' . $project->getId()->toString(), [], [], [
+    $client->request('PUT', '/api/projects/'.$project->getId()->toString(), [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
-        'name' => $newName
+        'name' => $newName,
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
@@ -113,14 +113,14 @@ it('can delete project via HTTP API', function (): void {
     // First create a user (owner)
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
-    $ownerEmail = 'project_owner_' . uniqid() . '@example.com';
+    $ownerEmail = 'project_owner_'.uniqid().'@example.com';
     $ownerCommand = new CreateUserCommand($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
     // First create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Project to Delete ' . uniqid();
+    $projectName = 'Project to Delete '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, $user->getId()->toString());
 
     $project = $projectHandler($registerProjectCommand);
@@ -128,17 +128,17 @@ it('can delete project via HTTP API', function (): void {
     $projectId = $project->getId()->toString();
 
     // Verify project exists before deletion
-    $client->request('GET', '/api/projects/' . $projectId);
+    $client->request('GET', '/api/projects/'.$projectId);
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     // Delete the project
-    $client->request('DELETE', '/api/projects/' . $projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId);
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Verify project is no longer accessible
-    $client->request('GET', '/api/projects/' . $projectId);
+    $client->request('GET', '/api/projects/'.$projectId);
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NOT_FOUND);
 });
 
@@ -149,33 +149,33 @@ it('can add worker to project via HTTP API', function (): void {
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
 
-    $ownerEmail = 'owner_' . uniqid() . '@example.com';
+    $ownerEmail = 'owner_'.uniqid().'@example.com';
     $ownerCommand = new CreateUserCommand($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
-    $workerEmail = 'worker_' . uniqid() . '@example.com';
+    $workerEmail = 'worker_'.uniqid().'@example.com';
     $workerCommand = new CreateUserCommand($workerEmail);
     $worker = $createUserHandler($workerCommand);
 
     // Create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Worker Test Project ' . uniqid();
+    $projectName = 'Worker Test Project '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, $user->getId()->toString());
     $project = $projectHandler($registerProjectCommand);
 
     // Add worker to project
-    $client->request('POST', '/api/projects/' . $project->getId()->toString() . '/workers', [], [], [
+    $client->request('POST', '/api/projects/'.$project->getId()->toString().'/workers', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'userId' => $worker->getId()->toString(),
-        'role' => 'participant'
+        'role' => 'participant',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Verify worker was added by getting project details
-    $client->request('GET', '/api/projects/' . $project->getId()->toString());
+    $client->request('GET', '/api/projects/'.$project->getId()->toString());
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
@@ -190,41 +190,41 @@ it('can remove worker from project via HTTP API', function (): void {
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
 
-    $ownerEmail = 'owner_remove_' . uniqid() . '@example.com';
+    $ownerEmail = 'owner_remove_'.uniqid().'@example.com';
     $ownerCommand = new CreateUserCommand($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
-    $workerEmail = 'worker_remove_' . uniqid() . '@example.com';
+    $workerEmail = 'worker_remove_'.uniqid().'@example.com';
     $workerCommand = new CreateUserCommand($workerEmail);
     $worker = $createUserHandler($workerCommand);
 
     // Create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Remove Worker Project ' . uniqid();
+    $projectName = 'Remove Worker Project '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, $user->getId()->toString());
     $project = $projectHandler($registerProjectCommand);
 
     // Add worker first
-    $client->request('POST', '/api/projects/' . $project->getId()->toString() . '/workers', [], [], [
+    $client->request('POST', '/api/projects/'.$project->getId()->toString().'/workers', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'userId' => $worker->getId()->toString(),
-        'role' => 'participant'
+        'role' => 'participant',
     ]));
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Remove worker from project
-    $client->request('DELETE', '/api/projects/' . $project->getId()->toString() . '/workers', [], [], [
+    $client->request('DELETE', '/api/projects/'.$project->getId()->toString().'/workers', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
-        'userId' => $worker->getId()->toString()
+        'userId' => $worker->getId()->toString(),
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Verify worker was removed
-    $client->request('GET', '/api/projects/' . $project->getId()->toString());
+    $client->request('GET', '/api/projects/'.$project->getId()->toString());
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
@@ -236,7 +236,7 @@ it('returns 404 when getting non-existent project', function (): void {
 
     $nonExistentId = '550e8400-e29b-41d4-a716-446655440000';
 
-    $client->request('GET', '/api/projects/' . $nonExistentId);
+    $client->request('GET', '/api/projects/'.$nonExistentId);
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NOT_FOUND);
 
@@ -251,7 +251,7 @@ it('validates project name when creating project', function (): void {
     $client->request('POST', '/api/projects', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
-        'name' => ''
+        'name' => '',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
@@ -266,15 +266,15 @@ it('validates project name when renaming project', function (): void {
     // First create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Project to Rename ' . uniqid();
+    $projectName = 'Project to Rename '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, '550e8400-e29b-41d4-a716-446655440001');
     $project = $projectHandler($registerProjectCommand);
 
     // Try to rename with invalid name
-    $client->request('PUT', '/api/projects/' . $project->getId()->toString(), [], [], [
+    $client->request('PUT', '/api/projects/'.$project->getId()->toString(), [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
-        'name' => 'ab' // Too short
+        'name' => 'ab', // Too short
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
@@ -289,16 +289,16 @@ it('validates worker role when adding worker', function (): void {
     // Create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Role Validation Project ' . uniqid();
+    $projectName = 'Role Validation Project '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, '550e8400-e29b-41d4-a716-446655440001');
     $project = $projectHandler($registerProjectCommand);
 
     // Try to add worker with invalid role
-    $client->request('POST', '/api/projects/' . $project->getId()->toString() . '/workers', [], [], [
+    $client->request('POST', '/api/projects/'.$project->getId()->toString().'/workers', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'userId' => '550e8400-e29b-41d4-a716-446655440002',
-        'role' => 'invalid_role'
+        'role' => 'invalid_role',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
@@ -313,18 +313,18 @@ it('prevents double deletion of project via HTTP API', function (): void {
     // Create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Double Delete Project ' . uniqid();
+    $projectName = 'Double Delete Project '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, '550e8400-e29b-41d4-a716-446655440001');
     $project = $projectHandler($registerProjectCommand);
 
     $projectId = $project->getId()->toString();
 
     // Delete the project first time
-    $client->request('DELETE', '/api/projects/' . $projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId);
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Try to delete the project second time - should return error
-    $client->request('DELETE', '/api/projects/' . $projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId);
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);
 });
 
@@ -334,21 +334,21 @@ it('cannot rename deleted project via HTTP API', function (): void {
     // Create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Project to Delete Then Rename ' . uniqid();
+    $projectName = 'Project to Delete Then Rename '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, '550e8400-e29b-41d4-a716-446655440001');
     $project = $projectHandler($registerProjectCommand);
 
     $projectId = $project->getId()->toString();
 
     // Delete the project
-    $client->request('DELETE', '/api/projects/' . $projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId);
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Try to rename the deleted project
-    $client->request('PUT', '/api/projects/' . $projectId, [], [], [
+    $client->request('PUT', '/api/projects/'.$projectId, [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
-        'name' => 'New Name for Deleted Project'
+        'name' => 'New Name for Deleted Project',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -360,22 +360,22 @@ it('cannot add worker to deleted project via HTTP API', function (): void {
     // Create a project
     /** @var RegisterProjectHandler $projectHandler */
     $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
-    $projectName = 'Project to Delete Then Add Worker ' . uniqid();
+    $projectName = 'Project to Delete Then Add Worker '.uniqid();
     $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, '550e8400-e29b-41d4-a716-446655440001');
     $project = $projectHandler($registerProjectCommand);
 
     $projectId = $project->getId()->toString();
 
     // Delete the project
-    $client->request('DELETE', '/api/projects/' . $projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId);
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Try to add worker to deleted project
-    $client->request('POST', '/api/projects/' . $projectId . '/workers', [], [], [
+    $client->request('POST', '/api/projects/'.$projectId.'/workers', [], [], [
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'userId' => '550e8400-e29b-41d4-a716-446655440002',
-        'role' => 'participant'
+        'role' => 'participant',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);

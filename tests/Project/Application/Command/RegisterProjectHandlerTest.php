@@ -9,18 +9,17 @@ use App\Tests\Project\Helpers\ProjectEventAsserter;
 use App\Tests\Project\Helpers\ProjectTestFactory;
 
 describe('RegisterProjectHandler', function (): void {
-
     test('register project handler creates new project', function (): void {
         $repository = new InMemoryProjectRepository();
         $handler = new RegisterProjectHandler($repository);
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'New Project'
+            'name' => 'New Project',
         ]);
 
         $project = $handler($registerProjectCommand);
 
         expect($project)->toBeInstanceOf(Project::class);
-        expect((string)$project->getName())->toBe('New Project');
+        expect((string) $project->getName())->toBe('New Project');
         expect($project->getOwnerId()->equals($registerProjectCommand->ownerId))->toBeTrue();
         expect($project->isDeleted())->toBeFalse();
     });
@@ -37,14 +36,14 @@ describe('RegisterProjectHandler', function (): void {
 
         $savedProject = $repository->getProject($project->getId());
         expect($savedProject->getId()->equals($project->getId()))->toBeTrue();
-        expect((string)$savedProject->getName())->toBe((string)$registerProjectCommand->name);
+        expect((string) $savedProject->getName())->toBe((string) $registerProjectCommand->name);
     });
 
     test('register project handler records ProjectCreatedEvent', function (): void {
         $repository = new InMemoryProjectRepository();
         $handler = new RegisterProjectHandler($repository);
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Test Project'
+            'name' => 'Test Project',
         ]);
 
         $project = $handler($registerProjectCommand);
@@ -65,13 +64,13 @@ describe('RegisterProjectHandler', function (): void {
         $projectName = ProjectTestFactory::createProjectName('Returned Project');
         $uuid = ProjectTestFactory::createValidUuid();
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => (string)$projectName,
-            'ownerId' => (string)$uuid
+            'name' => (string) $projectName,
+            'ownerId' => (string) $uuid,
         ]);
 
         $project = $handler($registerProjectCommand);
 
-        expect((string)$project->getName())->toBe((string)$projectName);
+        expect((string) $project->getName())->toBe((string) $projectName);
         expect($project->getOwnerId()->equals($uuid))->toBeTrue();
         expect($project->getCreatedAt())->toBeInstanceOf(DateTimeImmutable::class);
         expect($project->getWorkers())->toBeEmpty();
@@ -82,10 +81,10 @@ describe('RegisterProjectHandler', function (): void {
         $handler = new RegisterProjectHandler($repository);
 
         $registerProjectCommand = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Project One'
+            'name' => 'Project One',
         ]);
         $command2 = ProjectTestFactory::createValidRegisterProjectCommand([
-            'name' => 'Project Two'
+            'name' => 'Project Two',
         ]);
 
         $project1 = $handler($registerProjectCommand);
@@ -93,7 +92,7 @@ describe('RegisterProjectHandler', function (): void {
 
         expect($repository->count())->toBe(2);
         expect($project1->getId()->equals($project2->getId()))->toBeFalse();
-        expect((string)$project1->getName())->toBe('Project One');
-        expect((string)$project2->getName())->toBe('Project Two');
+        expect((string) $project1->getName())->toBe('Project One');
+        expect((string) $project2->getName())->toBe('Project Two');
     });
 });

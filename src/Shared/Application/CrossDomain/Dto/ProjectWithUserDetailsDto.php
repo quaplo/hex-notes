@@ -9,7 +9,7 @@ use App\User\Application\Dto\UserDto;
 final readonly class ProjectWithUserDetailsDto
 {
     public function __construct(
-        public array $project
+        public array $project,
     ) {
     }
 
@@ -18,14 +18,14 @@ final readonly class ProjectWithUserDetailsDto
         string $name,
         UserDto $userDto,
         array $workers,
-        bool $isDeleted
+        bool $isDeleted,
     ): self {
         return new self([
             'id' => $id,
             'name' => $name,
             'owner' => $userDto,
             'workers' => $workers,
-            'isDeleted' => $isDeleted
+            'isDeleted' => $isDeleted,
         ]);
     }
 }

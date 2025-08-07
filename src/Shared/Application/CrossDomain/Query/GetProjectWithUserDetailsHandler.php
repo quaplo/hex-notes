@@ -12,7 +12,7 @@ use App\User\Application\Query\Get\GetUserByIdQuery;
 final readonly class GetProjectWithUserDetailsHandler
 {
     public function __construct(
-        private QueryBus $queryBus
+        private QueryBus $queryBus,
     ) {
     }
 
@@ -38,10 +38,12 @@ final readonly class GetProjectWithUserDetailsHandler
 
         // Get all workers from User domain, filtering out deleted users
         $workers = [];
+
         foreach ($project->getWorkers() as $worker) {
             $workerUser = $this->queryBus->dispatch(
                 new GetUserByIdQuery($worker->getUserId()->toString())
             );
+
             if ($workerUser && !$workerUser->isDeleted) {
                 $workers[] = [
                     'id' => $workerUser->id,
@@ -49,7 +51,7 @@ final readonly class GetProjectWithUserDetailsHandler
                     'isDeleted' => $workerUser->isDeleted,
                     'addedBy' => $worker->getAddedBy()->toString(),
                     'addedAt' => $worker->getCreatedAt()->format('Y-m-d H:i:s'),
-                    'role' => $worker->getRole()->toString()
+                    'role' => $worker->getRole()->toString(),
                 ];
             }
         }

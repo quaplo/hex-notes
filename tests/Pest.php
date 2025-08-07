@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /*
@@ -26,7 +28,7 @@ pest()->extend(WebTestCase::class)->in('Feature');
 |
 */
 
-expect()->extend('toBeOne', fn() => $this->toBe(1));
+expect()->extend('toBeOne', fn () => $this->toBe(1));
 
 /*
 |--------------------------------------------------------------------------
@@ -38,4 +40,3 @@ expect()->extend('toBeOne', fn() => $this->toBe(1));
 | global functions to help you to reduce the number of lines of code in your test files.
 |
 */
-

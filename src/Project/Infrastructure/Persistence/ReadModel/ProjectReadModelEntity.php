@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Persistence\ReadModel;
 
-use Doctrine\DBAL\Types\Types;
 use DateTimeImmutable;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -32,7 +32,7 @@ class ProjectReadModelEntity
         #[ORM\Column(type: Types::STRING, length: 36, name: 'owner_id')]
         private string $ownerId,
         #[ORM\Column(type: Types::DATETIME_IMMUTABLE, name: 'created_at')]
-        private DateTimeImmutable $createdAt
+        private DateTimeImmutable $createdAt,
     ) {
     }
 
@@ -95,7 +95,7 @@ class ProjectReadModelEntity
     {
         $this->workers = array_filter(
             $this->workers,
-            fn(array $worker): bool => $worker['userId'] !== $userId
+            fn (array $worker): bool => $worker['userId'] !== $userId
         );
         $this->workers = array_values($this->workers); // Reindex
     }
@@ -112,6 +112,6 @@ class ProjectReadModelEntity
 
     public function incrementVersion(): void
     {
-        $this->version++;
+        ++$this->version;
     }
 }

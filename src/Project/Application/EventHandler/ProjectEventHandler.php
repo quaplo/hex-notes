@@ -17,7 +17,7 @@ final readonly class ProjectEventHandler
 {
     public function __construct(
         private LoggerInterface $logger,
-        private ProjectReadModelProjectionInterface $projectReadModelProjection
+        private ProjectReadModelProjectionInterface $projectReadModelProjection,
     ) {
     }
 
@@ -33,7 +33,7 @@ final readonly class ProjectEventHandler
             ProjectDeletedEvent::class => $this->handleProjectDeleted($domainEvent),
             ProjectWorkerAddedEvent::class => $this->handleProjectWorkerAdded($domainEvent),
             ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($domainEvent),
-            default => $this->logger->info('Unhandled project event', ['event' => $domainEvent::class])
+            default => $this->logger->info('Unhandled project event', ['event' => $domainEvent::class]),
         };
     }
 
@@ -46,7 +46,7 @@ final readonly class ProjectEventHandler
     {
         $this->logger->info('Project created - side effects processing', [
             'projectId' => $projectCreatedEvent->getProjectId()->toString(),
-            'name' => $projectCreatedEvent->getName()->__toString()
+            'name' => $projectCreatedEvent->getName()->__toString(),
         ]);
 
         // Additional side effects:
@@ -61,7 +61,7 @@ final readonly class ProjectEventHandler
         $this->logger->info('Project renamed - side effects processing', [
             'projectId' => $projectRenamedEvent->getProjectId()->toString(),
             'oldName' => $projectRenamedEvent->getOldName()->__toString(),
-            'newName' => $projectRenamedEvent->getNewName()->__toString()
+            'newName' => $projectRenamedEvent->getNewName()->__toString(),
         ]);
 
         // Additional side effects:
@@ -73,7 +73,7 @@ final readonly class ProjectEventHandler
     private function handleProjectDeleted(ProjectDeletedEvent $projectDeletedEvent): void
     {
         $this->logger->info('Project deleted - side effects processing', [
-            'projectId' => $projectDeletedEvent->getProjectId()->toString()
+            'projectId' => $projectDeletedEvent->getProjectId()->toString(),
         ]);
 
         // Additional side effects:
@@ -101,7 +101,7 @@ final readonly class ProjectEventHandler
     {
         $this->logger->info('Project worker removed - side effects processing', [
             'projectId' => $projectWorkerRemovedEvent->getProjectId()->toString(),
-            'userId' => $projectWorkerRemovedEvent->getUserId()->toString()
+            'userId' => $projectWorkerRemovedEvent->getUserId()->toString(),
         ]);
 
         // Additional side effects:

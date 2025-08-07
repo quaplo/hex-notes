@@ -12,7 +12,7 @@ final readonly class CreateUserRequestDto
         #[Assert\NotBlank(message: 'Email cannot be empty')]
         #[Assert\Email(message: 'Please provide a valid email address')]
         #[Assert\Length(max: 255, maxMessage: 'Email cannot exceed 255 characters')]
-        public string $email
+        public string $email,
     ) {
     }
 }

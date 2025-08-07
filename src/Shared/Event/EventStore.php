@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Shared\Event;
 
-use DateTimeImmutable;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
+use DateTimeImmutable;
 
 interface EventStore
 {
@@ -26,25 +26,29 @@ interface EventStore
     public function getEventsFromVersion(Uuid $uuid, int $fromVersion): array;
 
     /**
-     * Find all aggregate IDs by owner ID from ProjectCreatedEvent
+     * Find all aggregate IDs by owner ID from ProjectCreatedEvent.
+     *
      * @return Uuid[]
      */
     public function findProjectAggregatesByOwnerId(Uuid $uuid): array;
 
     /**
-     * Get events for specific aggregate type and time range (optimized with aggregate_type index)
+     * Get events for specific aggregate type and time range (optimized with aggregate_type index).
+     *
      * @return DomainEvent[]
      */
     public function getEventsByAggregateType(string $aggregateType, ?DateTimeImmutable $from = null, ?DateTimeImmutable $to = null): array;
 
     /**
-     * Get events for specific aggregate type and aggregate ID (optimized with aggregate_type index)
+     * Get events for specific aggregate type and aggregate ID (optimized with aggregate_type index).
+     *
      * @return DomainEvent[]
      */
     public function getEventsByAggregateTypeAndId(string $aggregateType, Uuid $uuid): array;
 
     /**
-     * Get all aggregate IDs for specific aggregate type
+     * Get all aggregate IDs for specific aggregate type.
+     *
      * @return Uuid[]
      */
     public function getAggregateIdsByType(string $aggregateType): array;

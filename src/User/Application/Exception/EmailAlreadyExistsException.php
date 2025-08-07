@@ -6,7 +6,7 @@ namespace App\User\Application\Exception;
 
 use Throwable;
 
-class EmailAlreadyExistsException extends ApplicationException
+final class EmailAlreadyExistsException extends ApplicationException
 {
     public function __construct(string $email, ?Throwable $throwable = null)
     {

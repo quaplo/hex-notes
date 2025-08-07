@@ -11,7 +11,7 @@ use App\User\Domain\Repository\UserRepositoryInterface;
 final readonly class DeleteUserHandler
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository
+        private UserRepositoryInterface $userRepository,
     ) {
     }
 
@@ -20,6 +20,7 @@ final readonly class DeleteUserHandler
         $uuid = $deleteUserCommand->getUserId();
 
         $user = $this->userRepository->findByIdIncludingDeleted($uuid);
+
         if (!$user instanceof User) {
             throw new UserNotFoundException($uuid->toString());
         }

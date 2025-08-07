@@ -13,11 +13,12 @@ use DateTimeImmutable;
 final class ProjectSnapshotFactory
 {
     /**
-     * Create a snapshot from Project aggregate
+     * Create a snapshot from Project aggregate.
      */
     public function createSnapshot(Project $project, int $version): ProjectSnapshot
     {
         $workersData = [];
+
         foreach ($project->getWorkers() as $projectWorker) {
             $workersData[] = [
                 'userId' => $projectWorker->getUserId()->toString(),
@@ -44,7 +45,7 @@ final class ProjectSnapshotFactory
     }
 
     /**
-     * Restore Project aggregate from snapshot
+     * Restore Project aggregate from snapshot.
      */
     public function restoreFromSnapshot(ProjectSnapshot $projectSnapshot): Project
     {

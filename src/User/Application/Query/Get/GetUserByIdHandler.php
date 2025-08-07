@@ -13,7 +13,7 @@ final readonly class GetUserByIdHandler
 {
     public function __construct(
         private UserRepositoryInterface $userRepository,
-        private UserDtoMapperInterface $userDtoMapper
+        private UserDtoMapperInterface $userDtoMapper,
     ) {
     }
 

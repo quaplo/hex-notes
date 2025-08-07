@@ -11,7 +11,7 @@ use App\Project\Domain\Repository\ProjectRepositoryInterface;
 final readonly class DeleteProjectHandler
 {
     public function __construct(
-        private ProjectRepositoryInterface $projectRepository
+        private ProjectRepositoryInterface $projectRepository,
     ) {
     }
 

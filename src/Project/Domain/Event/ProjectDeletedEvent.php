@@ -12,7 +12,7 @@ final readonly class ProjectDeletedEvent implements DomainEvent
 {
     public function __construct(
         private Uuid $uuid,
-        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable(),
     ) {
     }
 
@@ -40,7 +40,7 @@ final readonly class ProjectDeletedEvent implements DomainEvent
     {
         return [
             'projectId' => $this->uuid->toString(),
-            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
         ];
     }
 

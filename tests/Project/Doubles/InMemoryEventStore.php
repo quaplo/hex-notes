@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Project\Doubles;
 
-use DateTimeImmutable;
-use RuntimeException;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventStore;
 use App\Shared\ValueObject\Uuid;
+use DateTimeImmutable;
+use RuntimeException;
 
 final class InMemoryEventStore implements EventStore
 {
@@ -21,7 +21,7 @@ final class InMemoryEventStore implements EventStore
 
     public function append(Uuid $uuid, array $events, int $expectedVersion): void
     {
-        $id = (string)$uuid;
+        $id = (string) $uuid;
 
         if (!isset($this->events[$id])) {
             $this->events[$id] = [];
@@ -35,22 +35,23 @@ final class InMemoryEventStore implements EventStore
 
         foreach ($events as $event) {
             $this->events[$id][] = $event;
-            $this->versions[$id]++;
+            ++$this->versions[$id];
         }
     }
 
     public function getEvents(Uuid $uuid): array
     {
-        $id = (string)$uuid;
+        $id = (string) $uuid;
+
         return $this->events[$id] ?? [];
     }
 
     public function getEventsFromVersion(Uuid $uuid, int $fromVersion): array
     {
-        $id = (string)$uuid;
+        $id = (string) $uuid;
         $allEvents = $this->events[$id] ?? [];
 
-        return array_slice($allEvents, $fromVersion);
+        return \array_slice($allEvents, $fromVersion);
     }
 
     public function findProjectAggregatesByOwnerId(Uuid $uuid): array
@@ -62,6 +63,7 @@ final class InMemoryEventStore implements EventStore
                 if (!$event instanceof ProjectCreatedEvent) {
                     continue;
                 }
+
                 if (!$event->getOwnerId()->equals($uuid)) {
                     continue;
                 }
@@ -79,9 +81,11 @@ final class InMemoryEventStore implements EventStore
         // For testing, we'll return all events since we don't store aggregate_type in memory
         // This is a simplified implementation for testing purposes
         $allEvents = [];
+
         foreach ($this->events as $event) {
             $allEvents = array_merge($allEvents, $event);
         }
+
         return $allEvents;
     }
 
@@ -96,15 +100,18 @@ final class InMemoryEventStore implements EventStore
     {
         // For testing, return all aggregate IDs since we don't store aggregate_type
         $aggregateIds = [];
+
         foreach (array_keys($this->events) as $aggregateId) {
             $aggregateIds[] = Uuid::create($aggregateId);
         }
+
         return $aggregateIds;
     }
 
     public function getVersion(Uuid $uuid): int
     {
-        $id = (string)$uuid;
+        $id = (string) $uuid;
+
         return $this->versions[$id] ?? 0;
     }
 
@@ -118,16 +125,19 @@ final class InMemoryEventStore implements EventStore
 
     public function getEventCount(Uuid $uuid): int
     {
-        $id = (string)$uuid;
-        return count($this->events[$id] ?? []);
+        $id = (string) $uuid;
+
+        return \count($this->events[$id] ?? []);
     }
 
     public function getAllEvents(): array
     {
         $allEvents = [];
+
         foreach ($this->events as $event) {
             $allEvents = array_merge($allEvents, $event);
         }
+
         return $allEvents;
     }
 }

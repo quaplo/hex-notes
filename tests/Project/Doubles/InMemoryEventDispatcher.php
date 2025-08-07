@@ -19,7 +19,6 @@ final class InMemoryEventDispatcher implements EventDispatcher
         }
     }
 
-
     // Testing helper methods
 
     /**
@@ -32,14 +31,14 @@ final class InMemoryEventDispatcher implements EventDispatcher
 
     public function getDispatchedEventCount(): int
     {
-        return count($this->dispatchedEvents);
+        return \count($this->dispatchedEvents);
     }
 
     public function getEventsByType(string $eventClass): array
     {
         return array_filter(
             $this->dispatchedEvents,
-            fn(DomainEvent $domainEvent): bool => $domainEvent instanceof $eventClass
+            fn (DomainEvent $domainEvent): bool => $domainEvent instanceof $eventClass
         );
     }
 
@@ -50,6 +49,7 @@ final class InMemoryEventDispatcher implements EventDispatcher
                 return true;
             }
         }
+
         return false;
     }
 

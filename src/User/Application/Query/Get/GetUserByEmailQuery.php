@@ -9,7 +9,7 @@ use App\Shared\ValueObject\Email;
 final readonly class GetUserByEmailQuery
 {
     public function __construct(
-        public string $email
+        public string $email,
     ) {
     }
 

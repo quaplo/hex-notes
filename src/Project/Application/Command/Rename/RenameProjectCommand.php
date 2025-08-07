@@ -11,7 +11,7 @@ final readonly class RenameProjectCommand
 {
     private function __construct(
         public Uuid $projectId,
-        public ProjectName $newName
+        public ProjectName $newName,
     ) {
     }
 

@@ -33,6 +33,7 @@ final class InMemorySnapshotStore implements SnapshotStore
         }
 
         $maxVersion = max(array_keys($this->snapshots[$key]));
+
         return $this->snapshots[$key][$maxVersion];
     }
 
@@ -67,13 +68,13 @@ final class InMemorySnapshotStore implements SnapshotStore
         return max(array_keys($this->snapshots[$key]));
     }
 
-    private function getKey(Uuid $uuid, string $aggregateType): string
-    {
-        return $aggregateType . ':' . $uuid->toString();
-    }
-
     public function clear(): void
     {
         $this->snapshots = [];
+    }
+
+    private function getKey(Uuid $uuid, string $aggregateType): string
+    {
+        return $aggregateType.':'.$uuid->toString();
     }
 }

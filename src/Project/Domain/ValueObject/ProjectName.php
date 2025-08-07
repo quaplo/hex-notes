@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Project\Domain\ValueObject;
 
-use Stringable;
 use InvalidArgumentException;
+use Stringable;
 
 final readonly class ProjectName implements Stringable
 {

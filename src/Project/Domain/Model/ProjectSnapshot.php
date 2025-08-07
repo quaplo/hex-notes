@@ -14,14 +14,14 @@ final readonly class ProjectSnapshot implements AggregateSnapshot
         private Uuid $uuid,
         private int $version,
         private array $data,
-        private DateTimeImmutable $createdAt
+        private DateTimeImmutable $createdAt,
     ) {
     }
 
     public static function create(
         Uuid $uuid,
         int $version,
-        array $projectData
+        array $projectData,
     ): self {
         return new self(
             $uuid,
@@ -57,7 +57,7 @@ final readonly class ProjectSnapshot implements AggregateSnapshot
     }
 
     /**
-     * Helper method to get specific project data
+     * Helper method to get specific project data.
      */
     public function getProjectId(): string
     {

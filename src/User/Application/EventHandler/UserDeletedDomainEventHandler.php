@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\User\Application\EventHandler;
 
-use App\User\Domain\Event\UserDeletedEvent;
 use App\Shared\Domain\Event\UserDeletedIntegrationEvent;
 use App\Shared\Event\EventDispatcher;
+use App\User\Domain\Event\UserDeletedEvent;
 
 final readonly class UserDeletedDomainEventHandler
 {
     public function __construct(
-        private EventDispatcher $eventDispatcher
+        private EventDispatcher $eventDispatcher,
     ) {
     }
 

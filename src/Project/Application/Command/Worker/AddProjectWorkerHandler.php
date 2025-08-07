@@ -12,13 +12,14 @@ use App\Project\Domain\ValueObject\ProjectWorker;
 final readonly class AddProjectWorkerHandler
 {
     public function __construct(
-        private ProjectRepositoryInterface $projectRepository
+        private ProjectRepositoryInterface $projectRepository,
     ) {
     }
 
     public function __invoke(AddProjectWorkerCommand $addProjectWorkerCommand): Project
     {
         $project = $this->projectRepository->load($addProjectWorkerCommand->projectId);
+
         if (!$project instanceof Project) {
             throw new ProjectNotFoundException($addProjectWorkerCommand->projectId);
         }
@@ -31,6 +32,7 @@ final readonly class AddProjectWorkerHandler
 
         $project = $project->addWorker($projectWorker);
         $this->projectRepository->save($project);
+
         return $project;
     }
 }

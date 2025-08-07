@@ -16,7 +16,7 @@ final readonly class ProjectWorkerAddedEvent implements DomainEvent
         private Uuid $userId,
         private ProjectRole $projectRole,
         private ?Uuid $addedBy = null,
-        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable(),
     ) {
     }
 

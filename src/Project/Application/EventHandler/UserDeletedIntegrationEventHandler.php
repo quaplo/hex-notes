@@ -11,7 +11,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final readonly class UserDeletedIntegrationEventHandler
 {
     public function __construct(
-        private MessageBusInterface $messageBus
+        private MessageBusInterface $messageBus,
     ) {
     }
 

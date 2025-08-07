@@ -36,10 +36,10 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         $this->getProjectHandler = $container->get(GetProjectHandler::class);
     }
 
-    public function test_deleting_user_triggers_orphaned_projects_cleanup(): void
+    public function testDeletingUserTriggersOrphanedProjectsCleanup(): void
     {
         // Given: Create a user
-        $userEmail = 'test-owner-' . uniqid() . '@example.com';
+        $userEmail = 'test-owner-'.uniqid().'@example.com';
 
         $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
         $uuid = $user->getId();
@@ -88,10 +88,10 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         expect($cleanedProject2)->toBeNull();
     }
 
-    public function test_deleting_user_with_no_projects_works_without_errors(): void
+    public function testDeletingUserWithNoProjectsWorksWithoutErrors(): void
     {
         // Given: Create a user with no projects
-        $userEmail = 'no-projects-' . uniqid() . '@example.com';
+        $userEmail = 'no-projects-'.uniqid().'@example.com';
 
         $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
         $uuid = $user->getId();
@@ -108,11 +108,11 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         expect($deletedUser)->toBeNull();
     }
 
-    public function test_multiple_users_with_projects_cleanup_independently(): void
+    public function testMultipleUsersWithProjectsCleanupIndependently(): void
     {
         // Given: Create two users
-        $user1 = ($this->createUserHandler)(new CreateUserCommand('user1-' . uniqid() . '@example.com'));
-        $user2 = ($this->createUserHandler)(new CreateUserCommand('user2-' . uniqid() . '@example.com'));
+        $user1 = ($this->createUserHandler)(new CreateUserCommand('user1-'.uniqid().'@example.com'));
+        $user2 = ($this->createUserHandler)(new CreateUserCommand('user2-'.uniqid().'@example.com'));
 
         $uuid = $user1->getId();
         $user2Id = $user2->getId();

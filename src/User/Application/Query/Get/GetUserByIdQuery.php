@@ -9,7 +9,7 @@ use App\Shared\ValueObject\Uuid;
 final readonly class GetUserByIdQuery
 {
     public function __construct(
-        public string $userId
+        public string $userId,
     ) {
     }
 

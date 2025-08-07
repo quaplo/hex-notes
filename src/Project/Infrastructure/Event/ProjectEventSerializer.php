@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Event;
 
-use RuntimeException;
-use DateTimeInterface;
-use DateTimeImmutable;
 use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectDeletedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
@@ -17,7 +14,10 @@ use App\Project\Domain\ValueObject\ProjectRole;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventSerializer;
 use App\Shared\ValueObject\Uuid;
+use DateTimeImmutable;
+use DateTimeInterface;
 use JsonException;
+use RuntimeException;
 
 final class ProjectEventSerializer implements EventSerializer
 {
@@ -31,7 +31,7 @@ final class ProjectEventSerializer implements EventSerializer
 
     public function supports(string $eventType): bool
     {
-        return in_array($eventType, self::SUPPORTED_EVENTS, true);
+        return \in_array($eventType, self::SUPPORTED_EVENTS, true);
     }
 
     public function serialize(DomainEvent $domainEvent): string
@@ -43,7 +43,7 @@ final class ProjectEventSerializer implements EventSerializer
                 ProjectDeletedEvent::class => $this->serializeProjectDeletedEvent($domainEvent),
                 ProjectWorkerAddedEvent::class => $this->serializeProjectWorkerAddedEvent($domainEvent),
                 ProjectWorkerRemovedEvent::class => $this->serializeProjectWorkerRemovedEvent($domainEvent),
-                default => throw new RuntimeException("Unsupported event type for serialization: " . $domainEvent::class)
+                default => throw new RuntimeException('Unsupported event type for serialization: '.$domainEvent::class),
             };
         } catch (JsonException $e) {
             throw new RuntimeException('Failed to serialize event', 0, $e);
@@ -53,7 +53,7 @@ final class ProjectEventSerializer implements EventSerializer
     public function deserialize(string $eventData, string $eventType): DomainEvent
     {
         try {
-            $data = json_decode($eventData, true, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode($eventData, true, 512, \JSON_THROW_ON_ERROR);
 
             return match ($eventType) {
                 ProjectCreatedEvent::class => $this->deserializeProjectCreatedEvent($data),
@@ -61,7 +61,7 @@ final class ProjectEventSerializer implements EventSerializer
                 ProjectDeletedEvent::class => $this->deserializeProjectDeletedEvent($data),
                 ProjectWorkerAddedEvent::class => $this->deserializeProjectWorkerAddedEvent($data),
                 ProjectWorkerRemovedEvent::class => $this->deserializeProjectWorkerRemovedEvent($data),
-                default => throw new RuntimeException("Unsupported event type for deserialization: $eventType")
+                default => throw new RuntimeException("Unsupported event type for deserialization: $eventType"),
             };
         } catch (JsonException $e) {
             throw new RuntimeException('Failed to deserialize event', 0, $e);
@@ -74,9 +74,10 @@ final class ProjectEventSerializer implements EventSerializer
             'projectId' => $projectCreatedEvent->getProjectId()->toString(),
             'name' => $projectCreatedEvent->getName()->__toString(),
             'ownerId' => $projectCreatedEvent->getOwnerId()->toString(),
-            'occurredAt' => $projectCreatedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
+            'occurredAt' => $projectCreatedEvent->getOccurredAt()->format(DateTimeInterface::ATOM),
         ];
-        return json_encode($data, JSON_THROW_ON_ERROR);
+
+        return json_encode($data, \JSON_THROW_ON_ERROR);
     }
 
     private function serializeProjectRenamedEvent(ProjectRenamedEvent $projectRenamedEvent): string
@@ -85,18 +86,20 @@ final class ProjectEventSerializer implements EventSerializer
             'projectId' => $projectRenamedEvent->getProjectId()->toString(),
             'oldName' => $projectRenamedEvent->getOldName()->__toString(),
             'newName' => $projectRenamedEvent->getNewName()->__toString(),
-            'occurredAt' => $projectRenamedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
+            'occurredAt' => $projectRenamedEvent->getOccurredAt()->format(DateTimeInterface::ATOM),
         ];
-        return json_encode($data, JSON_THROW_ON_ERROR);
+
+        return json_encode($data, \JSON_THROW_ON_ERROR);
     }
 
     private function serializeProjectDeletedEvent(ProjectDeletedEvent $projectDeletedEvent): string
     {
         $data = [
             'projectId' => $projectDeletedEvent->getProjectId()->toString(),
-            'occurredAt' => $projectDeletedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
+            'occurredAt' => $projectDeletedEvent->getOccurredAt()->format(DateTimeInterface::ATOM),
         ];
-        return json_encode($data, JSON_THROW_ON_ERROR);
+
+        return json_encode($data, \JSON_THROW_ON_ERROR);
     }
 
     private function serializeProjectWorkerAddedEvent(ProjectWorkerAddedEvent $projectWorkerAddedEvent): string
@@ -106,9 +109,10 @@ final class ProjectEventSerializer implements EventSerializer
             'userId' => $projectWorkerAddedEvent->getUserId()->toString(),
             'role' => $projectWorkerAddedEvent->getRole()->toString(),
             'addedBy' => $projectWorkerAddedEvent->getAddedBy()?->toString(),
-            'occurredAt' => $projectWorkerAddedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
+            'occurredAt' => $projectWorkerAddedEvent->getOccurredAt()->format(DateTimeInterface::ATOM),
         ];
-        return json_encode($data, JSON_THROW_ON_ERROR);
+
+        return json_encode($data, \JSON_THROW_ON_ERROR);
     }
 
     private function serializeProjectWorkerRemovedEvent(ProjectWorkerRemovedEvent $projectWorkerRemovedEvent): string
@@ -117,9 +121,10 @@ final class ProjectEventSerializer implements EventSerializer
             'projectId' => $projectWorkerRemovedEvent->getProjectId()->toString(),
             'userId' => $projectWorkerRemovedEvent->getUserId()->toString(),
             'removedBy' => $projectWorkerRemovedEvent->getRemovedBy()?->toString(),
-            'occurredAt' => $projectWorkerRemovedEvent->getOccurredAt()->format(DateTimeInterface::ATOM)
+            'occurredAt' => $projectWorkerRemovedEvent->getOccurredAt()->format(DateTimeInterface::ATOM),
         ];
-        return json_encode($data, JSON_THROW_ON_ERROR);
+
+        return json_encode($data, \JSON_THROW_ON_ERROR);
     }
 
     private function deserializeProjectCreatedEvent(array $data): ProjectCreatedEvent

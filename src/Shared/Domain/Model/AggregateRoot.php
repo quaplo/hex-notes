@@ -13,20 +13,6 @@ abstract class AggregateRoot
     private array $domainEvents = [];
     private int $version = 0;
 
-    protected function recordEvent(DomainEvent $domainEvent): void
-    {
-        $this->domainEvents[] = $domainEvent;
-    }
-
-    /**
-     * Apply event to aggregate state and record it
-     */
-    protected function apply(DomainEvent $domainEvent): void
-    {
-        $this->handleEvent($domainEvent);
-        $this->recordEvent($domainEvent);
-    }
-
     /**
      * @return DomainEvent[]
      */
@@ -55,21 +41,48 @@ abstract class AggregateRoot
 
     public function hasUncommittedEvents(): bool
     {
-        return count($this->domainEvents) > 0;
+        return \count($this->domainEvents) > 0;
     }
 
     /**
-     * Public method for replaying events during aggregate reconstruction
+     * Public method for replaying events during aggregate reconstruction.
      */
     public function replayEvent(DomainEvent $domainEvent): void
     {
         $this->handleEvent($domainEvent);
-        $this->version++;
+        ++$this->version;
     }
 
     public function getVersion(): int
     {
         return $this->version;
+    }
+
+    /**
+     * Set version for snapshot restoration (package-private).
+     */
+    public function restoreVersion(int $version): void
+    {
+        $this->version = $version;
+    }
+
+    /**
+     * Get the unique identifier of this aggregate.
+     */
+    abstract public function getId(): Uuid;
+
+    protected function recordEvent(DomainEvent $domainEvent): void
+    {
+        $this->domainEvents[] = $domainEvent;
+    }
+
+    /**
+     * Apply event to aggregate state and record it.
+     */
+    protected function apply(DomainEvent $domainEvent): void
+    {
+        $this->handleEvent($domainEvent);
+        $this->recordEvent($domainEvent);
     }
 
     protected function setVersion(int $version): void
@@ -78,20 +91,7 @@ abstract class AggregateRoot
     }
 
     /**
-     * Set version for snapshot restoration (package-private)
-     */
-    public function restoreVersion(int $version): void
-    {
-        $this->version = $version;
-    }
-
-    /**
-     * Get the unique identifier of this aggregate
-     */
-    abstract public function getId(): Uuid;
-
-    /**
-     * Handle domain event for Event Sourcing replay and state changes
+     * Handle domain event for Event Sourcing replay and state changes.
      */
     abstract protected function handleEvent(DomainEvent $domainEvent): void;
 }

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Persistence\EventStore;
 
-use InvalidArgumentException;
 use App\Infrastructure\Persistence\EventStore\AggregateTypeResolver;
 use App\Project\Domain\Event\ProjectCreatedEvent;
-use App\User\Domain\Event\UserDeletedEvent;
 use App\Shared\Domain\Event\UserDeletedIntegrationEvent;
+use App\User\Domain\Event\UserDeletedEvent;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 final class AggregateTypeResolverTest extends TestCase

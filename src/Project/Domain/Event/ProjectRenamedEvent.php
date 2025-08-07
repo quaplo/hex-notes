@@ -15,7 +15,7 @@ final readonly class ProjectRenamedEvent implements DomainEvent
         private Uuid $uuid,
         private ProjectName $oldName,
         private ProjectName $newName,
-        private DateTimeImmutable $occurredAt = new DateTimeImmutable()
+        private DateTimeImmutable $occurredAt = new DateTimeImmutable(),
     ) {
     }
 
@@ -55,7 +55,7 @@ final readonly class ProjectRenamedEvent implements DomainEvent
             'projectId' => $this->uuid->toString(),
             'oldName' => $this->oldName->__toString(),
             'newName' => $this->newName->__toString(),
-            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s')
+            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
         ];
     }
 

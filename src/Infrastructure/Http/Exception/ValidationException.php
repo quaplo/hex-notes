@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Http\Exception;
 
 use Exception;
-use Throwable;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Throwable;
 
 final class ValidationException extends Exception
 {
@@ -14,7 +14,7 @@ final class ValidationException extends Exception
         private readonly ConstraintViolationListInterface $constraintViolationList,
         string $message = 'Validation failed',
         int $code = 400,
-        ?Throwable $throwable = null
+        ?Throwable $throwable = null,
     ) {
         parent::__construct($message, $code, $throwable);
     }
