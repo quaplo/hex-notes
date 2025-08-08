@@ -11,7 +11,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.4.2",
         "doctrine/orm": "^3.5",
         "ramsey/uuid": ">=4.9",
-        "symfony/console": "7.2.*",
+        "symfony/console": "7.3.*",
         "symfony/dotenv": "7.2.*",
         "symfony/flex": "^2.8.1",
         "symfony/framework-bundle": "7.2.*",
@@ -98,7 +98,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "7.2.*"
+            "require": "7.3.*"
         }
     },
     "require-dev": {

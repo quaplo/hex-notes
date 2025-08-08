@@ -22,7 +22,7 @@ return static function (RectorConfig $rectorConfig): void {
         SetList::EARLY_RETURN,
         SetList::TYPE_DECLARATION,
         SetList::NAMING,
-        SymfonySetList::SYMFONY_72,
+        SymfonySetList::SYMFONY_73,
         SymfonySetList::SYMFONY_CODE_QUALITY,
         SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION,
         DoctrineSetList::DOCTRINE_ORM_214,
