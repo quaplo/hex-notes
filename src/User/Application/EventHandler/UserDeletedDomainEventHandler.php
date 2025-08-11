@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\User\Application\EventHandler;
 
 use App\Shared\Domain\Event\UserDeletedIntegrationEvent;
-use App\Shared\Event\EventDispatcher;
 use App\User\Domain\Event\UserDeletedEvent;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class UserDeletedDomainEventHandler
 {
     public function __construct(
-        private EventDispatcher $eventDispatcher,
+        private MessageBusInterface $eventBus,
     ) {
     }
 
@@ -23,7 +23,7 @@ final readonly class UserDeletedDomainEventHandler
             $userDeletedEvent->getEmail()->__toString()
         );
 
-        // Publish Integration Event for other domains to consume
-        $this->eventDispatcher->dispatch([$userDeletedIntegrationEvent]);
+        // Publish Integration Event asynchronously via RabbitMQ
+        $this->eventBus->dispatch($userDeletedIntegrationEvent);
     }
 }

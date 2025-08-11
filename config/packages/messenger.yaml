@@ -3,6 +3,11 @@ framework:
         # Set command bus as default
         default_bus: command.bus
         
+        # Transports configuration
+        transports:
+            # Asynchronous transport for integration events
+            async_events: '%env(RABBITMQ_DSN)%'
+        
         buses:
             command.bus:
                 middleware:
@@ -10,3 +15,12 @@ framework:
             
             query.bus:
                 default_middleware: allow_no_handlers
+                
+            # Event bus for async integration events
+            event.bus:
+                default_middleware: allow_no_handlers
+        
+        # Routing configuration
+        routing:
+            # Route integration events to async transport
+            'App\Shared\Domain\Event\UserDeletedIntegrationEvent': async_events

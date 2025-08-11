@@ -72,13 +72,17 @@ services:
 
     # Event Handlers for domain events
     App\User\Application\EventHandler\UserDeletedDomainEventHandler:
+        arguments:
+            $eventBus: '@event.bus'
         tags:
             - { name: kernel.event_listener, event: 'App\User\Domain\Event\UserDeletedEvent' }
     
-    # Integration Event Handlers
+    # Integration Event Handlers - now async via messenger
     App\Project\Application\EventHandler\UserDeletedIntegrationEventHandler:
+        arguments:
+            $commandBus: '@App\Shared\Application\CommandBus'
         tags:
-            - { name: kernel.event_listener, event: 'App\Shared\Domain\Event\UserDeletedIntegrationEvent' }
+            - { name: messenger.message_handler, bus: event.bus }
     
     # Project Event Handlers for read model projection and side effects
     App\Project\Application\EventHandler\ProjectEventHandler:
@@ -151,3 +155,10 @@ services:
     
     # Domain Event Dispatcher
     App\Shared\Infrastructure\Event\DomainEventDispatcher: ~
+    
+    # Test Console Command
+    App\Infrastructure\Console\TestAsyncEventCommand:
+        arguments:
+            $eventBus: '@event.bus'
+        tags:
+            - { name: console.command }
