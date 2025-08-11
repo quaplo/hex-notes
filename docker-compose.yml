@@ -9,8 +9,8 @@ services:
     depends_on:
       - db
       - rabbitmq
-    environment:
-      - DATABASE_URL=postgresql://symfony:symfony@db:5432/hex_notes?serverVersion=16&charset=utf8
+    env_file:
+      - .env
   db:
     image: postgres:16
     environment:
@@ -21,6 +21,18 @@ services:
       - "5432:5432"
     volumes:
       - database_data:/var/lib/postgresql/data:rw
+
+  messenger-worker:
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - .env
+    command: php bin/console messenger:consume async_events --limit=100 --memory-limit=128M --time-limit=3600
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3.13-management

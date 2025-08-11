@@ -82,7 +82,7 @@ services:
         arguments:
             $commandBus: '@App\Shared\Application\CommandBus'
         tags:
-            - { name: messenger.message_handler, bus: event.bus }
+            - { name: messenger.message_handler }
     
     # Project Event Handlers for read model projection and side effects
     App\Project\Application\EventHandler\ProjectEventHandler:
@@ -155,10 +155,3 @@ services:
     
     # Domain Event Dispatcher
     App\Shared\Infrastructure\Event\DomainEventDispatcher: ~
-    
-    # Test Console Command
-    App\Infrastructure\Console\TestAsyncEventCommand:
-        arguments:
-            $eventBus: '@event.bus'
-        tags:
-            - { name: console.command }
