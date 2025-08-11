@@ -8,6 +8,7 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - rabbitmq
     environment:
       - DATABASE_URL=postgresql://symfony:symfony@db:5432/hex_notes?serverVersion=16&charset=utf8
   db:
@@ -21,5 +22,24 @@ services:
     volumes:
       - database_data:/var/lib/postgresql/data:rw
 
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: hex_notes_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   database_data:
+  rabbitmq_data:
