@@ -29,7 +29,7 @@ final readonly class GetProjectWithUserDetailsHandler
 
         // Get owner from User domain
         $owner = $this->queryBus->dispatch(
-            new GetUserByIdQuery($project->getOwnerId()->toString())
+            GetUserByIdQuery::fromPrimitives($project->getOwnerId()->toString())
         );
 
         if (!$owner) {
@@ -41,7 +41,7 @@ final readonly class GetProjectWithUserDetailsHandler
 
         foreach ($project->getWorkers() as $worker) {
             $workerUser = $this->queryBus->dispatch(
-                new GetUserByIdQuery($worker->getUserId()->toString())
+                GetUserByIdQuery::fromPrimitives($worker->getUserId()->toString())
             );
 
             if ($workerUser && !$workerUser->isDeleted) {

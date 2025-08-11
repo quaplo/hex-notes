@@ -41,11 +41,11 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         // Given: Create a user
         $userEmail = 'test-owner-'.uniqid().'@example.com';
 
-        $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
+        $user = ($this->createUserHandler)(CreateUserCommand::fromPrimitives($userEmail));
         $uuid = $user->getId();
 
         // Verify user was created
-        $userDto = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
+        $userDto = ($this->getUserByIdHandler)(GetUserByIdQuery::fromPrimitives($uuid->toString()));
         expect($userDto)->not()->toBeNull();
         expect($userDto->id)->toEqual($uuid->toString());
 
@@ -70,10 +70,10 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         expect($project2Query->getOwnerId())->toEqual($uuid);
 
         // When: Delete the user (triggers event-driven cleanup)
-        ($this->deleteUserHandler)(new DeleteUserCommand($uuid->toString()));
+        ($this->deleteUserHandler)(DeleteUserCommand::fromPrimitives($uuid->toString()));
 
         // Then: User should be soft deleted
-        $deletedUser = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
+        $deletedUser = ($this->getUserByIdHandler)(GetUserByIdQuery::fromPrimitives($uuid->toString()));
         expect($deletedUser)->toBeNull(); // Soft deleted users are not returned by queries
 
         // Then: Projects should be cleaned up automatically via event handlers
@@ -93,26 +93,26 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         // Given: Create a user with no projects
         $userEmail = 'no-projects-'.uniqid().'@example.com';
 
-        $user = ($this->createUserHandler)(new CreateUserCommand($userEmail));
+        $user = ($this->createUserHandler)(CreateUserCommand::fromPrimitives($userEmail));
         $uuid = $user->getId();
 
         // Verify user was created
-        $userDto = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
+        $userDto = ($this->getUserByIdHandler)(GetUserByIdQuery::fromPrimitives($uuid->toString()));
         expect($userDto)->not()->toBeNull();
 
         // When: Delete the user (no projects to clean up)
-        ($this->deleteUserHandler)(new DeleteUserCommand($uuid->toString()));
+        ($this->deleteUserHandler)(DeleteUserCommand::fromPrimitives($uuid->toString()));
 
         // Then: User should be soft deleted without any errors
-        $deletedUser = ($this->getUserByIdHandler)(new GetUserByIdQuery($uuid->toString()));
+        $deletedUser = ($this->getUserByIdHandler)(GetUserByIdQuery::fromPrimitives($uuid->toString()));
         expect($deletedUser)->toBeNull();
     }
 
     public function testMultipleUsersWithProjectsCleanupIndependently(): void
     {
         // Given: Create two users
-        $user1 = ($this->createUserHandler)(new CreateUserCommand('user1-'.uniqid().'@example.com'));
-        $user2 = ($this->createUserHandler)(new CreateUserCommand('user2-'.uniqid().'@example.com'));
+        $user1 = ($this->createUserHandler)(CreateUserCommand::fromPrimitives('user1-'.uniqid().'@example.com'));
+        $user2 = ($this->createUserHandler)(CreateUserCommand::fromPrimitives('user2-'.uniqid().'@example.com'));
 
         $uuid = $user1->getId();
         $user2Id = $user2->getId();
@@ -129,7 +129,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         ));
 
         // When: Delete only user1
-        ($this->deleteUserHandler)(new DeleteUserCommand($uuid->toString()));
+        ($this->deleteUserHandler)(DeleteUserCommand::fromPrimitives($uuid->toString()));
 
         // Then: Only user1's projects should be cleaned up
         $user1ProjectAfterDeletion = ($this->getProjectHandler)(GetProjectQuery::fromPrimitives($user1Project->getId()->toString()));
@@ -140,7 +140,7 @@ final class UserProjectCleanupIntegrationTest extends KernelTestCase
         expect($user2ProjectAfterDeletion->getOwnerId())->toEqual($user2Id);
 
         // And user2 should still exist
-        $user2AfterUser1Deletion = ($this->getUserByIdHandler)(new GetUserByIdQuery($user2Id->toString()));
+        $user2AfterUser1Deletion = ($this->getUserByIdHandler)(GetUserByIdQuery::fromPrimitives($user2Id->toString()));
         expect($user2AfterUser1Deletion)->not()->toBeNull();
     }
 }

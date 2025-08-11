@@ -21,13 +21,13 @@ it('can create and load user via handlers', function (): void {
     $getHandler = self::getContainer()->get(GetUserByIdHandler::class);
 
     $email = 'test'.uniqid().'@example.com';
-    $command = new CreateUserCommand($email);
+    $command = CreateUserCommand::fromPrimitives($email);
     $user = $createHandler($command);
 
     expect($user->getEmail()->getValue())->toBe($email);
     expect($user->getId())->not()->toBeNull();
 
-    $query = new GetUserByIdQuery($user->getId()->toString());
+    $query = GetUserByIdQuery::fromPrimitives($user->getId()->toString());
     $userDto = $getHandler($query);
 
     expect($userDto)->not()->toBeNull();
@@ -47,18 +47,18 @@ it('can soft delete user and user becomes unavailable via regular queries', func
 
     // Create user
     $email = 'delete_test'.uniqid().'@example.com';
-    $command = new CreateUserCommand($email);
+    $command = CreateUserCommand::fromPrimitives($email);
     $user = $createHandler($command);
 
     $uuid = $user->getId();
 
     // Verify user exists
-    $query = new GetUserByIdQuery($uuid->toString());
+    $query = GetUserByIdQuery::fromPrimitives($uuid->toString());
     $userDto = $getHandler($query);
     expect($userDto)->not()->toBeNull();
 
     // Soft delete user
-    $deleteCommand = new DeleteUserCommand($uuid->toString());
+    $deleteCommand = DeleteUserCommand::fromPrimitives($uuid->toString());
     $deleteHandler($deleteCommand);
 
     // Verify user is not available via regular query
@@ -82,13 +82,13 @@ it('soft delete is idempotent - deleting already deleted user does nothing', fun
 
     // Create user
     $email = 'idempotent_delete'.uniqid().'@example.com';
-    $command = new CreateUserCommand($email);
+    $command = CreateUserCommand::fromPrimitives($email);
     $user = $createHandler($command);
 
     $uuid = $user->getId();
 
     // Delete user first time
-    $deleteCommand = new DeleteUserCommand($uuid->toString());
+    $deleteCommand = DeleteUserCommand::fromPrimitives($uuid->toString());
     $deleteHandler($deleteCommand);
 
     $userAfterFirstDelete = $userRepository->findByIdIncludingDeleted($uuid);
@@ -112,11 +112,11 @@ it('cannot create user with same email as soft deleted user', function (): void 
 
     // Create user
     $email = 'unique_email_test'.uniqid().'@example.com';
-    $command = new CreateUserCommand($email);
+    $command = CreateUserCommand::fromPrimitives($email);
     $user = $createHandler($command);
 
     // Soft delete user
-    $deleteCommand = new DeleteUserCommand($user->getId()->toString());
+    $deleteCommand = DeleteUserCommand::fromPrimitives($user->getId()->toString());
     $deleteHandler($deleteCommand);
 
     // Try to create user with same email - should fail

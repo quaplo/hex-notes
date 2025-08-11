@@ -8,9 +8,14 @@ use App\Shared\ValueObject\Uuid;
 
 final readonly class DeleteUserCommand
 {
-    public function __construct(
-        public string $userId,
+    private function __construct(
+        private string $userId,
     ) {
+    }
+
+    public static function fromPrimitives(string $userId): self
+    {
+        return new self($userId);
     }
 
     public function getUserId(): Uuid

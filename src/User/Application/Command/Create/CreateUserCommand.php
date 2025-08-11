@@ -8,9 +8,14 @@ use App\Shared\ValueObject\Email;
 
 final readonly class CreateUserCommand
 {
-    public function __construct(
-        public string $email,
+    private function __construct(
+        private string $email,
     ) {
+    }
+
+    public static function fromPrimitives(string $email): self
+    {
+        return new self($email);
     }
 
     public function getEmail(): Email

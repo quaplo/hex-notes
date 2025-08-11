@@ -35,12 +35,12 @@ it('can get project with user details via HTTP API (cross-domain)', function ():
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
     $ownerEmail = 'project_owner_'.uniqid().'@example.com';
-    $ownerCommand = new CreateUserCommand($ownerEmail);
+    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
     // Create a worker user
     $workerEmail = 'project_worker_'.uniqid().'@example.com';
-    $workerCommand = new CreateUserCommand($workerEmail);
+    $workerCommand = CreateUserCommand::fromPrimitives($workerEmail);
     $worker = $createUserHandler($workerCommand);
 
     // Create a project with the owner
@@ -114,7 +114,7 @@ it('can delete project via HTTP API', function (): void {
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
     $ownerEmail = 'project_owner_'.uniqid().'@example.com';
-    $ownerCommand = new CreateUserCommand($ownerEmail);
+    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
     // First create a project
@@ -150,11 +150,11 @@ it('can add worker to project via HTTP API', function (): void {
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
 
     $ownerEmail = 'owner_'.uniqid().'@example.com';
-    $ownerCommand = new CreateUserCommand($ownerEmail);
+    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
     $workerEmail = 'worker_'.uniqid().'@example.com';
-    $workerCommand = new CreateUserCommand($workerEmail);
+    $workerCommand = CreateUserCommand::fromPrimitives($workerEmail);
     $worker = $createUserHandler($workerCommand);
 
     // Create a project
@@ -191,11 +191,11 @@ it('can remove worker from project via HTTP API', function (): void {
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
 
     $ownerEmail = 'owner_remove_'.uniqid().'@example.com';
-    $ownerCommand = new CreateUserCommand($ownerEmail);
+    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
     $user = $createUserHandler($ownerCommand);
 
     $workerEmail = 'worker_remove_'.uniqid().'@example.com';
-    $workerCommand = new CreateUserCommand($workerEmail);
+    $workerCommand = CreateUserCommand::fromPrimitives($workerEmail);
     $worker = $createUserHandler($workerCommand);
 
     // Create a project

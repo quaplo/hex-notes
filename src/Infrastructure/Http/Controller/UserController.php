@@ -37,7 +37,7 @@ final class UserController extends BaseController
             /** @var CreateUserRequestDto $dto */
             $dto = $this->deserializeAndValidate($request, CreateUserRequestDto::class);
 
-            $createUserCommand = new CreateUserCommand($dto->email);
+            $createUserCommand = CreateUserCommand::fromPrimitives($dto->email);
             $user = $this->commandBus->dispatch($createUserCommand);
 
             return new JsonResponse([
@@ -53,7 +53,7 @@ final class UserController extends BaseController
     #[Route('/api/users/{id}', name: 'get_user_by_id', methods: ['GET'])]
     public function getById(string $id): JsonResponse
     {
-        $getUserByIdQuery = new GetUserByIdQuery($id);
+        $getUserByIdQuery = GetUserByIdQuery::fromPrimitives($id);
         $userDto = $this->queryBus->dispatch($getUserByIdQuery);
 
         if (!$userDto) {
@@ -67,7 +67,7 @@ final class UserController extends BaseController
     public function delete(string $id): JsonResponse
     {
         try {
-            $deleteUserCommand = new DeleteUserCommand($id);
+            $deleteUserCommand = DeleteUserCommand::fromPrimitives($id);
             $this->commandBus->dispatch($deleteUserCommand);
 
             return new JsonResponse([

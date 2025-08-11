@@ -32,7 +32,7 @@ it('can get user by ID via HTTP API', function (): void {
     /** @var CreateUserHandler $createHandler */
     $createHandler = self::getContainer()->get(CreateUserHandler::class);
     $email = 'get_test_'.uniqid().'@example.com';
-    $command = new CreateUserCommand($email);
+    $command = CreateUserCommand::fromPrimitives($email);
     $user = $createHandler($command);
 
     // Then get the user via API
@@ -52,7 +52,7 @@ it('can delete user via HTTP API', function (): void {
     /** @var CreateUserHandler $createHandler */
     $createHandler = self::getContainer()->get(CreateUserHandler::class);
     $email = 'delete_test_'.uniqid().'@example.com';
-    $command = new CreateUserCommand($email);
+    $command = CreateUserCommand::fromPrimitives($email);
     $user = $createHandler($command);
 
     $userId = $user->getId()->toString();
@@ -94,7 +94,7 @@ it('delete operation is idempotent via HTTP API', function (): void {
     /** @var CreateUserHandler $createHandler */
     $createHandler = self::getContainer()->get(CreateUserHandler::class);
     $email = 'idempotent_delete_'.uniqid().'@example.com';
-    $command = new CreateUserCommand($email);
+    $command = CreateUserCommand::fromPrimitives($email);
     $user = $createHandler($command);
 
     $userId = $user->getId()->toString();
