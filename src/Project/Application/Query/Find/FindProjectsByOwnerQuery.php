@@ -8,9 +8,14 @@ use App\Shared\ValueObject\Uuid;
 
 final readonly class FindProjectsByOwnerQuery
 {
-    public function __construct(
-        public readonly Uuid $ownerId,
+    private function __construct(
+        private readonly Uuid $ownerId,
     ) {
+    }
+
+    public static function fromPrimitives(string $ownerId): self
+    {
+        return new self(Uuid::create($ownerId));
     }
 
     public function getOwnerId(): Uuid

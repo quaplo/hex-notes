@@ -10,9 +10,19 @@ use App\Shared\ValueObject\Uuid;
 final readonly class RenameProjectCommand
 {
     private function __construct(
-        public Uuid $projectId,
-        public ProjectName $newName,
+        private Uuid $projectId,
+        private ProjectName $newName,
     ) {
+    }
+
+    public function getProjectId(): Uuid
+    {
+        return $this->projectId;
+    }
+
+    public function getNewName(): ProjectName
+    {
+        return $this->newName;
     }
 
     public static function fromPrimitives(string $projectId, string $newName): self

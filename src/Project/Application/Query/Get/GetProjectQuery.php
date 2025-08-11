@@ -9,12 +9,17 @@ use App\Shared\ValueObject\Uuid;
 final readonly class GetProjectQuery
 {
     private function __construct(
-        public Uuid $projectId,
+        private Uuid $projectId,
     ) {
     }
 
     public static function fromPrimitives(string $projectId): self
     {
         return new self(Uuid::create($projectId));
+    }
+
+    public function getProjectId(): Uuid
+    {
+        return $this->projectId;
     }
 }

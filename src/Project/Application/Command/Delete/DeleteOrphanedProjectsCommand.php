@@ -8,13 +8,18 @@ use App\Shared\ValueObject\Uuid;
 
 final readonly class DeleteOrphanedProjectsCommand
 {
-    public function __construct(
-        private Uuid $uuid,
+    private function __construct(
+        private Uuid $deletedUserId,
     ) {
+    }
+
+    public static function fromPrimitives(string $deletedUserId): self
+    {
+        return new self(Uuid::create($deletedUserId));
     }
 
     public function getDeletedUserId(): Uuid
     {
-        return $this->uuid;
+        return $this->deletedUserId;
     }
 }

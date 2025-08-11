@@ -16,7 +16,7 @@ final readonly class GetProjectHandler
 
     public function __invoke(GetProjectQuery $getProjectQuery): ?Project
     {
-        $project = $this->projectRepository->load($getProjectQuery->projectId);
+        $project = $this->projectRepository->load($getProjectQuery->getProjectId());
 
         if (!$project || $project->isDeleted()) {
             return null;

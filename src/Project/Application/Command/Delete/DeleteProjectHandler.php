@@ -17,10 +17,10 @@ final readonly class DeleteProjectHandler
 
     public function __invoke(DeleteProjectCommand $deleteProjectCommand): Project
     {
-        $project = $this->projectRepository->load($deleteProjectCommand->projectId);
+        $project = $this->projectRepository->load($deleteProjectCommand->getProjectId());
 
         if (!$project instanceof Project) {
-            throw new ProjectNotFoundException($deleteProjectCommand->projectId);
+            throw new ProjectNotFoundException($deleteProjectCommand->getProjectId());
         }
 
         $deletedProject = $project->delete();

@@ -20,14 +20,14 @@ final readonly class GetProjectHistoryHandler
 
     public function __invoke(GetProjectHistoryQuery $getProjectHistoryQuery): array
     {
-        $project = $this->projectRepository->load($getProjectHistoryQuery->projectId);
+        $project = $this->projectRepository->load($getProjectHistoryQuery->getProjectId());
 
         if (!$project instanceof Project) {
             return [];
         }
 
         // Get all historical events from event store
-        $events = $this->eventStore->getEvents($getProjectHistoryQuery->projectId);
+        $events = $this->eventStore->getEvents($getProjectHistoryQuery->getProjectId());
 
         // Convert events to serializable data
         $eventData = array_map(

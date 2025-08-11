@@ -17,15 +17,15 @@ final readonly class RemoveProjectWorkerHandler
 
     public function __invoke(RemoveProjectWorkerCommand $removeProjectWorkerCommand): Project
     {
-        $project = $this->projectRepository->load($removeProjectWorkerCommand->projectId);
+        $project = $this->projectRepository->load($removeProjectWorkerCommand->getProjectId());
 
         if (!$project instanceof Project) {
-            throw new ProjectNotFoundException($removeProjectWorkerCommand->projectId);
+            throw new ProjectNotFoundException($removeProjectWorkerCommand->getProjectId());
         }
 
         $project = $project->removeWorkerByUserId(
-            $removeProjectWorkerCommand->userId,
-            $removeProjectWorkerCommand->removedBy
+            $removeProjectWorkerCommand->getUserId(),
+            $removeProjectWorkerCommand->getRemovedBy()
         );
         $this->projectRepository->save($project);
 

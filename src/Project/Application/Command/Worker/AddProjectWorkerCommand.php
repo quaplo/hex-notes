@@ -10,10 +10,10 @@ use App\Shared\ValueObject\Uuid;
 final readonly class AddProjectWorkerCommand
 {
     private function __construct(
-        public Uuid $projectId,
-        public Uuid $userId,
-        public ProjectRole $role,
-        public Uuid $addedBy,
+        private Uuid $projectId,
+        private Uuid $userId,
+        private ProjectRole $role,
+        private Uuid $addedBy,
     ) {
     }
 

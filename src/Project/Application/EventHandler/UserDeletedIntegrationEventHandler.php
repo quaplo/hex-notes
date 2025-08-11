@@ -19,7 +19,7 @@ final readonly class UserDeletedIntegrationEventHandler
     {
         // Integration Event → Project domain command
         $this->messageBus->dispatch(
-            new DeleteOrphanedProjectsCommand($userDeletedIntegrationEvent->getUserId())
+            DeleteOrphanedProjectsCommand::fromPrimitives($userDeletedIntegrationEvent->getUserId()->toString())
         );
     }
 }

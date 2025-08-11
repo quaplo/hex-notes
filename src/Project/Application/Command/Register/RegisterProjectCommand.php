@@ -10,9 +10,19 @@ use App\Shared\ValueObject\Uuid;
 final readonly class RegisterProjectCommand
 {
     private function __construct(
-        public ProjectName $name,
-        public Uuid $ownerId,
+        private ProjectName $name,
+        private Uuid $ownerId,
     ) {
+    }
+
+    public function getName(): ProjectName
+    {
+        return $this->name;
+    }
+
+    public function getOwnerId(): Uuid
+    {
+        return $this->ownerId;
     }
 
     public static function fromPrimitives(string $name, string $ownerId): self

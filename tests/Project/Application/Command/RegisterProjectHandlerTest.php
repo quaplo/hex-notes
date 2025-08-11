@@ -20,7 +20,7 @@ describe('RegisterProjectHandler', function (): void {
 
         expect($project)->toBeInstanceOf(Project::class);
         expect((string) $project->getName())->toBe('New Project');
-        expect($project->getOwnerId()->equals($registerProjectCommand->ownerId))->toBeTrue();
+        expect($project->getOwnerId()->equals($registerProjectCommand->getOwnerId()))->toBeTrue();
         expect($project->isDeleted())->toBeFalse();
     });
 
@@ -36,7 +36,7 @@ describe('RegisterProjectHandler', function (): void {
 
         $savedProject = $repository->getProject($project->getId());
         expect($savedProject->getId()->equals($project->getId()))->toBeTrue();
-        expect((string) $savedProject->getName())->toBe((string) $registerProjectCommand->name);
+        expect((string) $savedProject->getName())->toBe((string) $registerProjectCommand->getName());
     });
 
     test('register project handler records ProjectCreatedEvent', function (): void {
@@ -53,8 +53,8 @@ describe('RegisterProjectHandler', function (): void {
         ProjectEventAsserter::assertProjectCreatedEvent(
             $events[0],
             $project->getId(),
-            $registerProjectCommand->name,
-            $registerProjectCommand->ownerId
+            $registerProjectCommand->getName(),
+            $registerProjectCommand->getOwnerId()
         );
     });
 

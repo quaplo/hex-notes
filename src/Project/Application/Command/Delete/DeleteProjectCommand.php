@@ -9,8 +9,13 @@ use App\Shared\ValueObject\Uuid;
 final readonly class DeleteProjectCommand
 {
     private function __construct(
-        public Uuid $projectId,
+        private Uuid $projectId,
     ) {
+    }
+
+    public function getProjectId(): Uuid
+    {
+        return $this->projectId;
     }
 
     public static function fromPrimitives(string $projectId): self

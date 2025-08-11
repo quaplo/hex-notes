@@ -18,16 +18,16 @@ final readonly class AddProjectWorkerHandler
 
     public function __invoke(AddProjectWorkerCommand $addProjectWorkerCommand): Project
     {
-        $project = $this->projectRepository->load($addProjectWorkerCommand->projectId);
+        $project = $this->projectRepository->load($addProjectWorkerCommand->getProjectId());
 
         if (!$project instanceof Project) {
-            throw new ProjectNotFoundException($addProjectWorkerCommand->projectId);
+            throw new ProjectNotFoundException($addProjectWorkerCommand->getProjectId());
         }
 
         $projectWorker = ProjectWorker::create(
-            $addProjectWorkerCommand->userId,
-            $addProjectWorkerCommand->role,
-            $addProjectWorkerCommand->addedBy
+            $addProjectWorkerCommand->getUserId(),
+            $addProjectWorkerCommand->getRole(),
+            $addProjectWorkerCommand->getAddedBy()
         );
 
         $project = $project->addWorker($projectWorker);

@@ -9,10 +9,25 @@ use App\Shared\ValueObject\Uuid;
 final readonly class RemoveProjectWorkerCommand
 {
     private function __construct(
-        public Uuid $projectId,
-        public Uuid $userId,
-        public ?Uuid $removedBy = null,
+        private Uuid $projectId,
+        private Uuid $userId,
+        private ?Uuid $removedBy = null,
     ) {
+    }
+
+    public function getProjectId(): Uuid
+    {
+        return $this->projectId;
+    }
+
+    public function getUserId(): Uuid
+    {
+        return $this->userId;
+    }
+
+    public function getRemovedBy(): ?Uuid
+    {
+        return $this->removedBy;
     }
 
     public static function fromPrimitives(string $projectId, string $userId, ?string $removedBy = null): self
