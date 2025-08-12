@@ -12,6 +12,7 @@ final readonly class RenameProjectCommand
     private function __construct(
         private Uuid $projectId,
         private ProjectName $newName,
+        private Uuid $userId,
     ) {
     }
 
@@ -25,11 +26,17 @@ final readonly class RenameProjectCommand
         return $this->newName;
     }
 
-    public static function fromPrimitives(string $projectId, string $newName): self
+    public function getUserId(): Uuid
+    {
+        return $this->userId;
+    }
+
+    public static function fromPrimitives(string $projectId, string $newName, string $userId): self
     {
         return new self(
             Uuid::create($projectId),
-            new ProjectName($newName)
+            new ProjectName($newName),
+            Uuid::create($userId)
         );
     }
 }

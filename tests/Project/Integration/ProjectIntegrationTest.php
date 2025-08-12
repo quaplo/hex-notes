@@ -45,7 +45,8 @@ describe('Project Integration Tests', function (): void {
             // Rename project
             $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Renamed Project'
+                'Renamed Project',
+                (string) $project->getOwnerId()
             );
             $renamedProject = ($this->renameHandler)($renameProjectCommand);
 
@@ -83,7 +84,7 @@ describe('Project Integration Tests', function (): void {
             );
             $projectWithWorker1 = ($this->addWorkerHandler)($addProjectWorkerCommand);
 
-            expect($projectWithWorker1->getWorkers())->toHaveCount(1);
+            expect($projectWithWorker1->getWorkers())->toHaveCount(2);
 
             // Add second worker
             $addWorkerCommand2 = AddProjectWorkerCommand::fromPrimitives(
@@ -94,7 +95,7 @@ describe('Project Integration Tests', function (): void {
             );
             $projectWithWorker2 = ($this->addWorkerHandler)($addWorkerCommand2);
 
-            expect($projectWithWorker2->getWorkers())->toHaveCount(2);
+            expect($projectWithWorker2->getWorkers())->toHaveCount(3);
 
             // Remove first worker
             $removeProjectWorkerCommand = RemoveProjectWorkerCommand::fromPrimitives(
@@ -104,14 +105,22 @@ describe('Project Integration Tests', function (): void {
             );
             $projectWithRemovedWorker = ($this->removeWorkerHandler)($removeProjectWorkerCommand);
 
-            expect($projectWithRemovedWorker->getWorkers())->toHaveCount(1);
+            expect($projectWithRemovedWorker->getWorkers())->toHaveCount(2);
 
-            // Verify remaining worker is the second one
+            // Verify remaining workers (owner + second worker)
             $workers = $projectWithRemovedWorker->getWorkers();
-            expect($workers)->toHaveCount(1);
-            $remainingWorker = reset($workers); // Get first element regardless of key
-            expect($remainingWorker->getUserId()->equals($userId2))->toBeTrue();
-            expect($remainingWorker->getRole()->toString())->toBe('owner');
+            expect($workers)->toHaveCount(2);
+            // Find the second worker (not the owner)
+            $secondWorker = null;
+
+            foreach ($workers as $worker) {
+                if ($worker->getUserId()->equals($userId2)) {
+                    $secondWorker = $worker;
+                    break;
+                }
+            }
+            expect($secondWorker)->not()->toBeNull();
+            expect($secondWorker->getRole()->toString())->toBe('owner');
         });
     });
 
@@ -124,18 +133,19 @@ describe('Project Integration Tests', function (): void {
             $project = ($this->registerHandler)($registerProjectCommand);
 
             $events = $this->repository->getEventsForProject($project->getId());
-            ProjectEventAsserter::assertEventCount($events, 1);
+            ProjectEventAsserter::assertEventCount($events, 2);
             ProjectEventAsserter::assertContainsEventType($events, ProjectCreatedEvent::class);
 
             // Rename project
             $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Renamed Event Project'
+                'Renamed Event Project',
+                (string) $project->getOwnerId()
             );
             ($this->renameHandler)($renameProjectCommand);
 
             $events = $this->repository->getEventsForProject($project->getId());
-            ProjectEventAsserter::assertEventCount($events, 2);
+            ProjectEventAsserter::assertEventCount($events, 3);
             ProjectEventAsserter::assertContainsEventType($events, ProjectRenamedEvent::class);
 
             // Add worker
@@ -148,7 +158,7 @@ describe('Project Integration Tests', function (): void {
             ($this->addWorkerHandler)($addProjectWorkerCommand);
 
             $events = $this->repository->getEventsForProject($project->getId());
-            ProjectEventAsserter::assertEventCount($events, 3);
+            ProjectEventAsserter::assertEventCount($events, 4);
             ProjectEventAsserter::assertContainsEventType($events, ProjectWorkerAddedEvent::class);
 
             // Delete project
@@ -159,7 +169,7 @@ describe('Project Integration Tests', function (): void {
             ($this->deleteHandler)($deleteProjectCommand);
 
             $events = $this->repository->getEventsForProject($project->getId());
-            ProjectEventAsserter::assertEventCount($events, 4);
+            ProjectEventAsserter::assertEventCount($events, 5);
             ProjectEventAsserter::assertContainsEventType($events, ProjectDeletedEvent::class);
         });
     });
@@ -172,7 +182,8 @@ describe('Project Integration Tests', function (): void {
             expect(function () use ($uuid): void {
                 $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                     (string) $uuid,
-                    'New Name'
+                    'New Name',
+                    '550e8400-e29b-41d4-a716-446655440001'
                 );
                 ($this->renameHandler)($renameProjectCommand);
             })->toThrow(ProjectNotFoundException::class);
@@ -224,7 +235,8 @@ describe('Project Integration Tests', function (): void {
             expect(function () use ($project): void {
                 $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                     (string) $project->getId(),
-                    'New Name'
+                    'New Name',
+                    (string) $project->getOwnerId()
                 );
                 ($this->renameHandler)($renameProjectCommand);
             })->toThrow(DomainException::class, 'Cannot rename deleted project');
@@ -257,7 +269,7 @@ describe('Project Integration Tests', function (): void {
                 (string) $addedBy
             );
             $projectWithWorker = ($this->addWorkerHandler)($addProjectWorkerCommand);
-            expect($projectWithWorker->getWorkers())->toHaveCount(1);
+            expect($projectWithWorker->getWorkers())->toHaveCount(2);
 
             // Try to add same worker again
             $addWorkerCommand2 = AddProjectWorkerCommand::fromPrimitives(
@@ -268,8 +280,8 @@ describe('Project Integration Tests', function (): void {
             );
             $finalProject = ($this->addWorkerHandler)($addWorkerCommand2);
 
-            // Should still have only 1 worker (duplicate ignored)
-            expect($finalProject->getWorkers())->toHaveCount(1);
+            // Should still have 2 workers (owner + participant, duplicate ignored)
+            expect($finalProject->getWorkers())->toHaveCount(2);
         });
 
         test('removing non-existent worker throws exception', function (): void {
@@ -328,7 +340,8 @@ describe('Project Integration Tests', function (): void {
             // Rename project
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Renamed Concurrency Test'
+                'Renamed Concurrency Test',
+                (string) $project->getOwnerId()
             ));
 
             // Remove one worker
@@ -341,12 +354,12 @@ describe('Project Integration Tests', function (): void {
             // Verify final state
             $finalProject = $this->repository->getProject($project->getId());
             expect((string) $finalProject->getName())->toBe('Renamed Concurrency Test');
-            expect($finalProject->getWorkers())->toHaveCount(2);
+            expect($finalProject->getWorkers())->toHaveCount(3);
             expect($finalProject->isDeleted())->toBeFalse();
 
             // Verify events were recorded correctly
             $events = $this->repository->getEventsForProject($project->getId());
-            expect(count($events))->toBe(6); // Created + 3 workers added + renamed + 1 worker removed
+            expect(count($events))->toBe(7); // Created + owner worker + 3 workers added + renamed + 1 worker removed
         });
     });
 });

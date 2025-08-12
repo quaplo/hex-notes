@@ -75,10 +75,19 @@ it('can get project with user details via HTTP API (cross-domain)', function ():
     expect($responseData['project']['owner']['email'])->toBe($ownerEmail);
     expect($responseData['project']['owner']['id'])->toBe($user->getId()->toString());
 
-    // Validate cross-domain workers data
-    expect($responseData['project']['workers'])->toHaveCount(1);
-    expect($responseData['project']['workers'][0]['email'])->toBe($workerEmail);
-    expect($responseData['project']['workers'][0]['id'])->toBe($worker->getId()->toString());
+    // Validate cross-domain workers data (owner + added worker)
+    expect($responseData['project']['workers'])->toHaveCount(2);
+    // Find the added worker (not the owner)
+    $addedWorker = null;
+
+    foreach ($responseData['project']['workers'] as $workerData) {
+        if ($workerData['email'] === $workerEmail) {
+            $addedWorker = $workerData;
+            break;
+        }
+    }
+    expect($addedWorker)->not()->toBeNull();
+    expect($addedWorker['id'])->toBe($worker->getId()->toString());
 });
 
 it('can rename project via HTTP API', function (): void {
@@ -98,6 +107,7 @@ it('can rename project via HTTP API', function (): void {
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'name' => $newName,
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
@@ -105,6 +115,51 @@ it('can rename project via HTTP API', function (): void {
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
     expect($responseData['name'])->toBe($newName);
     expect($responseData['id'])->toBe($project->getId()->toString());
+});
+it('only project worker can rename project via HTTP API', function (): void {
+    $client = static::createClient();
+
+    // Create owner and non-worker users
+    /** @var CreateUserHandler $createUserHandler */
+    $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
+
+    $ownerEmail = 'owner_rename_'.uniqid().'@example.com';
+    $createUserCommand = CreateUserCommand::fromPrimitives($ownerEmail);
+    $user = $createUserHandler($createUserCommand);
+
+    $nonWorkerEmail = 'nonworker_'.uniqid().'@example.com';
+    $nonWorkerCommand = CreateUserCommand::fromPrimitives($nonWorkerEmail);
+    $nonWorker = $createUserHandler($nonWorkerCommand);
+
+    // Create a project
+    /** @var RegisterProjectHandler $projectHandler */
+    $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
+    $projectName = 'Worker Rename Test Project '.uniqid();
+    $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, $user->getId()->toString());
+    $project = $projectHandler($registerProjectCommand);
+
+    // Try to rename with non-worker user - should fail
+    $client->request('PUT', '/api/projects/'.$project->getId()->toString(), [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'name' => 'Renamed by Non-Worker',
+        'userId' => $nonWorker->getId()->toString(),
+    ]));
+
+    expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);
+
+    // Rename with owner (who is automatically a worker) - should succeed
+    $client->request('PUT', '/api/projects/'.$project->getId()->toString(), [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'name' => 'Renamed by Owner',
+        'userId' => $user->getId()->toString(),
+    ]));
+
+    expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
+
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
+    expect($responseData['name'])->toBe('Renamed by Owner');
 });
 
 it('can delete project via HTTP API', function (): void {
@@ -183,8 +238,17 @@ it('can add worker to project via HTTP API', function (): void {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
-    expect($responseData['project']['workers'])->toHaveCount(1);
-    expect($responseData['project']['workers'][0]['id'])->toBe($worker->getId()->toString());
+    expect($responseData['project']['workers'])->toHaveCount(2);
+    // Find the added worker (not the owner)
+    $addedWorker = null;
+
+    foreach ($responseData['project']['workers'] as $workerData) {
+        if ($workerData['id'] === $worker->getId()->toString()) {
+            $addedWorker = $workerData;
+            break;
+        }
+    }
+    expect($addedWorker)->not()->toBeNull();
 });
 
 it('can remove worker from project via HTTP API', function (): void {
@@ -232,7 +296,7 @@ it('can remove worker from project via HTTP API', function (): void {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
-    expect($responseData['project']['workers'])->toHaveCount(0);
+    expect($responseData['project']['workers'])->toHaveCount(1); // Only owner remains
 });
 
 it('returns 404 when getting non-existent project', function (): void {
@@ -279,6 +343,7 @@ it('validates project name when renaming project', function (): void {
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'name' => 'ab', // Too short
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
@@ -365,6 +430,7 @@ it('cannot rename deleted project via HTTP API', function (): void {
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'name' => 'New Name for Deleted Project',
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);

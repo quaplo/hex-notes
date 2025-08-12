@@ -21,7 +21,9 @@ describe('Project Domain Model', function (): void {
         expect($project->getId())->toBeInstanceOf(Uuid::class);
         expect($project->isDeleted())->toBeFalse();
         expect($project->getDeletedAt())->toBeNull();
-        expect($project->getWorkers())->toBeEmpty();
+        expect($project->getWorkers())->toHaveCount(1);
+        expect($project->getWorkers()[0]->getUserId()->equals($uuid))->toBeTrue();
+        expect($project->getWorkers()[0]->getRole()->toString())->toBe('owner');
     });
 
     test('project creation records ProjectCreatedEvent', function (): void {
@@ -31,8 +33,9 @@ describe('Project Domain Model', function (): void {
         $project = Project::create($projectName, $uuid);
         $events = $project->getDomainEvents();
 
-        ProjectEventAsserter::assertEventCount($events, 1);
+        ProjectEventAsserter::assertEventCount($events, 2);
         ProjectEventAsserter::assertProjectCreatedEvent($events[0], $project->getId(), $projectName, $uuid);
+        ProjectEventAsserter::assertProjectWorkerAddedEvent($events[1], $project->getId(), $uuid, ProjectRole::OWNER, $uuid);
     });
 
     test('project can be renamed', function (): void {
@@ -41,7 +44,7 @@ describe('Project Domain Model', function (): void {
         ]);
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
-        $renamedProject = $project->rename($projectName);
+        $renamedProject = $project->rename($projectName, $project->getOwnerId());
 
         expect((string) $renamedProject->getName())->toBe('New Name');
         expect($renamedProject->getId()->equals($project->getId()))->toBeTrue();
@@ -53,7 +56,7 @@ describe('Project Domain Model', function (): void {
         $project = ProjectTestFactory::createProject(['name' => $projectName]);
         $newName = ProjectTestFactory::createProjectName('New Name');
 
-        $renamedProject = $project->rename($newName);
+        $renamedProject = $project->rename($newName, $project->getOwnerId());
         $events = $renamedProject->getDomainEvents();
 
         ProjectEventAsserter::assertEventCount($events, 1);
@@ -66,8 +69,33 @@ describe('Project Domain Model', function (): void {
         ]);
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
-        expect(fn (): Project => $project->rename($projectName))
+        expect(fn (): Project => $project->rename($projectName, $project->getOwnerId()))
             ->toThrow(DomainException::class, 'Cannot rename deleted project');
+    });
+
+    test('only project worker can rename project', function (): void {
+        $project = ProjectTestFactory::createProject();
+        $uuid = ProjectTestFactory::createValidUuid();
+        $projectName = ProjectTestFactory::createProjectName('New Name');
+
+        expect(fn (): Project => $project->rename($projectName, $uuid))
+            ->toThrow(DomainException::class, 'Only project workers can rename the project');
+    });
+
+    test('project worker can rename project', function (): void {
+        $project = ProjectTestFactory::createProject();
+        $uuid = ProjectTestFactory::createValidUuid();
+        $projectWorker = ProjectTestFactory::createProjectWorker([
+            'userId' => $uuid,
+            'role' => ProjectRole::PARTICIPANT,
+        ]);
+        $projectWithWorker = $project->addWorker($projectWorker);
+        $projectName = ProjectTestFactory::createProjectName('New Name');
+
+        $renamedProject = $projectWithWorker->rename($projectName, $uuid);
+
+        expect((string) $renamedProject->getName())->toBe('New Name');
+        expect($renamedProject->getId()->equals($project->getId()))->toBeTrue();
     });
 
     test('project can be deleted', function (): void {

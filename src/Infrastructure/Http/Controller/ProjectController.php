@@ -120,7 +120,7 @@ final class ProjectController extends BaseController
             /** @var RenameProjectRequestDto $dto */
             $dto = $this->deserializeAndValidate($request, RenameProjectRequestDto::class);
 
-            $command = RenameProjectCommand::fromPrimitives($id, $dto->name);
+            $command = RenameProjectCommand::fromPrimitives($id, $dto->name, $dto->userId);
             $project = $this->commandBus->dispatch($command);
             $projectDto = $this->projectDtoMapper->toDto($project);
 

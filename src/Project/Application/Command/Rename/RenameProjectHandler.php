@@ -23,7 +23,7 @@ final readonly class RenameProjectHandler
             throw new ProjectNotFoundException($renameProjectCommand->getProjectId());
         }
 
-        $renamedProject = $project->rename($renameProjectCommand->getNewName());
+        $renamedProject = $project->rename($renameProjectCommand->getNewName(), $renameProjectCommand->getUserId());
         $this->projectRepository->save($renamedProject);
 
         return $renamedProject;

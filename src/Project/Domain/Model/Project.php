@@ -10,6 +10,7 @@ use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
 use App\Project\Domain\ValueObject\ProjectName;
+use App\Project\Domain\ValueObject\ProjectRole;
 use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Domain\Model\AggregateRoot;
@@ -25,14 +26,28 @@ final class Project extends AggregateRoot
      */
     private array $workers = [];
 
-    public function __construct(private Uuid $id, private ProjectName $projectName, private DateTimeImmutable $createdAt, private Uuid $ownerId, private ?DateTimeImmutable $deletedAt = null)
-    {
+    public function __construct(
+        private Uuid $id,
+        private ProjectName $projectName,
+        private DateTimeImmutable $createdAt,
+        private Uuid $ownerId,
+        private ?DateTimeImmutable $deletedAt = null,
+    ) {
     }
 
     public static function create(ProjectName $projectName, Uuid $uuid): self
     {
         $project = new self(Uuid::generate(), $projectName, new DateTimeImmutable(), $uuid);
         $project->apply(new ProjectCreatedEvent($project->getId(), $projectName, $uuid));
+
+        // Automatically add owner as worker with OWNER role
+        $projectWorker = ProjectWorker::create($uuid, ProjectRole::OWNER, $uuid);
+        $project->apply(new ProjectWorkerAddedEvent(
+            $project->getId(),
+            $projectWorker->getUserId(),
+            $projectWorker->getRole(),
+            $projectWorker->getAddedBy()
+        ));
 
         return $project;
     }
@@ -91,10 +106,14 @@ final class Project extends AggregateRoot
         return $this;
     }
 
-    public function rename(ProjectName $projectName): self
+    public function rename(ProjectName $projectName, Uuid $requestingUserId): self
     {
         if ($this->isDeleted()) {
             throw new DomainException('Cannot rename deleted project');
+        }
+
+        if (!$this->isUserWorker($requestingUserId)) {
+            throw new DomainException('Only project workers can rename the project');
         }
 
         $oldName = $this->projectName;
@@ -177,6 +196,16 @@ final class Project extends AggregateRoot
             ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($domainEvent),
             default => throw new RuntimeException('Unknown event type: '.$domainEvent::class),
         };
+    }
+
+    private function isUserWorker(Uuid $userId): bool
+    {
+        // Check if user is owner
+        if ($this->ownerId->equals($userId)) {
+            return true;
+        }
+
+        return array_any($this->workers, fn ($worker) => $worker->getUserId()->equals($userId));
     }
 
     private function handleProjectCreated(ProjectCreatedEvent $projectCreatedEvent): void
