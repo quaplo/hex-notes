@@ -53,13 +53,15 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Verify events were stored
             $storedEvents = $this->eventStore->getEvents($project->getId());
-            expect($storedEvents)->toHaveCount(1);
+            expect($storedEvents)->toHaveCount(2);
             expect($storedEvents[0])->toBeInstanceOf(ProjectCreatedEvent::class);
+            expect($storedEvents[1])->toBeInstanceOf(ProjectWorkerAddedEvent::class);
 
             // Verify events were dispatched
             $dispatchedEvents = $this->eventDispatcher->getDispatchedEvents();
-            expect($dispatchedEvents)->toHaveCount(1);
+            expect($dispatchedEvents)->toHaveCount(2);
             expect($dispatchedEvents[0])->toBeInstanceOf(ProjectCreatedEvent::class);
+            expect($dispatchedEvents[1])->toBeInstanceOf(ProjectWorkerAddedEvent::class);
         });
 
         test('project can be loaded from event store', function (): void {
@@ -103,15 +105,16 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Verify event stream
             $storedEvents = $this->eventStore->getEvents($project->getId());
-            expect($storedEvents)->toHaveCount(3);
+            expect($storedEvents)->toHaveCount(4);
             expect($storedEvents[0])->toBeInstanceOf(ProjectCreatedEvent::class);
-            expect($storedEvents[1])->toBeInstanceOf(ProjectRenamedEvent::class);
-            expect($storedEvents[2])->toBeInstanceOf(ProjectWorkerAddedEvent::class);
+            expect($storedEvents[1])->toBeInstanceOf(ProjectWorkerAddedEvent::class);
+            expect($storedEvents[2])->toBeInstanceOf(ProjectRenamedEvent::class);
+            expect($storedEvents[3])->toBeInstanceOf(ProjectWorkerAddedEvent::class);
 
             // Verify project can be reconstructed from events
             $reconstructedProject = $this->repository->load($project->getId());
             expect((string) $reconstructedProject->getName())->toBe('Renamed Event Stream Test');
-            expect($reconstructedProject->getWorkers())->toHaveCount(1);
+            expect($reconstructedProject->getWorkers())->toHaveCount(2);
         });
 
         test('project state is correctly reconstructed from events', function (): void {
@@ -159,7 +162,7 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Verify state is correctly reconstructed
             expect((string) $reconstructedProject->getName())->toBe('Final Name');
-            expect($reconstructedProject->getWorkers())->toHaveCount(2);
+            expect($reconstructedProject->getWorkers())->toHaveCount(3);
             expect($reconstructedProject->getId()->equals($project->getId()))->toBeTrue();
             expect($reconstructedProject->isDeleted())->toBeFalse();
 
@@ -209,7 +212,7 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Verify all events were dispatched
             $dispatchedEvents = $this->eventDispatcher->getDispatchedEvents();
-            expect($dispatchedEvents)->toHaveCount(3);
+            expect($dispatchedEvents)->toHaveCount(4);
 
             $eventTypes = array_map(fn ($event): string|false => $event::class, $dispatchedEvents);
             expect($eventTypes)->toContain(ProjectCreatedEvent::class);

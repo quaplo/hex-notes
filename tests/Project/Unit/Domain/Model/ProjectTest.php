@@ -21,7 +21,9 @@ describe('Project Domain Model', function (): void {
         expect($project->getId())->toBeInstanceOf(Uuid::class);
         expect($project->isDeleted())->toBeFalse();
         expect($project->getDeletedAt())->toBeNull();
-        expect($project->getWorkers())->toBeEmpty();
+        expect($project->getWorkers())->toHaveCount(1);
+        expect($project->getWorkers()[0]->getUserId()->equals($uuid))->toBeTrue();
+        expect($project->getWorkers()[0]->getRole()->toString())->toBe('owner');
     });
 
     test('project creation records ProjectCreatedEvent', function (): void {
@@ -31,8 +33,9 @@ describe('Project Domain Model', function (): void {
         $project = Project::create($projectName, $uuid);
         $events = $project->getDomainEvents();
 
-        ProjectEventAsserter::assertEventCount($events, 1);
+        ProjectEventAsserter::assertEventCount($events, 2);
         ProjectEventAsserter::assertProjectCreatedEvent($events[0], $project->getId(), $projectName, $uuid);
+        ProjectEventAsserter::assertProjectWorkerAddedEvent($events[1], $project->getId(), $uuid, ProjectRole::OWNER, $uuid);
     });
 
     test('project can be renamed', function (): void {

@@ -49,7 +49,7 @@ describe('RegisterProjectHandler', function (): void {
         $project = $handler($registerProjectCommand);
 
         $events = $repository->getEventsForProject($project->getId());
-        ProjectEventAsserter::assertEventCount($events, 1);
+        ProjectEventAsserter::assertEventCount($events, 2);
         ProjectEventAsserter::assertProjectCreatedEvent(
             $events[0],
             $project->getId(),
@@ -73,7 +73,9 @@ describe('RegisterProjectHandler', function (): void {
         expect((string) $project->getName())->toBe((string) $projectName);
         expect($project->getOwnerId()->equals($uuid))->toBeTrue();
         expect($project->getCreatedAt())->toBeInstanceOf(DateTimeImmutable::class);
-        expect($project->getWorkers())->toBeEmpty();
+        expect($project->getWorkers())->toHaveCount(1);
+        expect($project->getWorkers()[0]->getUserId()->equals($uuid))->toBeTrue();
+        expect($project->getWorkers()[0]->getRole()->toString())->toBe('owner');
     });
 
     test('multiple projects can be registered', function (): void {

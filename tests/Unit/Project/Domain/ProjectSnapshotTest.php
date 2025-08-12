@@ -58,16 +58,21 @@ final class ProjectSnapshotTest extends TestCase
         $this->assertEquals($uuid->toString(), $data['ownerId']);
         $this->assertArrayHasKey('createdAt', $data);
         $this->assertNull($data['deletedAt']);
-        $this->assertCount(2, $data['workers']);
+        $this->assertCount(3, $data['workers']);
 
-        // Check worker data
-        $this->assertEquals($worker1Id->toString(), $data['workers'][0]['userId']);
-        $this->assertEquals('participant', $data['workers'][0]['role']);
-        $this->assertEquals($addedBy->toString(), $data['workers'][0]['addedBy']);
+        // Check worker data - first worker is the owner (automatically added)
+        $this->assertEquals($uuid->toString(), $data['workers'][0]['userId']);
+        $this->assertEquals('owner', $data['workers'][0]['role']);
+        $this->assertEquals($uuid->toString(), $data['workers'][0]['addedBy']);
 
-        $this->assertEquals($worker2Id->toString(), $data['workers'][1]['userId']);
-        $this->assertEquals('owner', $data['workers'][1]['role']);
+        // Then manually added workers
+        $this->assertEquals($worker1Id->toString(), $data['workers'][1]['userId']);
+        $this->assertEquals('participant', $data['workers'][1]['role']);
         $this->assertEquals($addedBy->toString(), $data['workers'][1]['addedBy']);
+
+        $this->assertEquals($worker2Id->toString(), $data['workers'][2]['userId']);
+        $this->assertEquals('owner', $data['workers'][2]['role']);
+        $this->assertEquals($addedBy->toString(), $data['workers'][2]['addedBy']);
     }
 
     public function testRestoreProjectFromSnapshot(): void
@@ -170,11 +175,11 @@ final class ProjectSnapshotTest extends TestCase
 
         // Assert
         $data = $projectSnapshot->getData();
-        $this->assertEmpty($data['workers']);
+        $this->assertCount(1, $data['workers']); // Owner is automatically added
 
         // Restore and verify
         $restoredProject = $this->projectSnapshotFactory->restoreFromSnapshot($projectSnapshot);
-        $this->assertEmpty($restoredProject->getWorkers());
+        $this->assertCount(1, $restoredProject->getWorkers()); // Owner is automatically added
     }
 
     public function testSnapshotDataSerialization(): void

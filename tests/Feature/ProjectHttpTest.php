@@ -75,10 +75,18 @@ it('can get project with user details via HTTP API (cross-domain)', function ():
     expect($responseData['project']['owner']['email'])->toBe($ownerEmail);
     expect($responseData['project']['owner']['id'])->toBe($user->getId()->toString());
 
-    // Validate cross-domain workers data
-    expect($responseData['project']['workers'])->toHaveCount(1);
-    expect($responseData['project']['workers'][0]['email'])->toBe($workerEmail);
-    expect($responseData['project']['workers'][0]['id'])->toBe($worker->getId()->toString());
+    // Validate cross-domain workers data (owner + added worker)
+    expect($responseData['project']['workers'])->toHaveCount(2);
+    // Find the added worker (not the owner)
+    $addedWorker = null;
+    foreach ($responseData['project']['workers'] as $workerData) {
+        if ($workerData['email'] === $workerEmail) {
+            $addedWorker = $workerData;
+            break;
+        }
+    }
+    expect($addedWorker)->not()->toBeNull();
+    expect($addedWorker['id'])->toBe($worker->getId()->toString());
 });
 
 it('can rename project via HTTP API', function (): void {
@@ -183,8 +191,16 @@ it('can add worker to project via HTTP API', function (): void {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
-    expect($responseData['project']['workers'])->toHaveCount(1);
-    expect($responseData['project']['workers'][0]['id'])->toBe($worker->getId()->toString());
+    expect($responseData['project']['workers'])->toHaveCount(2);
+    // Find the added worker (not the owner)
+    $addedWorker = null;
+    foreach ($responseData['project']['workers'] as $workerData) {
+        if ($workerData['id'] === $worker->getId()->toString()) {
+            $addedWorker = $workerData;
+            break;
+        }
+    }
+    expect($addedWorker)->not()->toBeNull();
 });
 
 it('can remove worker from project via HTTP API', function (): void {
@@ -232,7 +248,7 @@ it('can remove worker from project via HTTP API', function (): void {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     $responseData = json_decode((string) $client->getResponse()->getContent(), true);
-    expect($responseData['project']['workers'])->toHaveCount(0);
+    expect($responseData['project']['workers'])->toHaveCount(1); // Only owner remains
 });
 
 it('returns 404 when getting non-existent project', function (): void {
