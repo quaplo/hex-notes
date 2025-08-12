@@ -6,6 +6,7 @@ framework:
         # For test environment, use synchronous transports to ensure immediate handling
         transports:
             sync: 'sync://'
+            async_events: 'sync://'  # Synchronous processing for async events in tests
         
         buses:
             command.bus:
@@ -21,3 +22,5 @@ framework:
             'App\User\Application\Command\*': sync
             'App\Project\Application\Query\*': sync
             'App\User\Application\Query\*': sync
+            # Route async events to in-memory transport for synchronous testing
+            'App\Shared\Domain\Event\UserDeletedIntegrationEvent': async_events
