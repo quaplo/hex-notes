@@ -40,6 +40,11 @@ return (new PhpCsFixer\Config())
         'single_quote' => true,
         'class_attributes_separation' => ['elements' => ['method' => 'one']],
         'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
+        'method_chaining_indentation' => true,
+        'function_declaration' => [
+            'closure_function_spacing' => 'one',
+        ],
+        'single_line_throw' => false,
         'blank_line_before_statement' => [
             'statements' => ['return', 'throw', 'if', 'foreach', 'for', 'while', 'try'],
         ],

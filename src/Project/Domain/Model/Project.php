@@ -26,8 +26,13 @@ final class Project extends AggregateRoot
      */
     private array $workers = [];
 
-    public function __construct(private Uuid $id, private ProjectName $projectName, private DateTimeImmutable $createdAt, private Uuid $ownerId, private ?DateTimeImmutable $deletedAt = null)
-    {
+    public function __construct(
+        private Uuid $id,
+        private ProjectName $projectName,
+        private DateTimeImmutable $createdAt,
+        private Uuid $ownerId,
+        private ?DateTimeImmutable $deletedAt = null,
+    ) {
     }
 
     public static function create(ProjectName $projectName, Uuid $uuid): self
@@ -36,12 +41,12 @@ final class Project extends AggregateRoot
         $project->apply(new ProjectCreatedEvent($project->getId(), $projectName, $uuid));
 
         // Automatically add owner as worker with OWNER role
-        $ownerWorker = ProjectWorker::create($uuid, ProjectRole::OWNER, $uuid);
+        $projectWorker = ProjectWorker::create($uuid, ProjectRole::OWNER, $uuid);
         $project->apply(new ProjectWorkerAddedEvent(
             $project->getId(),
-            $ownerWorker->getUserId(),
-            $ownerWorker->getRole(),
-            $ownerWorker->getAddedBy()
+            $projectWorker->getUserId(),
+            $projectWorker->getRole(),
+            $projectWorker->getAddedBy()
         ));
 
         return $project;
@@ -150,23 +155,6 @@ final class Project extends AggregateRoot
         return $this->ownerId;
     }
 
-    private function isUserWorker(Uuid $userId): bool
-    {
-        // Check if user is owner
-        if ($this->ownerId->equals($userId)) {
-            return true;
-        }
-
-        // Check if user is in workers list
-        foreach ($this->workers as $worker) {
-            if ($worker->getUserId()->equals($userId)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public function removeWorkerByUserId(Uuid $userId, ?Uuid $removedBy = null): self
     {
         if ($this->isDeleted()) {
@@ -208,6 +196,16 @@ final class Project extends AggregateRoot
             ProjectWorkerRemovedEvent::class => $this->handleProjectWorkerRemoved($domainEvent),
             default => throw new RuntimeException('Unknown event type: '.$domainEvent::class),
         };
+    }
+
+    private function isUserWorker(Uuid $userId): bool
+    {
+        // Check if user is owner
+        if ($this->ownerId->equals($userId)) {
+            return true;
+        }
+
+        return array_any($this->workers, fn ($worker) => $worker->getUserId()->equals($userId));
     }
 
     private function handleProjectCreated(ProjectCreatedEvent $projectCreatedEvent): void

@@ -112,6 +112,7 @@ describe('Project Integration Tests', function (): void {
             expect($workers)->toHaveCount(2);
             // Find the second worker (not the owner)
             $secondWorker = null;
+
             foreach ($workers as $worker) {
                 if ($worker->getUserId()->equals($userId2)) {
                     $secondWorker = $worker;

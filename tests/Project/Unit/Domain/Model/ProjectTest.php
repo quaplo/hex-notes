@@ -75,24 +75,24 @@ describe('Project Domain Model', function (): void {
 
     test('only project worker can rename project', function (): void {
         $project = ProjectTestFactory::createProject();
-        $nonWorkerUserId = ProjectTestFactory::createValidUuid();
+        $uuid = ProjectTestFactory::createValidUuid();
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
-        expect(fn (): Project => $project->rename($projectName, $nonWorkerUserId))
+        expect(fn (): Project => $project->rename($projectName, $uuid))
             ->toThrow(DomainException::class, 'Only project workers can rename the project');
     });
 
     test('project worker can rename project', function (): void {
         $project = ProjectTestFactory::createProject();
-        $workerUserId = ProjectTestFactory::createValidUuid();
+        $uuid = ProjectTestFactory::createValidUuid();
         $projectWorker = ProjectTestFactory::createProjectWorker([
-            'userId' => $workerUserId,
+            'userId' => $uuid,
             'role' => ProjectRole::PARTICIPANT,
         ]);
         $projectWithWorker = $project->addWorker($projectWorker);
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
-        $renamedProject = $projectWithWorker->rename($projectName, $workerUserId);
+        $renamedProject = $projectWithWorker->rename($projectName, $uuid);
 
         expect((string) $renamedProject->getName())->toBe('New Name');
         expect($renamedProject->getId()->equals($project->getId()))->toBeTrue();

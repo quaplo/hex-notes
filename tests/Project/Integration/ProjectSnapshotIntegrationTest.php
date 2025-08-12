@@ -172,14 +172,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
 
         // Verify remaining workers (owner + second worker)
         $workers = $restoredProject->getWorkers();
-        // Find the second worker (not the original owner)
-        $secondWorker = null;
-        foreach ($workers as $worker) {
-            if ($worker->getUserId()->equals($userId2)) {
-                $secondWorker = $worker;
-                break;
-            }
-        }
+        $secondWorker = array_find($workers, fn ($worker) => $worker->getUserId()->equals($userId2));
         $this->assertTrue($secondWorker !== null);
         $this->assertEquals('owner', $secondWorker->getRole()->toString());
     }
@@ -252,14 +245,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $this->assertTrue($restoredProject->getId()->equals($project->getId()));
 
         $workers = $restoredProject->getWorkers();
-        // Find the added worker (not the owner)
-        $addedWorker = null;
-        foreach ($workers as $worker) {
-            if ($worker->getUserId()->equals($uuid)) {
-                $addedWorker = $worker;
-                break;
-            }
-        }
+        $addedWorker = array_find($workers, fn ($worker) => $worker->getUserId()->equals($uuid));
         $this->assertTrue($addedWorker !== null);
     }
 
@@ -384,14 +370,14 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         // Find the added workers (not the owners)
         $addedWorker1 = null;
         $addedWorker2 = null;
-        
+
         foreach ($workers1 as $worker) {
             if ($worker->getUserId()->equals($uuid)) {
                 $addedWorker1 = $worker;
                 break;
             }
         }
-        
+
         foreach ($workers2 as $worker) {
             if ($worker->getUserId()->equals($userId2)) {
                 $addedWorker2 = $worker;
