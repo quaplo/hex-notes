@@ -101,10 +101,14 @@ final class Project extends AggregateRoot
         return $this;
     }
 
-    public function rename(ProjectName $projectName): self
+    public function rename(ProjectName $projectName, Uuid $requestingUserId): self
     {
         if ($this->isDeleted()) {
             throw new DomainException('Cannot rename deleted project');
+        }
+
+        if (!$this->isUserWorker($requestingUserId)) {
+            throw new DomainException('Only project workers can rename the project');
         }
 
         $oldName = $this->projectName;
@@ -144,6 +148,23 @@ final class Project extends AggregateRoot
     public function getOwnerId(): Uuid
     {
         return $this->ownerId;
+    }
+
+    private function isUserWorker(Uuid $userId): bool
+    {
+        // Check if user is owner
+        if ($this->ownerId->equals($userId)) {
+            return true;
+        }
+
+        // Check if user is in workers list
+        foreach ($this->workers as $worker) {
+            if ($worker->getUserId()->equals($userId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function removeWorkerByUserId(Uuid $userId, ?Uuid $removedBy = null): self

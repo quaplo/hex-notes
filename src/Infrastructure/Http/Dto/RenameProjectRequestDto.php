@@ -12,6 +12,9 @@ final readonly class RenameProjectRequestDto
         #[Assert\NotBlank(message: 'Project name cannot be empty')]
         #[Assert\Length(min: 3, max: 100, minMessage: 'Project name must be at least 3 characters', maxMessage: 'Project name cannot exceed 100 characters')]
         public string $name,
+        #[Assert\NotBlank(message: 'User ID cannot be empty')]
+        #[Assert\Uuid(message: 'User ID must be a valid UUID')]
+        public string $userId,
     ) {
     }
 }
