@@ -45,7 +45,8 @@ describe('Project Integration Tests', function (): void {
             // Rename project
             $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Renamed Project'
+                'Renamed Project',
+                (string) $project->getOwnerId()
             );
             $renamedProject = ($this->renameHandler)($renameProjectCommand);
 
@@ -137,7 +138,8 @@ describe('Project Integration Tests', function (): void {
             // Rename project
             $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Renamed Event Project'
+                'Renamed Event Project',
+                (string) $project->getOwnerId()
             );
             ($this->renameHandler)($renameProjectCommand);
 
@@ -179,7 +181,8 @@ describe('Project Integration Tests', function (): void {
             expect(function () use ($uuid): void {
                 $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                     (string) $uuid,
-                    'New Name'
+                    'New Name',
+                    '550e8400-e29b-41d4-a716-446655440001'
                 );
                 ($this->renameHandler)($renameProjectCommand);
             })->toThrow(ProjectNotFoundException::class);
@@ -231,7 +234,8 @@ describe('Project Integration Tests', function (): void {
             expect(function () use ($project): void {
                 $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                     (string) $project->getId(),
-                    'New Name'
+                    'New Name',
+                    (string) $project->getOwnerId()
                 );
                 ($this->renameHandler)($renameProjectCommand);
             })->toThrow(DomainException::class, 'Cannot rename deleted project');
@@ -335,7 +339,8 @@ describe('Project Integration Tests', function (): void {
             // Rename project
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Renamed Concurrency Test'
+                'Renamed Concurrency Test',
+                (string) $project->getOwnerId()
             ));
 
             // Remove one worker

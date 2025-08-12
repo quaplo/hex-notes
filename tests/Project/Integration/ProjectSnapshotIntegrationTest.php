@@ -109,7 +109,8 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         // Rename project (2nd event - should create snapshot at version 2)
         $renameProjectCommand = RenameProjectCommand::fromPrimitives(
             (string) $project->getId(),
-            'Renamed Once'
+            'Renamed Once',
+            (string) $project->getOwnerId()
         );
         ($this->renameProjectHandler)($renameProjectCommand);
 
@@ -144,7 +145,8 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         // Rename again (5th event)
         $renameCommand2 = RenameProjectCommand::fromPrimitives(
             (string) $project->getId(),
-            'Final Name After 5 Events'
+            'Final Name After 5 Events',
+            (string) $project->getOwnerId()
         );
         ($this->renameProjectHandler)($renameCommand2);
 
@@ -236,7 +238,8 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         // Rename project (3rd event - after snapshot)
         $renameProjectCommand = RenameProjectCommand::fromPrimitives(
             (string) $project->getId(),
-            'Renamed After Snapshot'
+            'Renamed After Snapshot',
+            (string) $project->getOwnerId()
         );
         ($this->renameProjectHandler)($renameProjectCommand);
 
@@ -315,7 +318,8 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         // This should trigger snapshot creation but should not fail the operation
         $renameProjectCommand = RenameProjectCommand::fromPrimitives(
             (string) $project->getId(),
-            'Renamed Despite Snapshot Failure'
+            'Renamed Despite Snapshot Failure',
+            (string) $project->getOwnerId()
         );
         $renamedProject = ($renameProjectHandler)($renameProjectCommand);
 

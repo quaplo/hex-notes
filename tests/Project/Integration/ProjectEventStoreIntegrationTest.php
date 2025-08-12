@@ -90,7 +90,8 @@ describe('Project Event Store Integration Tests', function (): void {
             // Rename project
             $renameProjectCommand = RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Renamed Event Stream Test'
+                'Renamed Event Stream Test',
+                (string) $project->getOwnerId()
             );
             ($this->renameHandler)($renameProjectCommand);
 
@@ -146,7 +147,8 @@ describe('Project Event Store Integration Tests', function (): void {
             // Rename project
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Final Name'
+                'Final Name',
+                (string) $project->getOwnerId()
             ));
 
             // Clear in-memory state and reload from events
@@ -200,7 +202,8 @@ describe('Project Event Store Integration Tests', function (): void {
 
             ($this->renameHandler)(RenameProjectCommand::fromPrimitives(
                 (string) $project->getId(),
-                'Dispatcher Test'
+                'Dispatcher Test',
+                (string) $project->getOwnerId()
             ));
 
             ($this->addWorkerHandler)(AddProjectWorkerCommand::fromPrimitives(

@@ -106,6 +106,7 @@ it('can rename project via HTTP API', function (): void {
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'name' => $newName,
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
@@ -114,6 +115,52 @@ it('can rename project via HTTP API', function (): void {
     expect($responseData['name'])->toBe($newName);
     expect($responseData['id'])->toBe($project->getId()->toString());
 });
+it('only project worker can rename project via HTTP API', function (): void {
+    $client = static::createClient();
+
+    // Create owner and non-worker users
+    /** @var CreateUserHandler $createUserHandler */
+    $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
+
+    $ownerEmail = 'owner_rename_'.uniqid().'@example.com';
+    $createUserCommand = CreateUserCommand::fromPrimitives($ownerEmail);
+    $owner = $createUserHandler($createUserCommand);
+
+    $nonWorkerEmail = 'nonworker_'.uniqid().'@example.com';
+    $nonWorkerCommand = CreateUserCommand::fromPrimitives($nonWorkerEmail);
+    $nonWorker = $createUserHandler($nonWorkerCommand);
+
+    // Create a project
+    /** @var RegisterProjectHandler $projectHandler */
+    $projectHandler = self::getContainer()->get(RegisterProjectHandler::class);
+    $projectName = 'Worker Rename Test Project '.uniqid();
+    $registerProjectCommand = RegisterProjectCommand::fromPrimitives($projectName, $owner->getId()->toString());
+    $project = $projectHandler($registerProjectCommand);
+
+    // Try to rename with non-worker user - should fail
+    $client->request('PUT', '/api/projects/'.$project->getId()->toString(), [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'name' => 'Renamed by Non-Worker',
+        'userId' => $nonWorker->getId()->toString(),
+    ]));
+
+    expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);
+
+    // Rename with owner (who is automatically a worker) - should succeed
+    $client->request('PUT', '/api/projects/'.$project->getId()->toString(), [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'name' => 'Renamed by Owner',
+        'userId' => $owner->getId()->toString(),
+    ]));
+
+    expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
+
+    $responseData = json_decode((string) $client->getResponse()->getContent(), true);
+    expect($responseData['name'])->toBe('Renamed by Owner');
+});
+
 
 it('can delete project via HTTP API', function (): void {
     $client = static::createClient();
@@ -295,6 +342,7 @@ it('validates project name when renaming project', function (): void {
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'name' => 'ab', // Too short
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_BAD_REQUEST);
@@ -381,6 +429,7 @@ it('cannot rename deleted project via HTTP API', function (): void {
         'CONTENT_TYPE' => 'application/json',
     ], json_encode([
         'name' => 'New Name for Deleted Project',
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
     ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);

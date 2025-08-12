@@ -44,7 +44,7 @@ describe('Project Domain Model', function (): void {
         ]);
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
-        $renamedProject = $project->rename($projectName);
+        $renamedProject = $project->rename($projectName, $project->getOwnerId());
 
         expect((string) $renamedProject->getName())->toBe('New Name');
         expect($renamedProject->getId()->equals($project->getId()))->toBeTrue();
@@ -56,7 +56,7 @@ describe('Project Domain Model', function (): void {
         $project = ProjectTestFactory::createProject(['name' => $projectName]);
         $newName = ProjectTestFactory::createProjectName('New Name');
 
-        $renamedProject = $project->rename($newName);
+        $renamedProject = $project->rename($newName, $project->getOwnerId());
         $events = $renamedProject->getDomainEvents();
 
         ProjectEventAsserter::assertEventCount($events, 1);
@@ -69,8 +69,33 @@ describe('Project Domain Model', function (): void {
         ]);
         $projectName = ProjectTestFactory::createProjectName('New Name');
 
-        expect(fn (): Project => $project->rename($projectName))
+        expect(fn (): Project => $project->rename($projectName, $project->getOwnerId()))
             ->toThrow(DomainException::class, 'Cannot rename deleted project');
+    });
+
+    test('only project worker can rename project', function (): void {
+        $project = ProjectTestFactory::createProject();
+        $nonWorkerUserId = ProjectTestFactory::createValidUuid();
+        $projectName = ProjectTestFactory::createProjectName('New Name');
+
+        expect(fn (): Project => $project->rename($projectName, $nonWorkerUserId))
+            ->toThrow(DomainException::class, 'Only project workers can rename the project');
+    });
+
+    test('project worker can rename project', function (): void {
+        $project = ProjectTestFactory::createProject();
+        $workerUserId = ProjectTestFactory::createValidUuid();
+        $projectWorker = ProjectTestFactory::createProjectWorker([
+            'userId' => $workerUserId,
+            'role' => ProjectRole::PARTICIPANT,
+        ]);
+        $projectWithWorker = $project->addWorker($projectWorker);
+        $projectName = ProjectTestFactory::createProjectName('New Name');
+
+        $renamedProject = $projectWithWorker->rename($projectName, $workerUserId);
+
+        expect((string) $renamedProject->getName())->toBe('New Name');
+        expect($renamedProject->getId()->equals($project->getId()))->toBeTrue();
     });
 
     test('project can be deleted', function (): void {
