@@ -21,14 +21,14 @@ it('can create and load user via handlers', function (): void {
     $getHandler = self::getContainer()->get(GetUserByIdHandler::class);
 
     $email = 'test'.uniqid().'@example.com';
-    $command = CreateUserCommand::fromPrimitives($email);
-    $user = $createHandler($command);
+    $createUserCommand = CreateUserCommand::fromPrimitives($email);
+    $user = $createHandler($createUserCommand);
 
     expect($user->getEmail()->getValue())->toBe($email);
     expect($user->getId())->not()->toBeNull();
 
-    $query = GetUserByIdQuery::fromPrimitives($user->getId()->toString());
-    $userDto = $getHandler($query);
+    $getUserByIdQuery = GetUserByIdQuery::fromPrimitives($user->getId()->toString());
+    $userDto = $getHandler($getUserByIdQuery);
 
     expect($userDto)->not()->toBeNull();
     expect($userDto->email)->toBe($email);
@@ -47,22 +47,22 @@ it('can soft delete user and user becomes unavailable via regular queries', func
 
     // Create user
     $email = 'delete_test'.uniqid().'@example.com';
-    $command = CreateUserCommand::fromPrimitives($email);
-    $user = $createHandler($command);
+    $createUserCommand = CreateUserCommand::fromPrimitives($email);
+    $user = $createHandler($createUserCommand);
 
     $uuid = $user->getId();
 
     // Verify user exists
-    $query = GetUserByIdQuery::fromPrimitives($uuid->toString());
-    $userDto = $getHandler($query);
+    $getUserByIdQuery = GetUserByIdQuery::fromPrimitives($uuid->toString());
+    $userDto = $getHandler($getUserByIdQuery);
     expect($userDto)->not()->toBeNull();
 
     // Soft delete user
-    $deleteCommand = DeleteUserCommand::fromPrimitives($uuid->toString());
-    $deleteHandler($deleteCommand);
+    $deleteUserCommand = DeleteUserCommand::fromPrimitives($uuid->toString());
+    $deleteHandler($deleteUserCommand);
 
     // Verify user is not available via regular query
-    $userDtoAfterDelete = $getHandler($query);
+    $userDtoAfterDelete = $getHandler($getUserByIdQuery);
     expect($userDtoAfterDelete)->toBeNull();
 
     // Verify user still exists with including deleted method
@@ -82,20 +82,20 @@ it('soft delete is idempotent - deleting already deleted user does nothing', fun
 
     // Create user
     $email = 'idempotent_delete'.uniqid().'@example.com';
-    $command = CreateUserCommand::fromPrimitives($email);
-    $user = $createHandler($command);
+    $createUserCommand = CreateUserCommand::fromPrimitives($email);
+    $user = $createHandler($createUserCommand);
 
     $uuid = $user->getId();
 
     // Delete user first time
-    $deleteCommand = DeleteUserCommand::fromPrimitives($uuid->toString());
-    $deleteHandler($deleteCommand);
+    $deleteUserCommand = DeleteUserCommand::fromPrimitives($uuid->toString());
+    $deleteHandler($deleteUserCommand);
 
     $userAfterFirstDelete = $userRepository->findByIdIncludingDeleted($uuid);
     $firstDeleteTime = $userAfterFirstDelete->getDeletedAt();
 
     // Delete user second time
-    $deleteHandler($deleteCommand);
+    $deleteHandler($deleteUserCommand);
 
     $userAfterSecondDelete = $userRepository->findByIdIncludingDeleted($uuid);
     $secondDeleteTime = $userAfterSecondDelete->getDeletedAt();
@@ -112,14 +112,14 @@ it('cannot create user with same email as soft deleted user', function (): void 
 
     // Create user
     $email = 'unique_email_test'.uniqid().'@example.com';
-    $command = CreateUserCommand::fromPrimitives($email);
-    $user = $createHandler($command);
+    $createUserCommand = CreateUserCommand::fromPrimitives($email);
+    $user = $createHandler($createUserCommand);
 
     // Soft delete user
-    $deleteCommand = DeleteUserCommand::fromPrimitives($user->getId()->toString());
-    $deleteHandler($deleteCommand);
+    $deleteUserCommand = DeleteUserCommand::fromPrimitives($user->getId()->toString());
+    $deleteHandler($deleteUserCommand);
 
     // Try to create user with same email - should fail
-    expect(fn () => $createHandler($command))
+    expect(fn () => $createHandler($createUserCommand))
         ->toThrow(UserAlreadyExistsException::class);
 });

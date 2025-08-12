@@ -46,12 +46,6 @@ final readonly class CompositeEventSerializer implements EventSerializer
 
     public function supports(string $eventType): bool
     {
-        foreach ($this->serializers as $serializer) {
-            if ($serializer->supports($eventType)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->serializers, fn($serializer) => $serializer->supports($eventType));
     }
 }

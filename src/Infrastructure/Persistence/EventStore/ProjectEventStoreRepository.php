@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\EventStore;
 
+use App\Project\Domain\Model\ProjectSnapshot;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Model\ProjectSnapshotFactory;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
@@ -73,7 +74,7 @@ final readonly class ProjectEventStoreRepository implements ProjectRepositoryInt
 
         if ($snapshot instanceof AggregateSnapshot) {
             // Ensure we have a ProjectSnapshot
-            if (!$snapshot instanceof \App\Project\Domain\Model\ProjectSnapshot) {
+            if (!$snapshot instanceof ProjectSnapshot) {
                 throw new InvalidArgumentException('Expected ProjectSnapshot, got '.$snapshot::class);
             }
 

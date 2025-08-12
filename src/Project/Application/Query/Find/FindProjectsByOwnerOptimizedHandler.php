@@ -15,8 +15,8 @@ final readonly class FindProjectsByOwnerOptimizedHandler
 
     public function __invoke(FindProjectsByOwnerQuery $findProjectsByOwnerQuery): array
     {
-        $ownerId = $findProjectsByOwnerQuery->getOwnerId();
-        $readModels = $this->projectReadModelRepository->findByOwnerId($ownerId);
+        $uuid = $findProjectsByOwnerQuery->getOwnerId();
+        $readModels = $this->projectReadModelRepository->findByOwnerId($uuid);
 
         return array_map(fn ($readModel): array => [
             'id' => $readModel->getId(),

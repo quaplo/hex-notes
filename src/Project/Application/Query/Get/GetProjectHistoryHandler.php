@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Query\Get;
 
+use App\Shared\Domain\Event\DomainEvent;
 use App\Project\Application\Mapper\ProjectDtoMapperInterface;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
@@ -31,7 +32,7 @@ final readonly class GetProjectHistoryHandler
 
         // Convert events to serializable data
         $eventData = array_map(
-            fn ($event): array => [
+            fn (DomainEvent $event): array => [
                 'eventName' => $event->getEventName(),
                 'data' => $event->getEventData(),
                 'occurredAt' => $event->getOccurredAt()->format('Y-m-d H:i:s'),
