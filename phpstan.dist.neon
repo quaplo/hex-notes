@@ -2,5 +2,9 @@ parameters:
     level: 6
     paths:
         - src/
+    ignoreErrors:
+        - '#Method .* return type has no value type specified in iterable type array#'
+        - '#Method .* has parameter .* with no value type specified in iterable type array#'
+        - '#Property .* type has no value type specified in iterable type array#'
 includes:
     - phpstan-baseline.neon

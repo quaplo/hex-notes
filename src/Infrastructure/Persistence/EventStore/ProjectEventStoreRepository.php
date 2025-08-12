@@ -14,6 +14,7 @@ use App\Shared\Event\SnapshotStore;
 use App\Shared\Event\SnapshotStrategy;
 use App\Shared\ValueObject\Uuid;
 use Exception;
+use InvalidArgumentException;
 
 final readonly class ProjectEventStoreRepository implements ProjectRepositoryInterface
 {
@@ -71,6 +72,11 @@ final readonly class ProjectEventStoreRepository implements ProjectRepositoryInt
         $snapshot = $this->snapshotStore->loadLatest($uuid, self::AGGREGATE_TYPE);
 
         if ($snapshot instanceof AggregateSnapshot) {
+            // Ensure we have a ProjectSnapshot
+            if (!$snapshot instanceof \App\Project\Domain\Model\ProjectSnapshot) {
+                throw new InvalidArgumentException('Expected ProjectSnapshot, got '.$snapshot::class);
+            }
+
             // Restore project from snapshot
             $project = $this->projectSnapshotFactory->restoreFromSnapshot($snapshot);
 

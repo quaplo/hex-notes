@@ -35,16 +35,22 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
         ]);
     }
 
-    private function loadProject(DomainEvent $domainEvent)
+    private function loadProject(DomainEvent $domainEvent): \App\Project\Domain\Model\Project
     {
-        // All project events have getProjectId() method - no need for method_exists()
-        $id = $domainEvent->getProjectId();
+        // Extract project ID from event data
+        $eventData = $domainEvent->getEventData();
+
+        if (!isset($eventData['projectId'])) {
+            throw new RuntimeException('Project ID not found in event data');
+        }
+
+        $id = \App\Shared\ValueObject\Uuid::create($eventData['projectId']);
 
         return $this->projectRepository->load($id)
             ?? throw new RuntimeException("Project not found: {$id->toString()}");
     }
 
-    private function syncReadModel($project): ProjectReadModelEntity
+    private function syncReadModel(\App\Project\Domain\Model\Project $project): ProjectReadModelEntity
     {
         $readModel = $this->projectReadModelRepository->findById($project->getId())
             ?? new ProjectReadModelEntity(

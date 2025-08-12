@@ -57,10 +57,14 @@ final class UserEventSerializer implements EventSerializer
 
     private function serializeUserCreatedEvent(DomainEvent $domainEvent): string
     {
+        if (!$domainEvent instanceof UserCreatedEvent) {
+            throw new RuntimeException('Expected UserCreatedEvent, got '.$domainEvent::class);
+        }
+
         $data = [
-            'userId' => $domainEvent->userId->toString(),
-            'email' => $domainEvent->email->__toString(),
-            'createdAt' => $domainEvent->createdAt->format(DateTimeInterface::ATOM),
+            'userId' => $domainEvent->getUserId()->toString(),
+            'email' => $domainEvent->getEmail()->__toString(),
+            'createdAt' => $domainEvent->getCreatedAt()->format(DateTimeInterface::ATOM),
         ];
 
         return json_encode($data, \JSON_THROW_ON_ERROR);
