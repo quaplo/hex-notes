@@ -10,6 +10,7 @@ use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Event\ProjectWorkerRemovedEvent;
 use App\Project\Domain\ValueObject\ProjectName;
+use App\Project\Domain\ValueObject\ProjectRole;
 use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Domain\Model\AggregateRoot;
@@ -33,6 +34,15 @@ final class Project extends AggregateRoot
     {
         $project = new self(Uuid::generate(), $projectName, new DateTimeImmutable(), $uuid);
         $project->apply(new ProjectCreatedEvent($project->getId(), $projectName, $uuid));
+
+        // Automatically add owner as worker with OWNER role
+        $ownerWorker = ProjectWorker::create($uuid, ProjectRole::OWNER, $uuid);
+        $project->apply(new ProjectWorkerAddedEvent(
+            $project->getId(),
+            $ownerWorker->getUserId(),
+            $ownerWorker->getRole(),
+            $ownerWorker->getAddedBy()
+        ));
 
         return $project;
     }
