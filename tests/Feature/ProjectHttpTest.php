@@ -133,7 +133,11 @@ it('can delete project via HTTP API', function (): void {
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_OK);
 
     // Delete the project
-    $client->request('DELETE', '/api/projects/'.$projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId, [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'userId' => $user->getId()->toString(),
+    ]));
 
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
@@ -320,11 +324,19 @@ it('prevents double deletion of project via HTTP API', function (): void {
     $projectId = $project->getId()->toString();
 
     // Delete the project first time
-    $client->request('DELETE', '/api/projects/'.$projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId, [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
+    ]));
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Try to delete the project second time - should return error
-    $client->request('DELETE', '/api/projects/'.$projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId, [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
+    ]));
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_INTERNAL_SERVER_ERROR);
 });
 
@@ -341,7 +353,11 @@ it('cannot rename deleted project via HTTP API', function (): void {
     $projectId = $project->getId()->toString();
 
     // Delete the project
-    $client->request('DELETE', '/api/projects/'.$projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId, [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
+    ]));
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Try to rename the deleted project
@@ -367,7 +383,11 @@ it('cannot add worker to deleted project via HTTP API', function (): void {
     $projectId = $project->getId()->toString();
 
     // Delete the project
-    $client->request('DELETE', '/api/projects/'.$projectId);
+    $client->request('DELETE', '/api/projects/'.$projectId, [], [], [
+        'CONTENT_TYPE' => 'application/json',
+    ], json_encode([
+        'userId' => '550e8400-e29b-41d4-a716-446655440001',
+    ]));
     expect($client->getResponse()->getStatusCode())->toBe(Response::HTTP_NO_CONTENT);
 
     // Try to add worker to deleted project

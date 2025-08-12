@@ -30,7 +30,7 @@ final readonly class DeleteOrphanedProjectsHandler
             $project = $this->projectRepository->load(Uuid::create($readModel->getId()));
 
             if ($project instanceof Project) {
-                $project->delete();
+                $project->delete($uuid);
                 $this->projectRepository->save($project);
             }
         }

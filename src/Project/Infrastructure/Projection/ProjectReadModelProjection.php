@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Projection;
 
-use App\Project\Domain\Model\Project;
-use App\Shared\ValueObject\Uuid;
-use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Project\Application\Projection\ProjectReadModelProjectionInterface;
+use App\Project\Domain\Model\Project;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelEntity;
 use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelRepository;
 use App\Shared\Domain\Event\DomainEvent;
+use App\Shared\ValueObject\Uuid;
 use DateTimeInterface;
 use Psr\Log\LoggerInterface;
 use RuntimeException;

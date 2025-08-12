@@ -23,7 +23,7 @@ final readonly class DeleteProjectHandler
             throw new ProjectNotFoundException($deleteProjectCommand->getProjectId());
         }
 
-        $deletedProject = $project->delete();
+        $deletedProject = $project->delete($deleteProjectCommand->getUserId());
         $this->projectRepository->save($deletedProject);
 
         return $deletedProject;

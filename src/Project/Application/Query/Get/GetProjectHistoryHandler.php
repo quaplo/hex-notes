@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Project\Application\Query\Get;
 
-use App\Shared\Domain\Event\DomainEvent;
 use App\Project\Application\Mapper\ProjectDtoMapperInterface;
 use App\Project\Domain\Model\Project;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
+use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Event\EventStore;
 
 final readonly class GetProjectHistoryHandler

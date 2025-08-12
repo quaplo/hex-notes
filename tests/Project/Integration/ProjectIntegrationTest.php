@@ -54,7 +54,8 @@ describe('Project Integration Tests', function (): void {
 
             // Delete project
             $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
-                (string) $project->getId()
+                (string) $project->getId(),
+                (string) $project->getOwnerId()
             );
             $deletedProject = ($this->deleteHandler)($deleteProjectCommand);
 
@@ -152,7 +153,8 @@ describe('Project Integration Tests', function (): void {
 
             // Delete project
             $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
-                (string) $project->getId()
+                (string) $project->getId(),
+                (string) $project->getOwnerId()
             );
             ($this->deleteHandler)($deleteProjectCommand);
 
@@ -178,7 +180,8 @@ describe('Project Integration Tests', function (): void {
             // Delete non-existent project
             expect(function () use ($uuid): void {
                 $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
-                    (string) $uuid
+                    (string) $uuid,
+                    (string) ProjectTestFactory::createValidUuid()
                 );
                 ($this->deleteHandler)($deleteProjectCommand);
             })->toThrow(ProjectNotFoundException::class);
@@ -212,7 +215,8 @@ describe('Project Integration Tests', function (): void {
             $project = ($this->registerHandler)($registerProjectCommand);
 
             $deleteProjectCommand = DeleteProjectCommand::fromPrimitives(
-                (string) $project->getId()
+                (string) $project->getId(),
+                (string) $project->getOwnerId()
             );
             ($this->deleteHandler)($deleteProjectCommand);
 

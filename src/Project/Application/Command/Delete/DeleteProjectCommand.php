@@ -10,6 +10,7 @@ final readonly class DeleteProjectCommand
 {
     private function __construct(
         private Uuid $projectId,
+        private Uuid $userId,
     ) {
     }
 
@@ -18,8 +19,13 @@ final readonly class DeleteProjectCommand
         return $this->projectId;
     }
 
-    public static function fromPrimitives(string $projectId): self
+    public function getUserId(): Uuid
     {
-        return new self(Uuid::create($projectId));
+        return $this->userId;
+    }
+
+    public static function fromPrimitives(string $projectId, string $userId): self
+    {
+        return new self(Uuid::create($projectId), Uuid::create($userId));
     }
 }

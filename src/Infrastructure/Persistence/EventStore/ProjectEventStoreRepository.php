@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\EventStore;
 
-use App\Project\Domain\Model\ProjectSnapshot;
 use App\Project\Domain\Model\Project;
+use App\Project\Domain\Model\ProjectSnapshot;
 use App\Project\Domain\Model\ProjectSnapshotFactory;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
 use App\Shared\Domain\Model\AggregateSnapshot;

@@ -72,8 +72,9 @@ describe('Project Domain Model', function (): void {
 
     test('project can be deleted', function (): void {
         $project = ProjectTestFactory::createProject();
+        $uuid = $project->getOwnerId();
 
-        $deletedProject = $project->delete();
+        $deletedProject = $project->delete($uuid);
 
         expect($deletedProject->isDeleted())->toBeTrue();
         expect($deletedProject->getDeletedAt())->toBeInstanceOf(DateTimeImmutable::class);
@@ -82,8 +83,9 @@ describe('Project Domain Model', function (): void {
 
     test('project deletion records ProjectDeletedEvent', function (): void {
         $project = ProjectTestFactory::createProject();
+        $uuid = $project->getOwnerId();
 
-        $deletedProject = $project->delete();
+        $deletedProject = $project->delete($uuid);
         $events = $deletedProject->getDomainEvents();
 
         ProjectEventAsserter::assertEventCount($events, 1);
@@ -94,9 +96,18 @@ describe('Project Domain Model', function (): void {
         $project = ProjectTestFactory::createProject([
             'deletedAt' => new DateTimeImmutable(),
         ]);
+        $uuid = $project->getOwnerId();
 
-        expect(fn (): Project => $project->delete())
+        expect(fn (): Project => $project->delete($uuid))
             ->toThrow(DomainException::class, 'Project is already deleted');
+    });
+
+    test('only project owner can delete project', function (): void {
+        $project = ProjectTestFactory::createProject();
+        $uuid = ProjectTestFactory::createValidUuid();
+
+        expect(fn (): Project => $project->delete($uuid))
+            ->toThrow(DomainException::class, 'Only project owner can delete the project');
     });
 
     test('worker can be added to project', function (): void {

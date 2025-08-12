@@ -6,6 +6,7 @@ namespace App\Infrastructure\Http\Controller;
 
 use App\Infrastructure\Http\Dto\AddProjectWorkerRequestDto;
 use App\Infrastructure\Http\Dto\CreateProjectRequestDto;
+use App\Infrastructure\Http\Dto\DeleteProjectRequestDto;
 use App\Infrastructure\Http\Dto\RemoveProjectWorkerRequestDto;
 use App\Infrastructure\Http\Dto\RenameProjectRequestDto;
 use App\Infrastructure\Http\Exception\ValidationException;
@@ -130,12 +131,19 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects/{id}', name: 'delete_project', methods: ['DELETE'])]
-    public function delete(string $id): JsonResponse
+    public function delete(string $id, Request $request): JsonResponse
     {
-        $deleteProjectCommand = DeleteProjectCommand::fromPrimitives($id);
-        $this->commandBus->dispatch($deleteProjectCommand);
+        try {
+            /** @var DeleteProjectRequestDto $dto */
+            $dto = $this->deserializeAndValidate($request, DeleteProjectRequestDto::class);
 
-        return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+            $deleteProjectCommand = DeleteProjectCommand::fromPrimitives($id, $dto->userId);
+            $this->commandBus->dispatch($deleteProjectCommand);
+
+            return new JsonResponse(null, JsonResponse::HTTP_NO_CONTENT);
+        } catch (ValidationException $e) {
+            return $this->createValidationErrorResponse($e->getViolations());
+        }
     }
 
     #[Route('/api/projects/{id}/history', name: 'get_project_history', methods: ['GET'])]
