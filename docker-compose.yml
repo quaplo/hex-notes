@@ -8,8 +8,9 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    environment:
-      - DATABASE_URL=postgresql://symfony:symfony@db:5432/hex_notes?serverVersion=16&charset=utf8
+      - rabbitmq
+    env_file:
+      - .env
   db:
     image: postgres:16
     environment:
@@ -21,5 +22,36 @@ services:
     volumes:
       - database_data:/var/lib/postgresql/data:rw
 
+  messenger-worker:
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - .env
+    command: php bin/console messenger:consume async_events --limit=100 --memory-limit=128M --time-limit=3600
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: hex_notes_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 volumes:
   database_data:
+  rabbitmq_data:
