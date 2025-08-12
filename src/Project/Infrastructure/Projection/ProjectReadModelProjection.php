@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Projection;
 
+use App\Project\Domain\Model\Project;
+use App\Shared\ValueObject\Uuid;
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Project\Application\Projection\ProjectReadModelProjectionInterface;
 use App\Project\Domain\Repository\ProjectRepositoryInterface;
 use App\Project\Infrastructure\Persistence\ReadModel\ProjectReadModelEntity;
@@ -35,16 +38,22 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
         ]);
     }
 
-    private function loadProject(DomainEvent $domainEvent)
+    private function loadProject(DomainEvent $domainEvent): Project
     {
-        // All project events have getProjectId() method - no need for method_exists()
-        $id = $domainEvent->getProjectId();
+        // Extract project ID from event data
+        $eventData = $domainEvent->getEventData();
 
-        return $this->projectRepository->load($id)
-            ?? throw new RuntimeException("Project not found: {$id->toString()}");
+        if (!isset($eventData['projectId'])) {
+            throw new RuntimeException('Project ID not found in event data');
+        }
+
+        $uuid = Uuid::create($eventData['projectId']);
+
+        return $this->projectRepository->load($uuid)
+            ?? throw new RuntimeException("Project not found: {$uuid->toString()}");
     }
 
-    private function syncReadModel($project): ProjectReadModelEntity
+    private function syncReadModel(Project $project): ProjectReadModelEntity
     {
         $readModel = $this->projectReadModelRepository->findById($project->getId())
             ?? new ProjectReadModelEntity(
@@ -60,7 +69,7 @@ final readonly class ProjectReadModelProjection implements ProjectReadModelProje
         $readModel->setVersion($project->getVersion());
         $readModel->setWorkers(
             array_map(
-                fn ($w): array => [
+                fn (ProjectWorker $w): array => [
                     'userId' => $w->getUserId()->toString(),
                     'role' => $w->getRole()->toString(),
                     'addedBy' => $w->getAddedBy()->toString(),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Mapper;
 
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Project\Application\Mapper\ProjectDtoMapperInterface;
 use App\Project\Domain\Model\Project;
 
@@ -17,7 +18,7 @@ final readonly class ProjectDtoMapper implements ProjectDtoMapperInterface
             'ownerId' => $project->getOwnerId()->toString(),
             'createdAt' => $project->getCreatedAt()->format('Y-m-d H:i:s'),
             'deletedAt' => $project->getDeletedAt()?->format('Y-m-d H:i:s'),
-            'workers' => array_map(fn ($worker): array => [
+            'workers' => array_map(fn (ProjectWorker $worker): array => [
                 'userId' => $worker->getUserId()->toString(),
                 'role' => $worker->getRole()->toString(),
                 'addedBy' => $worker->getAddedBy()->toString(),

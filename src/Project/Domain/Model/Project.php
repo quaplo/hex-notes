@@ -207,7 +207,7 @@ final class Project extends AggregateRoot
     {
         $this->workers = array_filter(
             $this->workers,
-            fn ($worker): bool => !$worker->getUserId()->equals($projectWorkerRemovedEvent->getUserId())
+            fn (ProjectWorker $worker): bool => !$worker->getUserId()->equals($projectWorkerRemovedEvent->getUserId())
         );
     }
 }

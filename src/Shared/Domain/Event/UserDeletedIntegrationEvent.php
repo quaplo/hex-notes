@@ -37,6 +37,20 @@ final readonly class UserDeletedIntegrationEvent implements DomainEvent
         return $this->occurredAt;
     }
 
+    public function getEventName(): string
+    {
+        return 'user.deleted.integration';
+    }
+
+    public function getEventData(): array
+    {
+        return [
+            'userId' => $this->uuid->toString(),
+            'userEmail' => $this->userEmail,
+            'occurredAt' => $this->occurredAt->format(DateTimeInterface::ATOM),
+        ];
+    }
+
     public function toArray(): array
     {
         return [

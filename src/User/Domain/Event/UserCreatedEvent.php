@@ -9,19 +9,19 @@ use App\Shared\ValueObject\Email;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final readonly class UserDeletedEvent implements DomainEvent
+final readonly class UserCreatedEvent implements DomainEvent
 {
     public function __construct(
-        private Uuid $uuid,
+        private Uuid $userId,
         private Email $email,
-        private DateTimeImmutable $occurredAt,
+        private DateTimeImmutable $createdAt,
     ) {
     }
 
-    public static function create(Uuid $uuid, Email $email): self
+    public static function create(Uuid $userId, Email $email): self
     {
         return new self(
-            $uuid,
+            $userId,
             $email,
             new DateTimeImmutable()
         );
@@ -29,7 +29,7 @@ final readonly class UserDeletedEvent implements DomainEvent
 
     public function getUserId(): Uuid
     {
-        return $this->uuid;
+        return $this->userId;
     }
 
     public function getEmail(): Email
@@ -37,22 +37,27 @@ final readonly class UserDeletedEvent implements DomainEvent
         return $this->email;
     }
 
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
     public function getOccurredAt(): DateTimeImmutable
     {
-        return $this->occurredAt;
+        return $this->createdAt;
     }
 
     public function getEventName(): string
     {
-        return 'user.deleted';
+        return 'user.created';
     }
 
     public function getEventData(): array
     {
         return [
-            'userId' => $this->uuid->toString(),
+            'userId' => $this->userId->toString(),
             'email' => $this->email->__toString(),
-            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
+            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
         ];
     }
 }

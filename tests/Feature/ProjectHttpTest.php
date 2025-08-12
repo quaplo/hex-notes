@@ -35,8 +35,8 @@ it('can get project with user details via HTTP API (cross-domain)', function ():
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
     $ownerEmail = 'project_owner_'.uniqid().'@example.com';
-    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
-    $user = $createUserHandler($ownerCommand);
+    $createUserCommand = CreateUserCommand::fromPrimitives($ownerEmail);
+    $user = $createUserHandler($createUserCommand);
 
     // Create a worker user
     $workerEmail = 'project_worker_'.uniqid().'@example.com';
@@ -114,8 +114,8 @@ it('can delete project via HTTP API', function (): void {
     /** @var CreateUserHandler $createUserHandler */
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
     $ownerEmail = 'project_owner_'.uniqid().'@example.com';
-    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
-    $user = $createUserHandler($ownerCommand);
+    $createUserCommand = CreateUserCommand::fromPrimitives($ownerEmail);
+    $user = $createUserHandler($createUserCommand);
 
     // First create a project
     /** @var RegisterProjectHandler $projectHandler */
@@ -150,8 +150,8 @@ it('can add worker to project via HTTP API', function (): void {
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
 
     $ownerEmail = 'owner_'.uniqid().'@example.com';
-    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
-    $user = $createUserHandler($ownerCommand);
+    $createUserCommand = CreateUserCommand::fromPrimitives($ownerEmail);
+    $user = $createUserHandler($createUserCommand);
 
     $workerEmail = 'worker_'.uniqid().'@example.com';
     $workerCommand = CreateUserCommand::fromPrimitives($workerEmail);
@@ -191,8 +191,8 @@ it('can remove worker from project via HTTP API', function (): void {
     $createUserHandler = self::getContainer()->get(CreateUserHandler::class);
 
     $ownerEmail = 'owner_remove_'.uniqid().'@example.com';
-    $ownerCommand = CreateUserCommand::fromPrimitives($ownerEmail);
-    $user = $createUserHandler($ownerCommand);
+    $createUserCommand = CreateUserCommand::fromPrimitives($ownerEmail);
+    $user = $createUserHandler($createUserCommand);
 
     $workerEmail = 'worker_remove_'.uniqid().'@example.com';
     $workerCommand = CreateUserCommand::fromPrimitives($workerEmail);

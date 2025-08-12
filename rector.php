@@ -37,6 +37,11 @@ return static function (RectorConfig $rectorConfig): void {
         __DIR__ . '/config/bootstrap.php',
     ]);
 
+    $rectorConfig->skip([
+        \Rector\Naming\Rector\Class_\RenamePropertyToMatchTypeRector::class,
+        \Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector::class,
+    ]);
+
     // Configure parallel processing
     $rectorConfig->parallel();
 

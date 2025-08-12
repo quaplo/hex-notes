@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Project\Application\Command\Register\RegisterProjectHandler;
 use App\Project\Application\Command\Rename\RenameProjectCommand;
@@ -164,7 +165,7 @@ describe('Project Event Store Integration Tests', function (): void {
 
             // Verify workers are correctly reconstructed
             $workers = $reconstructedProject->getWorkers();
-            $userIds = array_map(fn ($worker): string => (string) $worker->getUserId(), $workers);
+            $userIds = array_map(fn (ProjectWorker $worker): string => (string) $worker->getUserId(), $workers);
             expect($userIds)->toContain((string) $uuid);
             expect($userIds)->toContain((string) $userId2);
         });

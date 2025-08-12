@@ -44,13 +44,7 @@ final class InMemoryEventDispatcher implements EventDispatcher
 
     public function hasEventOfType(string $eventClass): bool
     {
-        foreach ($this->dispatchedEvents as $dispatchedEvent) {
-            if ($dispatchedEvent instanceof $eventClass) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->dispatchedEvents, fn($dispatchedEvent): bool => $dispatchedEvent instanceof $eventClass);
     }
 
     public function clear(): void
