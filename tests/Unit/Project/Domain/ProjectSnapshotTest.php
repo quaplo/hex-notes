@@ -133,7 +133,7 @@ final class ProjectSnapshotTest extends TestCase
         $projectName = new ProjectName('Deleted Project');
 
         $project = Project::create($projectName, $uuid);
-        $project->delete();
+        $project->delete($uuid);
 
         $version = 2;
 

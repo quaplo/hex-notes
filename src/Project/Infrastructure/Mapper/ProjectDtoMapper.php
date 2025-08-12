@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Project\Infrastructure\Mapper;
 
-use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Project\Application\Mapper\ProjectDtoMapperInterface;
 use App\Project\Domain\Model\Project;
+use App\Project\Domain\ValueObject\ProjectWorker;
 
 final readonly class ProjectDtoMapper implements ProjectDtoMapperInterface
 {

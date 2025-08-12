@@ -76,10 +76,14 @@ final class Project extends AggregateRoot
         return $this->deletedAt instanceof DateTimeImmutable;
     }
 
-    public function delete(): self
+    public function delete(Uuid $requestingUserId): self
     {
         if ($this->isDeleted()) {
             throw new DomainException('Project is already deleted');
+        }
+
+        if (!$this->ownerId->equals($requestingUserId)) {
+            throw new DomainException('Only project owner can delete the project');
         }
 
         $this->apply(new ProjectDeletedEvent($this->getId()));

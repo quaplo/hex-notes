@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Infrastructure\Persistence\EventStore\ProjectEventStoreRepository;
 use App\Project\Application\Command\Register\RegisterProjectHandler;
 use App\Project\Application\Command\Rename\RenameProjectCommand;
@@ -13,6 +12,7 @@ use App\Project\Domain\Event\ProjectCreatedEvent;
 use App\Project\Domain\Event\ProjectRenamedEvent;
 use App\Project\Domain\Event\ProjectWorkerAddedEvent;
 use App\Project\Domain\Model\ProjectSnapshotFactory;
+use App\Project\Domain\ValueObject\ProjectWorker;
 use App\Tests\Project\Doubles\InMemoryEventDispatcher;
 use App\Tests\Project\Doubles\InMemoryEventStore;
 use App\Tests\Project\Doubles\InMemorySnapshotStore;
