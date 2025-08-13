@@ -205,7 +205,7 @@ final class Project extends AggregateRoot
             return true;
         }
 
-        return array_any($this->workers, fn ($worker) => $worker->getUserId()->equals($userId));
+        return array_any($this->workers, fn ($worker): bool => $worker->getUserId()->equals($userId));
     }
 
     private function handleProjectCreated(ProjectCreatedEvent $projectCreatedEvent): void

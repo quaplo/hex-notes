@@ -4,23 +4,18 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\Event;
 
-use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final readonly class ProjectWorkerRemovedEvent implements DomainEvent
+final readonly class ProjectWorkerRemovedEvent extends ProjectEvent
 {
     public function __construct(
-        private Uuid $projectId,
+        Uuid $projectId,
         private Uuid $userId,
         private ?Uuid $removedBy = null,
-        private DateTimeImmutable $occurredAt = new DateTimeImmutable(),
+        DateTimeImmutable $occurredAt = new DateTimeImmutable(),
     ) {
-    }
-
-    public function getProjectId(): Uuid
-    {
-        return $this->projectId;
+        parent::__construct($projectId, $occurredAt);
     }
 
     public function getUserId(): Uuid
@@ -33,16 +28,6 @@ final readonly class ProjectWorkerRemovedEvent implements DomainEvent
         return $this->removedBy;
     }
 
-    public function getOccurredAt(): DateTimeImmutable
-    {
-        return $this->occurredAt;
-    }
-
-    public function getAggregateId(): string
-    {
-        return $this->projectId->toString();
-    }
-
     public function getEventName(): string
     {
         return 'project.worker_removed';
@@ -50,12 +35,10 @@ final readonly class ProjectWorkerRemovedEvent implements DomainEvent
 
     public function getEventData(): array
     {
-        return [
-            'projectId' => $this->projectId->toString(),
+        return array_merge($this->getBaseEventData(), [
             'userId' => $this->userId->toString(),
             'removedBy' => $this->removedBy?->toString(),
-            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
-        ];
+        ]);
     }
 
     public static function fromEventData(array $eventData): self

@@ -5,23 +5,18 @@ declare(strict_types=1);
 namespace App\Project\Domain\Event;
 
 use App\Project\Domain\ValueObject\ProjectName;
-use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final readonly class ProjectRenamedEvent implements DomainEvent
+final readonly class ProjectRenamedEvent extends ProjectEvent
 {
     public function __construct(
-        private Uuid $uuid,
+        Uuid $projectId,
         private ProjectName $oldName,
         private ProjectName $newName,
-        private DateTimeImmutable $occurredAt = new DateTimeImmutable(),
+        DateTimeImmutable $occurredAt = new DateTimeImmutable(),
     ) {
-    }
-
-    public function getProjectId(): Uuid
-    {
-        return $this->uuid;
+        parent::__construct($projectId, $occurredAt);
     }
 
     public function getOldName(): ProjectName
@@ -34,16 +29,6 @@ final readonly class ProjectRenamedEvent implements DomainEvent
         return $this->newName;
     }
 
-    public function getOccurredAt(): DateTimeImmutable
-    {
-        return $this->occurredAt;
-    }
-
-    public function getAggregateId(): string
-    {
-        return $this->uuid->toString();
-    }
-
     public function getEventName(): string
     {
         return 'project.renamed';
@@ -51,12 +36,10 @@ final readonly class ProjectRenamedEvent implements DomainEvent
 
     public function getEventData(): array
     {
-        return [
-            'projectId' => $this->uuid->toString(),
+        return array_merge($this->getBaseEventData(), [
             'oldName' => $this->oldName->__toString(),
             'newName' => $this->newName->__toString(),
-            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
-        ];
+        ]);
     }
 
     public static function fromEventData(array $eventData): self

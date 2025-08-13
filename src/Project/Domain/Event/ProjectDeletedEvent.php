@@ -4,31 +4,16 @@ declare(strict_types=1);
 
 namespace App\Project\Domain\Event;
 
-use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\ValueObject\Uuid;
 use DateTimeImmutable;
 
-final readonly class ProjectDeletedEvent implements DomainEvent
+final readonly class ProjectDeletedEvent extends ProjectEvent
 {
     public function __construct(
-        private Uuid $uuid,
-        private DateTimeImmutable $occurredAt = new DateTimeImmutable(),
+        Uuid $projectId,
+        DateTimeImmutable $occurredAt = new DateTimeImmutable(),
     ) {
-    }
-
-    public function getProjectId(): Uuid
-    {
-        return $this->uuid;
-    }
-
-    public function getOccurredAt(): DateTimeImmutable
-    {
-        return $this->occurredAt;
-    }
-
-    public function getAggregateId(): string
-    {
-        return $this->uuid->toString();
+        parent::__construct($projectId, $occurredAt);
     }
 
     public function getEventName(): string
@@ -38,10 +23,7 @@ final readonly class ProjectDeletedEvent implements DomainEvent
 
     public function getEventData(): array
     {
-        return [
-            'projectId' => $this->uuid->toString(),
-            'occurredAt' => $this->occurredAt->format('Y-m-d H:i:s'),
-        ];
+        return $this->getBaseEventData();
     }
 
     public static function fromEventData(array $eventData): self

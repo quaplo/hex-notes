@@ -172,7 +172,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
 
         // Verify remaining workers (owner + second worker)
         $workers = $restoredProject->getWorkers();
-        $secondWorker = array_find($workers, fn ($worker) => $worker->getUserId()->equals($userId2));
+        $secondWorker = array_find($workers, fn ($worker): bool => $worker->getUserId()->equals($userId2));
         $this->assertTrue($secondWorker !== null);
         $this->assertEquals('owner', $secondWorker->getRole()->toString());
     }
@@ -245,7 +245,7 @@ final class ProjectSnapshotIntegrationTest extends KernelTestCase
         $this->assertTrue($restoredProject->getId()->equals($project->getId()));
 
         $workers = $restoredProject->getWorkers();
-        $addedWorker = array_find($workers, fn ($worker) => $worker->getUserId()->equals($uuid));
+        $addedWorker = array_find($workers, fn ($worker): bool => $worker->getUserId()->equals($uuid));
         $this->assertTrue($addedWorker !== null);
     }
 
