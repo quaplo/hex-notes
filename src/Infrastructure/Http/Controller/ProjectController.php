@@ -7,6 +7,7 @@ namespace App\Infrastructure\Http\Controller;
 use App\Infrastructure\Http\Dto\AddProjectWorkerRequestDto;
 use App\Infrastructure\Http\Dto\CreateProjectRequestDto;
 use App\Infrastructure\Http\Dto\DeleteProjectRequestDto;
+use App\Infrastructure\Http\Dto\ProjectDto;
 use App\Infrastructure\Http\Dto\RemoveProjectWorkerRequestDto;
 use App\Infrastructure\Http\Dto\RenameProjectRequestDto;
 use App\Infrastructure\Http\Exception\ValidationException;
@@ -20,6 +21,8 @@ use App\Project\Application\Query\Get\GetProjectHistoryQuery;
 use App\Shared\Application\CommandBus;
 use App\Shared\Application\CrossDomain\Query\GetProjectWithUserDetailsQuery;
 use App\Shared\Application\QueryBus;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,6 +42,34 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects', name: 'create_project', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/projects',
+        summary: 'Vytvorenie nového projektu',
+        description: 'Vytvorí nový projekt v systéme',
+        requestBody: new OA\RequestBody(
+            description: 'Údaje pre vytvorenie projektu',
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: CreateProjectRequestDto::class))
+        ),
+        tags: ['Projects'],
+        responses: [
+            new OA\Response(
+                response: 201,
+                description: 'Projekt úspešne vytvorený',
+                content: new OA\JsonContent(ref: new Model(type: ProjectDto::class))
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Chyba validácie',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Validation failed'),
+                        new OA\Property(property: 'violations', type: 'object')
+                    ]
+                )
+            )
+        ]
+    )]
     public function create(Request $request): JsonResponse
     {
         try {
@@ -58,6 +89,37 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects/{id}', name: 'get_project', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/projects/{id}',
+        summary: 'Získanie projektu podľa ID',
+        description: 'Vráti údaje projektu vrátane detailov používateľov',
+        tags: ['Projects'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'UUID projektu',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Údaje projektu s detailmi používateľov',
+                content: new OA\JsonContent(type: 'object')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Projekt nenájdený',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Project not found')
+                    ]
+                )
+            )
+        ]
+    )]
     public function detail(string $id): JsonResponse
     {
         $getProjectWithUserDetailsQuery = GetProjectWithUserDetailsQuery::fromPrimitives($id);
@@ -71,6 +133,42 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects/{id}/workers', name: 'add_project_worker', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/projects/{id}/workers',
+        summary: 'Pridanie pracovníka do projektu',
+        description: 'Pridá nového pracovníka do existujúceho projektu',
+        requestBody: new OA\RequestBody(
+            description: 'Údaje pre pridanie pracovníka',
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: AddProjectWorkerRequestDto::class))
+        ),
+        tags: ['Projects'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'UUID projektu',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: 'Pracovník úspešne pridaný'
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Chyba validácie',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Validation failed'),
+                        new OA\Property(property: 'violations', type: 'object')
+                    ]
+                )
+            )
+        ]
+    )]
     public function addWorker(string $id, Request $request): JsonResponse
     {
         try {
@@ -94,6 +192,42 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects/{id}/workers', name: 'remove_project_worker', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/projects/{id}/workers',
+        summary: 'Odstránenie pracovníka z projektu',
+        description: 'Odstráni pracovníka z existujúceho projektu',
+        requestBody: new OA\RequestBody(
+            description: 'Údaje pre odstránenie pracovníka',
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: RemoveProjectWorkerRequestDto::class))
+        ),
+        tags: ['Projects'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'UUID projektu',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: 'Pracovník úspešne odstránený'
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Chyba validácie',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Validation failed'),
+                        new OA\Property(property: 'violations', type: 'object')
+                    ]
+                )
+            )
+        ]
+    )]
     public function removeWorker(string $id, Request $request): JsonResponse
     {
         try {
@@ -114,6 +248,43 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects/{id}', name: 'rename_project', methods: ['PUT'])]
+    #[OA\Put(
+        path: '/api/projects/{id}',
+        summary: 'Premenovanie projektu',
+        description: 'Zmení názov existujúceho projektu',
+        requestBody: new OA\RequestBody(
+            description: 'Údaje pre premenovanie projektu',
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: RenameProjectRequestDto::class))
+        ),
+        tags: ['Projects'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'UUID projektu',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Projekt úspešne premenovaný',
+                content: new OA\JsonContent(ref: new Model(type: ProjectDto::class))
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Chyba validácie',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Validation failed'),
+                        new OA\Property(property: 'violations', type: 'object')
+                    ]
+                )
+            )
+        ]
+    )]
     public function rename(string $id, Request $request): JsonResponse
     {
         try {
@@ -131,6 +302,42 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects/{id}', name: 'delete_project', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/projects/{id}',
+        summary: 'Zmazanie projektu',
+        description: 'Zmaže existujúci projekt zo systému',
+        requestBody: new OA\RequestBody(
+            description: 'Údaje pre zmazanie projektu',
+            required: true,
+            content: new OA\JsonContent(ref: new Model(type: DeleteProjectRequestDto::class))
+        ),
+        tags: ['Projects'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'UUID projektu',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 204,
+                description: 'Projekt úspešne zmazaný'
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Chyba validácie',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'error', type: 'string', example: 'Validation failed'),
+                        new OA\Property(property: 'violations', type: 'object')
+                    ]
+                )
+            )
+        ]
+    )]
     public function delete(string $id, Request $request): JsonResponse
     {
         try {
@@ -147,6 +354,31 @@ final class ProjectController extends BaseController
     }
 
     #[Route('/api/projects/{id}/history', name: 'get_project_history', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/projects/{id}/history',
+        summary: 'História projektu',
+        description: 'Vráti históriu zmien projektu',
+        tags: ['Projects'],
+        parameters: [
+            new OA\Parameter(
+                name: 'id',
+                description: 'UUID projektu',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000')
+            )
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'História projektu',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(type: 'object')
+                )
+            )
+        ]
+    )]
     public function history(string $id): JsonResponse
     {
         $getProjectHistoryQuery = GetProjectHistoryQuery::fromPrimitives($id);

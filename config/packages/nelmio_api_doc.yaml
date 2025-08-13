@@ -1,0 +1,29 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Hex Notes API
+            description: REST API pre Hex Notes projekt
+            version: 1.0.0
+        servers:
+            - url: http://localhost:8000
+              description: Development server
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+    areas:
+        default:
+            path_patterns:
+                - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+    models:
+        names:
+            - { alias: CreateUserRequest, type: App\Infrastructure\Http\Dto\CreateUserRequestDto }
+            - { alias: UserResponse, type: App\Infrastructure\Http\Dto\UserDto }
+            - { alias: CreateProjectRequest, type: App\Infrastructure\Http\Dto\CreateProjectRequestDto }
+            - { alias: ProjectResponse, type: App\Infrastructure\Http\Dto\ProjectDto }
+            - { alias: AddProjectWorkerRequest, type: App\Infrastructure\Http\Dto\AddProjectWorkerRequestDto }
+            - { alias: RemoveProjectWorkerRequest, type: App\Infrastructure\Http\Dto\RemoveProjectWorkerRequestDto }
+            - { alias: RenameProjectRequest, type: App\Infrastructure\Http\Dto\RenameProjectRequestDto }
+            - { alias: DeleteProjectRequest, type: App\Infrastructure\Http\Dto\DeleteProjectRequestDto }
